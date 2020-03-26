@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "ream-workspace",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "EGOIST",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "website"
+  ],
+  "devDependencies": {
+    "typescript": "^3.8.2"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@ream/fs",
+  "version": "0.0.0",
+  "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "mkdirp": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/mkdirp": "^1.0.0"
+  }
+}

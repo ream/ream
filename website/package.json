@@ -1,0 +1,21 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "EGOIST",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "export": "ream export"
+  },
+  "dependencies": {
+    "front-matter": "^3.1.0",
+    "markdown-it": "^10.0.0",
+    "prismjs": "^1.19.0"
+  },
+  "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^2.0.6",
+    "tailwindcss": "^1.2.0"
+  }
+}
