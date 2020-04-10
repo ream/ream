@@ -6,6 +6,10 @@ __Ream__ is an experiental framework for building monolithic Vue apps.
 
 __Ream__ can be used to build all kinds of web apps, like server-rendered app (SSR), statically-generated app (SSG), client-rendered app (CSR). In SSR mode, you can also render specific pages in SSG or CSR mode.
 
+## Current status
+
+[Implementing serverless architecture](https://github.com/egoist/ream/issues/6), please [sponsor me](https://github.com/sponsors/egoist) to help this project grow.
+
 ## Goals
 
 - Implement Next.js features in Vue.js
