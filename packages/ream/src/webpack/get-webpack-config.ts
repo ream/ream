@@ -2,6 +2,7 @@ import WebpackChain from 'webpack-chain'
 import webpack from 'webpack'
 import { Ream } from '../'
 import { resolve, relative } from 'path'
+import {GET_SERVER_SIDE_PROPS_INDICATOR, GET_STATIC_PROPS_INDICATOR} from '../babel/plugins/page-exports-transforms'
 
 export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
   const chain = new WebpackChain()
@@ -113,6 +114,8 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
     {
       'process.browser': JSON.stringify(type === 'client'),
       'process.server': JSON.stringify(type === 'server'),
+      GET_SERVER_SIDE_PROPS_INDICATOR: JSON.stringify(GET_SERVER_SIDE_PROPS_INDICATOR),
+      GET_STATIC_PROPS_INDICATOR: JSON.stringify(GET_STATIC_PROPS_INDICATOR)
     },
   ])
 

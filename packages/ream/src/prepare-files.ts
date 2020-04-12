@@ -2,6 +2,7 @@ import glob from 'fast-glob'
 import { pathToRoutes } from './utils/path-to-routes'
 import { outputFile } from 'fs-extra'
 import { Ream } from '.'
+import { GET_SERVER_SIDE_PROPS_INDICATOR, GET_STATIC_PROPS_INDICATOR } from './babel/plugins/page-exports-transforms'
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
@@ -26,7 +27,8 @@ export async function prepareFiles(api: Ream) {
     var wrapPage = function(page) {
       return {
         functional: true,
-        getServerSideProps: page.getServerSideProps,
+        getServerSideProps: page[${JSON.stringify(GET_SERVER_SIDE_PROPS_INDICATOR)}],
+        getStaticProps: page[${JSON.stringify(GET_STATIC_PROPS_INDICATOR)}],
         render(h, ctx) {
           return h(App, {
             props: {

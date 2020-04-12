@@ -13,9 +13,9 @@ const EXPORT_GET_SERVER_SIDE_PROPS = `getServerSideProps`
 const EXPORT_GET_STATIC_PROPS = `getStaticProps`
 const EXPORT_GET_STATIC_PATHS = `getStaticPaths`
 
-const GET_SERVER_SIDE_PROPS_INDICATOR = `__re0`
-const GET_STATIC_PROPS_INDICATOR = `__re1`
-const GET_STATIC_PATHS_INDICATOR = `__re2`
+export const GET_SERVER_SIDE_PROPS_INDICATOR = `__re0`
+export const GET_STATIC_PROPS_INDICATOR = `__re1`
+export const GET_STATIC_PATHS_INDICATOR = `__re2`
 
 const exportPatterns = [
   {
