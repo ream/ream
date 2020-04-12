@@ -11,8 +11,8 @@
   "bin": "dist/cli.js",
   "scripts": {
     "test": "jest",
-    "watch": "tsc --watch -p tsconfig.build.json",
-    "build": "tsc -p tsconfig.build.json"
+    "watch": "tsc --watch",
+    "build": "tsc"
   },
   "license": "MIT",
   "author": {
@@ -32,6 +32,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "@babel/runtime": "^7.9.2",
     "@egoist/postcss-loader": "^3.0.2",
+    "@ream/common": "0.0.0",
     "babel-loader": "^8.1.0",
     "cac": "^6.5.8",
     "chokidar": "^3.3.1",
@@ -43,6 +44,7 @@
     "fs-extra": "^9.0.0",
     "joycon": "^2.2.5",
     "path-to-regexp": "^6.1.0",
+    "ream-server": "0.0.0",
     "source-map-support": "^0.5.16",
     "time-fix-plugin": "^2.0.6",
     "vue": "^2.6.11",

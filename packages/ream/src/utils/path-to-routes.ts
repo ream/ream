@@ -1,16 +1,6 @@
 import { join } from 'path'
+import { Route } from '@ream/common/dist/route'
 import { rankRoute } from './rank-routes'
-
-export type Route = {
-  routePath: string
-  entryName: string
-  absolutePath: string
-  relativePath: string
-  isClientRoute: boolean
-  isApiRoute: boolean
-  index: number
-  score: number
-}
 
 const matchApiRoute = (filepath: string) => {
   // **/*.xxx.{js,ts}

@@ -1,6 +1,6 @@
 import 'source-map-support/register'
 import { resolve } from 'path'
-import { Route } from './utils/path-to-routes'
+import { Route } from '@ream/common/dist/route'
 export interface Options {
   dir?: string
   dev?: boolean

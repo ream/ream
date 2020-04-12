@@ -1,0 +1,14 @@
+{
+  "version": "0.0.0",
+  "name": "ream-server",
+  "files": ["dist"],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@ream/common": "0.0.0"
+  }
+}
