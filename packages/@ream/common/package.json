@@ -6,7 +6,8 @@
   },
   "scripts": {
     "watch": "tsc --watch",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "echo lol"
   },
   "files": ["dist"],
   "main": "dist/index.js",
