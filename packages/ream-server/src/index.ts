@@ -5,7 +5,6 @@ import express, {
   Response,
   NextFunction,
 } from 'express'
-import { useProdMiddlewares } from './use-prod-middlewares'
 import { findMatchedRoute } from '@ream/common/dist/find-matched-route'
 import { prodReadRoutes } from '@ream/common/dist/prod-read-routes'
 import {Route} from '@ream/common/dist/route'
@@ -50,7 +49,7 @@ export function createServer(dir: string) {
   const server = express()
   const buildDir = join(dir, '.ream')
 
-  useProdMiddlewares(server, buildDir)
+  server.use('/_ream', express.static(join(buildDir, 'client')))
 
   const routes = prodReadRoutes(buildDir)
 
