@@ -79,8 +79,8 @@ test('remove variable declaration', () => {
 
   expect(code).toMatchInlineSnapshot(`
     "export var __re0 = true;
-    export const __re1 = true;
-    export let __re2 = true;"
+    export var __re1 = true;
+    export var __re2 = true;"
   `)
 })
 
