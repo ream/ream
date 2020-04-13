@@ -6,7 +6,7 @@ import express, {
   Response,
   NextFunction,
 } from 'express'
-import { findMatchedRoute } from '@ream/common/dist/find-matched-route'
+import { findMatchedRoute } from '@ream/common/dist/route-helpers'
 import { prodReadRoutes } from '@ream/common/dist/prod-read-routes'
 import { Route } from '@ream/common/dist/route'
 import {
@@ -27,7 +27,7 @@ export function createPagePropsHandler(
 ): RequestHandler {
   return async (req, res) => {
     const routes = getRoutes()
-    
+
     req.url = req.url
       .replace('.pageprops.json', '')
       .replace(/\/index$/, '')
@@ -43,9 +43,17 @@ export function createPagePropsHandler(
 
     const pageProps = await getPageProps(page, {
       buildDir,
-      req,
-      res,
       pageEntryName: route.entryName,
+      getServerSidePropsContext: {
+        req,
+        res,
+        params,
+        query: req.query,
+        path: req.path,
+      },
+      getStaticPropsContext: {
+        params,
+      },
       dev,
     })
 
@@ -81,7 +89,10 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
 
   const getRoutes = options.getRoutes || (() => prodReadRoutes(buildDir))
 
-  server.get('*.pageprops.json', createPagePropsHandler(getRoutes, buildDir, dev))
+  server.get(
+    '*.pageprops.json',
+    createPagePropsHandler(getRoutes, buildDir, dev)
+  )
 
   server.get('*', async (req, res, next) => {
     const routes = getRoutes()
@@ -116,8 +127,17 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
       _document,
       buildDir,
       dev,
-      req,
-      res,
+      path: req.path,
+      getServerSidePropsContext: {
+        req,
+        res,
+        params,
+        query: req.query,
+        path: req.path,
+      },
+      getStaticPropsContext: {
+        params,
+      },
     })
 
     res.end(`<!DOCTYPE html>${html}`)

@@ -9,12 +9,14 @@ cli
   })
   .option('--no-cache', 'Disable webpack caching')
   .option('--port <port>', 'Server port')
+  .option('--target <target>', `Build target`)
   .action(async (dir, options) => {
     const { Ream } = await import('./')
     const app = new Ream({
       dir,
       dev: true,
       cache: options.cache,
+      target: options.target,
       server: {
         port: options.port
       },
@@ -22,13 +24,17 @@ cli
     await app.serve()
   })
 
-cli.command('build [dir]', 'Build a directory for production')
+cli.command('build [dir]', 'Build a directory for production', {
+  ignoreOptionDefaultValue: true
+})
+.option('--target <target>', `Build target`)
 .option('--no-cache', 'Disable webpack caching')
 .action(async (dir, options) => {
   const { Ream } = await import('./')
   const app = new Ream({
     dir,
     dev: false,
+    target: options.target,
     cache: options.cache
   })
   await app.build()

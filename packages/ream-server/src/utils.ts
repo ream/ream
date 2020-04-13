@@ -17,15 +17,15 @@ export type GetStaticPropsResult = {
   props: Obj
 }
 
-export type StaticPropsContext = {
+export type GetStaticPropsContext = {
   params: Obj
 }
 
 export type GetStaticProps = (
-  context: StaticPropsContext
+  context: GetStaticPropsContext
 ) => GetStaticPropsResult | Promise<GetStaticPropsResult>
 
-export type ServerSidePropsContext = {
+export type GetServerSidePropsContext = {
   req: Request
   res: Response
   params: Obj
@@ -38,7 +38,7 @@ export type GetServerSidePropsResult = {
 }
 
 export type GetServerSideProps = (
-  context: ServerSidePropsContext
+  context: GetServerSidePropsContext
 ) => GetServerSidePropsResult | Promise<GetServerSidePropsResult>
 
 export type GetStaticPathsResult = {
@@ -70,8 +70,9 @@ export async function renderToHTML(
     _document,
     buildDir,
     dev,
-    req,
-    res,
+    path,
+    getServerSidePropsContext,
+    getStaticPropsContext
   }: {
     route: Route
     clientManifest: any
@@ -79,8 +80,9 @@ export async function renderToHTML(
     _document: any
     buildDir: string
     dev?: boolean
-    req: Request
-    res: Response
+    path: string
+    getServerSidePropsContext: GetServerSidePropsContext | false
+    getStaticPropsContext: GetStaticPropsContext | false
   }
 ) {
   const ssrContext: { [k: string]: any } = {}
@@ -91,12 +93,12 @@ export async function renderToHTML(
   const App = _app.createApp()
   const pageProps = await getPageProps(page, {
     buildDir,
-    req,
-    res,
+    getServerSidePropsContext,
+    getStaticPropsContext,
     pageEntryName: route.entryName,
     dev,
   })
-  const router = createServerRouter(req.path, {
+  const router = createServerRouter(path, {
     // @ts-ignore
     render(h: any) {
       return h(App, {
@@ -171,44 +173,32 @@ export async function getPageProps(
   page: PageInterface,
   {
     buildDir,
-    req,
-    res,
+    getServerSidePropsContext,
+    getStaticPropsContext,
     pageEntryName,
     dev,
   }: {
     buildDir: string
-    req: Request
-    res: Response
     pageEntryName: string
     dev?: boolean
+    getServerSidePropsContext: GetServerSidePropsContext | false
+    getStaticPropsContext: GetStaticPropsContext | false
   }
 ) {
   if (!page.getServerSideProps || !page.getStaticProps) {
     return false
   }
-  const query = req.query
-  const params = req.params
+
   const props = {}
 
-  if (page.getServerSideProps) {
-    const serverSidePropsContext = {
-      req,
-      res,
-      query,
-      params,
-      path: req.path,
-    }
-    const result = await page.getServerSideProps(serverSidePropsContext)
+  if (page.getServerSideProps && getServerSidePropsContext) {
+    const result = await page.getServerSideProps(getServerSidePropsContext)
     Object.assign(props, result?.props)
   }
 
-  if (page.getStaticProps) {
+  if (page.getStaticProps && getStaticPropsContext) {
     if (dev) {
-      const staticPropsContext = {
-        query,
-        params,
-      }
-      const result = await page.getStaticProps(staticPropsContext)
+      const result = await page.getStaticProps(getStaticPropsContext)
       Object.assign(props, result?.props)
     } else {
       Object.assign(

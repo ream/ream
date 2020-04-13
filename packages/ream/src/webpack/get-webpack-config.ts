@@ -138,7 +138,9 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
             children: false,
             assets: false,
             version: false,
-            builtAt: false
+            builtAt: false,
+            colors: true,
+            chunkModules: false
           }))
         }
       })

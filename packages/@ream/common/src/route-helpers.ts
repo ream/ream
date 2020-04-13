@@ -1,4 +1,4 @@
-import { Key, pathToRegexp } from 'path-to-regexp'
+import { Key, pathToRegexp, compile } from 'path-to-regexp'
 import { Route } from './route'
 
 function exec(path: string, regexp: RegExp, keys: Key[]) {
@@ -32,4 +32,10 @@ export function findMatchedRoute(routes: Route[], path: string) {
     }
   }
   return { params: {} }
+}
+
+export function compileToPath(template: string, params: any) {
+  return compile(template, {
+    encode: encodeURIComponent,
+  })(params)
 }
