@@ -1,9 +1,9 @@
 import Vue from 'vue'
-import {useMeta} from './use-meta'
-import {createClientRouter} from './create-client-router'
+import { useMeta } from 'ream-server/dist/use-meta'
+import { createClientRouter } from './create-client-router'
 import { _app } from 'dot-ream/client-routes'
 
-useMeta(Vue)
+useMeta()
 
 const state = window.__REAM__
 
@@ -13,20 +13,23 @@ const app = new Vue({
   router,
   pageProps: state.pageProps,
   render(h) {
-    return h('div', {
-      attrs: {
-        id: '_ream'
-      }
-    }, [h('router-view')])
-  }
+    return h(
+      'div',
+      {
+        attrs: {
+          id: '_ream',
+        },
+      },
+      [h('router-view')]
+    )
+  },
 })
 
-
-_app.onCreated && _app.onCreated({
-  app,
-  router
-})
-
+_app.onCreated &&
+  _app.onCreated({
+    app,
+    router,
+  })
 
 router.onReady(() => {
   app.$mount('#_ream')
@@ -39,10 +42,12 @@ router.onReady(() => {
     if (!getServerSideProps) {
       return next()
     }
-    fetch(`${to.path === '/' ? '/index' : to.path}.pageprops.json`).then(res => res.json()).then(res => {
-      app.$options.pageProps = res
-      next()
-    })
+    fetch(`${to.path === '/' ? '/index' : to.path}.pageprops.json`)
+      .then(res => res.json())
+      .then(res => {
+        app.$options.pageProps = res
+        next()
+      })
   })
 }, console.error)
 

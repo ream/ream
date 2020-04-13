@@ -1,19 +1,13 @@
 import { join } from 'path'
 import Vue from 'vue'
-import Meta from 'vue-meta'
 import { Request, Response } from 'express'
 import { createRenderer } from 'vue-server-renderer'
 import devalue from 'devalue'
 import { Route } from '@ream/common/dist/route'
 import { createServerRouter } from './create-server-router'
+import { useMeta } from './use-meta'
 
-Vue.use(Meta, {
-  keyName: 'head',
-  attribute: 'x-ream-head',
-  ssrAttribute: 'x-ream-ssr',
-  tagIDKeyName: 'rhid',
-  refreshOnceOnNavigation: true,
-})
+useMeta()
 
 type Obj = {
   [k: string]: any
