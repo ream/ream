@@ -8,6 +8,7 @@
 
 import { PluginObj, NodePath } from '@babel/core'
 import * as BabelTypes from '@babel/types'
+import { BuildTarget } from 'ream/src'
 
 const EXPORT_GET_SERVER_SIDE_PROPS = `getServerSideProps`
 const EXPORT_GET_STATIC_PROPS = `getStaticProps`
@@ -32,7 +33,9 @@ const exportPatterns = [
   },
 ]
 
-export type PluginOpts = {}
+export type PluginOpts = {
+  buildTarget: BuildTarget
+}
 
 function getIdentifier(
   path: NodePath<
@@ -105,6 +108,7 @@ function markImport(
 type PluginState = {
   refs: Set<NodePath<BabelTypes.Identifier>>
   opts: PluginOpts
+  hasExportsToRemove: boolean
 }
 
 export default function pageExportsTransforms({
@@ -138,11 +142,15 @@ export default function pageExportsTransforms({
       // @ts-ignore
       ImportNamespaceSpecifier: markImport,
 
-      ExportNamedDeclaration(path) {
+      ExportNamedDeclaration(path, state: PluginState) {
         const insertIndicator = (
           path: NodePath<BabelTypes.ExportNamedDeclaration>,
           exportName: string
         ) => {
+          if (state.opts.buildTarget === 'static' && exportName === GET_SERVER_SIDE_PROPS_INDICATOR) {
+            throw new Error(`You can't use ${EXPORT_GET_SERVER_SIDE_PROPS} when build target is set to "static"`)
+          }
+
           path.insertBefore(
             t.exportNamedDeclaration(
               t.variableDeclaration('var', [
@@ -185,9 +193,8 @@ export default function pageExportsTransforms({
                   (declarator.id as BabelTypes.Identifier).name ===
                   pattern.input
                 ) {
-                  declarator.id = t.identifier(pattern.output)
-                  declarator.init = t.booleanLiteral(true)
-                  return true
+                  insertIndicator(path, pattern.output)
+                  return false
                 }
               }
               return true
@@ -208,6 +215,7 @@ export default function pageExportsTransforms({
         }
 
         if (shouldRemove) {
+          state.hasExportsToRemove = true
           path.remove()
         }
       },
@@ -215,9 +223,15 @@ export default function pageExportsTransforms({
       Program: {
         enter(path, state: PluginState) {
           state.refs = new Set()
+          state.hasExportsToRemove = false
         },
 
         exit(path, state: PluginState) {
+          if (!state.hasExportsToRemove) {
+            // No need to clean unused references then
+            return
+          }
+
           const refs = state.refs
 
           let count: number

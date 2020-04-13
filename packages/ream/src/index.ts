@@ -1,6 +1,8 @@
 import 'source-map-support/register'
 import { resolve } from 'path'
 import { Route } from '@ream/common/dist/route'
+
+export type BuildTarget = 'server' | 'static'
 export interface Options {
   dir?: string
   dev?: boolean
@@ -8,6 +10,7 @@ export interface Options {
   server?: {
     port?: number | string
   }
+  target?: BuildTarget
 }
 
 type ServerOptions = {
@@ -25,6 +28,7 @@ export class Ream {
    */
   _routes: Route[]
   prepareType?: 'serve' | 'build'
+  target: BuildTarget
 
   constructor(options: Options = {}) {
     this.dir = resolve(options.dir || '.')
@@ -34,6 +38,7 @@ export class Ream {
       port: options.server?.port || '3000',
     }
     this._routes = []
+    this.target = options.target || 'server'
   }
 
   invalidate() {

@@ -3,10 +3,13 @@ import pageExportsTransforms, {
   PluginOpts,
 } from '../../src/babel/plugins/page-exports-transforms'
 
-const compile = (input: string, opts?: PluginOpts) =>
-  transformSync(input, {
-    plugins: [[pageExportsTransforms, opts]],
-  })?.code || ''
+const compile = (input: string, opts?: PluginOpts) => {
+  return (
+    transformSync(input, {
+      plugins: [[pageExportsTransforms, opts]],
+    })?.code || ''
+  )
+}
 
 test('remove function declaration', () => {
   const code = compile(
@@ -105,4 +108,20 @@ test('keep other exports', () => {
     "export const a = 1;
     export var __re0 = true;"
   `)
+})
+
+test(`throw when getServerSideProps is used in static target`, () => {
+  expect(() => {
+    const code = compile(
+      `
+  export const getServerSideProps = () => {}
+  `,
+      {
+        buildTarget: 'static',
+      }
+    )
+    console.log(code)
+  }).toThrowErrorMatchingInlineSnapshot(
+    `"unknown: You can't use getServerSideProps when build target is set to \\"static\\""`
+  )
 })

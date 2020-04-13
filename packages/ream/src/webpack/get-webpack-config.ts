@@ -76,6 +76,7 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
         type,
         cwd: api.resolveRoot(),
         buildDir: api.resolveDotReam(),
+        buildTarget: api.target,
         shouldCache: api.shouldCache,
         pagesDir: api.resolveRoot('pages')
       },
@@ -110,12 +111,13 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
       .use(require('vue-server-renderer/client-plugin'))
   }
 
-  chain.plugin('contants').use(webpack.DefinePlugin, [
+  chain.plugin('constants').use(webpack.DefinePlugin, [
     {
       'process.browser': JSON.stringify(type === 'client'),
       'process.server': JSON.stringify(type === 'server'),
       GET_SERVER_SIDE_PROPS_INDICATOR: JSON.stringify(GET_SERVER_SIDE_PROPS_INDICATOR),
-      GET_STATIC_PROPS_INDICATOR: JSON.stringify(GET_STATIC_PROPS_INDICATOR)
+      GET_STATIC_PROPS_INDICATOR: JSON.stringify(GET_STATIC_PROPS_INDICATOR),
+      __REAM_BUILD_TARGET__: JSON.stringify(api.target)
     },
   ])
 
