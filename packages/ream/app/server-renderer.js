@@ -14,7 +14,7 @@ export async function render({ entryPage, path, clientManifest, _app, _document 
   const renderer = createRenderer({
     clientManifest,
   })
-  const pageProps = await renderServerProps({ entryPage }, context)
+  const pageProps = await renderServerSideProps({ entryPage }, context)
 
   const App = _app.createApp()
   const router = createServerRouter(path, {
@@ -86,7 +86,7 @@ export async function render({ entryPage, path, clientManifest, _app, _document 
   return html
 }
 
-export async function renderServerProps({ entryPage }, context) {
+export async function renderServerSideProps({ entryPage }, context) {
   const { getServerSideProps } = __non_webpack_require__(`./${entryPage}.js`)
 
   if (getServerSideProps) {

@@ -1,4 +1,4 @@
-import { resolve, join } from 'path'
+import { join } from 'path'
 import express, {
   RequestHandler,
   Request,
@@ -25,12 +25,12 @@ export function createPagePropsHandler(
     }
 
     req.params = params
-    const { renderServerProps } = require(join(
+    const { renderServerSideProps } = require(join(
       buildDir,
       'server/server-renderer.js'
     ))
 
-    const result = await renderServerProps(
+    const result = await renderServerSideProps(
       { entryPage: route.entryName },
       {
         req,
