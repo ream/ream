@@ -4,8 +4,8 @@ import { createServer } from 'ream-server'
 
 export function createDevServer(api: Ream) {
   const server = createServer(api.resolveRoot(), {
-    serveStaticProps: true,
-    routes: api.routes,
+    dev: true,
+    getRoutes: () => api.routes,
     beforeMiddlewares(server) {
       useDevMiddlewares(api, server)
       server.use((req, res, next) => {

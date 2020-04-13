@@ -9,18 +9,25 @@ import express, {
 import { findMatchedRoute } from '@ream/common/dist/find-matched-route'
 import { prodReadRoutes } from '@ream/common/dist/prod-read-routes'
 import { Route } from '@ream/common/dist/route'
-import { renderToHTML, PageInterface, getPageProps } from './utils'
+import {
+  renderToHTML,
+  PageInterface,
+  getPageProps,
+  getServerAssets,
+} from './utils'
 
 function render404(res: Response) {
   return res.status(404).end('404')
 }
 
 export function createPagePropsHandler(
-  routes: Route[],
+  getRoutes: () => Route[],
   buildDir: string,
-  serveStaticProps?: boolean
+  dev?: boolean
 ): RequestHandler {
   return async (req, res) => {
+    const routes = getRoutes()
+    
     req.url = req.url
       .replace('.pageprops.json', '')
       .replace(/\/index$/, '')
@@ -39,7 +46,7 @@ export function createPagePropsHandler(
       req,
       res,
       pageEntryName: route.entryName,
-      serveStaticProps,
+      dev,
     })
 
     res.send(pageProps)
@@ -47,9 +54,12 @@ export function createPagePropsHandler(
 }
 
 export type CreateServerOptions = {
-  serveStaticProps?: boolean
+  /**
+   * Disable production middlewares and optimizations
+   */
+  dev?: boolean
   beforeMiddlewares?: (server: Express) => void
-  routes?: Route[]
+  getRoutes?: () => Route[]
 }
 
 /**
@@ -59,25 +69,22 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
   const server = express()
   const buildDir = join(dir, '.ream')
 
-  const { serveStaticProps, beforeMiddlewares } = options
+  const { dev, beforeMiddlewares } = options
 
   if (beforeMiddlewares) {
     beforeMiddlewares(server)
   }
 
-  server.use('/_ream', express.static(join(buildDir, 'client')))
+  if (!dev) {
+    server.use('/_ream', express.static(join(buildDir, 'client')))
+  }
 
-  const routes = options.routes || prodReadRoutes(buildDir)
-  const clientManifest = require(join(
-    buildDir,
-    'client/vue-ssr-client-manifest.json'
-  ))
-  const _app = require(join(buildDir, `server/pages/_app`))
-  const _document = require(join(buildDir, `server/pages/_document`))
+  const getRoutes = options.getRoutes || (() => prodReadRoutes(buildDir))
 
-  server.get('*.pageprops.json', createPagePropsHandler(routes, buildDir, serveStaticProps))
+  server.get('*.pageprops.json', createPagePropsHandler(getRoutes, buildDir, dev))
 
   server.get('*', async (req, res, next) => {
+    const routes = getRoutes()
     const { route, params } = findMatchedRoute(routes, req.path)
     req.params = params
 
@@ -101,13 +108,14 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
       buildDir,
       `server/${route.entryName}`
     ))
+    const { clientManifest, _app, _document } = getServerAssets(buildDir)
     const html = await renderToHTML(page, {
       route,
       clientManifest,
       _app,
       _document,
       buildDir,
-      serveStaticProps,
+      dev,
       req,
       res,
     })

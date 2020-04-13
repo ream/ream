@@ -5,10 +5,21 @@ import { routes } from 'dot-ream/client-routes'
 Vue.use(Router)
 
 export function createClientRouter() {
-  const router = new Router({
-    mode: 'history',
-    routes
-  })
+  const createRouter = () =>
+    new Router({
+      mode: 'history',
+      routes,
+    })
+
+  const router = createRouter()
+
+  if (module.hot) {
+    module.hot.accept('dot-ream/client-routes', () => {
+      const routes = require('dot-ream/client-routes').routes
+      router.options.routes = routes
+      router.matcher = createRouter(routes).matcher
+    })
+  }
 
   return router
 }

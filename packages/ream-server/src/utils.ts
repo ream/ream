@@ -75,7 +75,7 @@ export async function renderToHTML(
     _app,
     _document,
     buildDir,
-    serveStaticProps,
+    dev,
     req,
     res,
   }: {
@@ -84,7 +84,7 @@ export async function renderToHTML(
     _app: any
     _document: any
     buildDir: string
-    serveStaticProps?: boolean
+    dev?: boolean
     req: Request
     res: Response
   }
@@ -100,7 +100,7 @@ export async function renderToHTML(
     req,
     res,
     pageEntryName: route.entryName,
-    serveStaticProps,
+    dev,
   })
   const router = createServerRouter(req.path, {
     // @ts-ignore
@@ -180,13 +180,13 @@ export async function getPageProps(
     req,
     res,
     pageEntryName,
-    serveStaticProps,
+    dev,
   }: {
     buildDir: string
     req: Request
     res: Response
     pageEntryName: string
-    serveStaticProps?: boolean
+    dev?: boolean
   }
 ) {
   if (!page.getServerSideProps || !page.getStaticProps) {
@@ -209,7 +209,7 @@ export async function getPageProps(
   }
 
   if (page.getStaticProps) {
-    if (serveStaticProps) {
+    if (dev) {
       const staticPropsContext = {
         query,
         params,
@@ -225,4 +225,18 @@ export async function getPageProps(
   }
 
   return props
+}
+
+export function getServerAssets(buildDir: string) {
+  const clientManifest = require(join(
+    buildDir,
+    'client/vue-ssr-client-manifest.json'
+  ))
+  const _app = require(join(buildDir, `server/pages/_app`))
+  const _document = require(join(buildDir, `server/pages/_document`))
+  return {
+    clientManifest,
+    _app,
+    _document
+  }
 }
