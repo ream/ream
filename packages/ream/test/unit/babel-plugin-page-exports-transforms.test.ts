@@ -33,7 +33,7 @@ test('remove function declaration', () => {
   `)
 })
 
-test('remove unused stuff', () => {
+test('remove references that are only used in ssr exports', () => {
   const code = compile(
     `
     var readFile = require('fs').readFile
