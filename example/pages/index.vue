@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  props: ['hello'],
+  props: ['hello', 'msg'],
 
   data() {
     return {
@@ -23,6 +23,14 @@ export const getServerSideProps = () => {
   return {
     props: {
       hello: 'hello world'
+    }
+  }
+};
+
+export const getStaticProps = () => {
+  return {
+    props: {
+      msg: 'try static props'
     }
   }
 };

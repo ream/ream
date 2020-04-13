@@ -91,7 +91,7 @@ export class Ream {
         }
       },
       {
-        'server-renderer': this.resolveApp('server-renderer.js'),
+        // Defaults
         'pages/_app': this.resolveApp('pages/_app.js'),
         'pages/_document': this.resolveApp('pages/_document.js')
       }

@@ -1,17 +1,17 @@
-import Vue from 'vue'
+import Vue, { VueConstructor } from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
 
-export function createServerRouter(path, Component) {
+export function createServerRouter(path: string, Component: VueConstructor) {
   const router = new Router({
     mode: 'abstract',
     routes: [
       {
         path,
-        component: Component
-      }
-    ]
+        component: Component,
+      },
+    ],
   })
 
   router.push(path)
