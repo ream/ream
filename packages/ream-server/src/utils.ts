@@ -19,7 +19,7 @@ type Obj = {
   [k: string]: any
 }
 
-export type StaticPropsResult = {
+export type GetStaticPropsResult = {
   props: Obj
 }
 
@@ -29,7 +29,7 @@ export type StaticPropsContext = {
 
 export type GetStaticProps = (
   context: StaticPropsContext
-) => StaticPropsResult | Promise<StaticPropsResult>
+) => GetStaticPropsResult | Promise<GetStaticPropsResult>
 
 export type ServerSidePropsContext = {
   req: Request
@@ -39,17 +39,26 @@ export type ServerSidePropsContext = {
   path: string
 }
 
-export type ServerSidePropsResult = {
+export type GetServerSidePropsResult = {
   props: Obj
 }
 
 export type GetServerSideProps = (
   context: ServerSidePropsContext
-) => ServerSidePropsResult | Promise<ServerSidePropsResult>
+) => GetServerSidePropsResult | Promise<GetServerSidePropsResult>
+
+export type GetStaticPathsResult = {
+  paths: Array<{
+    params: Obj
+  }>
+}
+
+export type GetStaticPaths = () => GetStaticPathsResult | Promise<GetStaticPathsResult>
 
 export type PageInterface = {
   getStaticProps?: GetStaticProps
   getServerSideProps?: GetServerSideProps
+  getStaticPaths?: GetStaticPaths
   default: Vue
 }
 
