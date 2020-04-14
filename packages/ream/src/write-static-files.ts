@@ -54,7 +54,12 @@ export async function writeStaticFiles(api: Ream) {
         params,
       },
     })
-    const filename = path === `/` ? `/index.html` : `${path}/index.html`
+    const filename =
+      path === `/`
+        ? `/index.html`
+        : path.endsWith('.html')
+        ? path
+        : `${path}/index.html`
     const outputPath = join(staticOutDir, filename)
     await outputFile(outputPath, `<!DOCTYPE html>${html}`, 'utf8')
   }
@@ -71,6 +76,10 @@ export async function writeStaticFiles(api: Ream) {
       `server/${route.entryName}`
     ))
     const { getStaticProps, getStaticPaths } = page
+    // Use static path for 404 page
+    if (route.entryName === 'pages/404') {
+      route.routePath = '/404.html'
+    }
     const hasParams = route.routePath.includes(':')
     if (hasParams && !getStaticPaths) {
       throw new Error(
