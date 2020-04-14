@@ -120,7 +120,8 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
     }
 
     res.setHeader('content-type', 'text/html')
-
+    // @ts-ignore TODO
+    req.__route_path__ = route.routePath
     const page: PageInterface = require(join(
       buildDir,
       `server/${route.entryName}`
@@ -135,6 +136,8 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
         buildDir,
         dev,
         path: req.path,
+        url: req.url,
+        originalPath: route.routePath,
         getServerSidePropsContext: {
           req,
           res,
@@ -172,6 +175,9 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
         clientManifest,
         buildDir,
         path: req.path,
+        url: req.url,
+        // @ts-ignore
+        originalPath: req.__route_path__ || req.url,
         getServerSidePropsContext: {
           req,
           res,

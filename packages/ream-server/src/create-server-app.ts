@@ -3,18 +3,18 @@ import { createServerRouter } from './create-server-router'
 import { PageInterface } from './utils'
 
 export function createServerApp({
-  path,
+  originalPath,
   page,
   pageProps,
   _app,
 }: {
-  path: string
+  originalPath: string
   page: PageInterface
   pageProps: any
   _app: any
 }) {
   const App = _app.createApp()
-  const router = createServerRouter(path, {
+  const router = createServerRouter(originalPath, {
     // @ts-ignore
     render(h: any) {
       return h(App, {

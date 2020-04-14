@@ -3,18 +3,16 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-export function createServerRouter(path: string, Component: VueConstructor) {
+export function createServerRouter(originalPath: string, Component: VueConstructor) {
   const router = new Router({
     mode: 'abstract',
     routes: [
       {
-        path,
+        path: originalPath,
         component: Component,
       },
     ],
   })
-
-  router.push(path)
 
   return router
 }

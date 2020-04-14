@@ -3,7 +3,6 @@ import Vue from 'vue'
 import { Request, Response } from 'express'
 import { createRenderer } from 'vue-server-renderer'
 import devalue from 'devalue'
-import { Route } from '@ream/common/dist/route'
 import { useMeta } from './use-meta'
 import { createServerApp } from './create-server-app'
 
@@ -71,6 +70,8 @@ export async function renderToHTML(
     buildDir,
     dev,
     path,
+    originalPath,
+    url,
     getServerSidePropsContext,
     getStaticPropsContext,
     initialPageProps
@@ -81,7 +82,12 @@ export async function renderToHTML(
     _document: any
     buildDir: string
     dev?: boolean
+    /** The path that's actually being visted */
     path: string
+    /** The path that potentiall contains path-to-regexp templates, like `:id`  */
+    originalPath: string
+    /** Full URL, including query  */
+    url: string
     getServerSidePropsContext: GetServerSidePropsContext | false
     getStaticPropsContext: GetStaticPropsContext | false
     initialPageProps?: Obj
@@ -103,11 +109,12 @@ export async function renderToHTML(
     })),
   }
   const app = createServerApp({
-    path,
+    originalPath,
     page,
     pageProps,
     _app
   })
+  app.$router.push(url)
   const main = await renderer.renderToString(app, ssrContext)
   const meta = app.$meta().inject()
   const html = await _document.default({
@@ -165,7 +172,7 @@ export async function getPageProps(
     getStaticPropsContext: GetStaticPropsContext | false
   }
 ) {
-  if (!page.getServerSideProps || !page.getStaticProps) {
+  if (!page.getServerSideProps && !page.getStaticProps) {
     return false
   }
 

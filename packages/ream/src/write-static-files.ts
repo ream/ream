@@ -45,6 +45,8 @@ export async function writeStaticFiles(api: Ream) {
     const html = await renderToHTML(page, {
       pageEntryName: route.entryName,
       path,
+      originalPath: route.routePath,
+      url: path,
       clientManifest,
       _app,
       _document,

@@ -2,7 +2,10 @@ import WebpackChain from 'webpack-chain'
 import webpack from 'webpack'
 import { Ream } from '../'
 import { resolve, relative } from 'path'
-import {GET_SERVER_SIDE_PROPS_INDICATOR, GET_STATIC_PROPS_INDICATOR} from '../babel/plugins/page-exports-transforms'
+import {
+  GET_SERVER_SIDE_PROPS_INDICATOR,
+  GET_STATIC_PROPS_INDICATOR,
+} from '../babel/plugins/page-exports-transforms'
 
 export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
   const chain = new WebpackChain()
@@ -78,7 +81,7 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
         buildDir: api.resolveDotReam(),
         buildTarget: api.target,
         shouldCache: api.shouldCache,
-        pagesDir: api.resolveRoot('pages')
+        pagesDir: api.resolveRoot('pages'),
       },
     })
 
@@ -115,9 +118,11 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
     {
       'process.browser': JSON.stringify(type === 'client'),
       'process.server': JSON.stringify(type === 'server'),
-      GET_SERVER_SIDE_PROPS_INDICATOR: JSON.stringify(GET_SERVER_SIDE_PROPS_INDICATOR),
+      GET_SERVER_SIDE_PROPS_INDICATOR: JSON.stringify(
+        GET_SERVER_SIDE_PROPS_INDICATOR
+      ),
       GET_STATIC_PROPS_INDICATOR: JSON.stringify(GET_STATIC_PROPS_INDICATOR),
-      __REAM_BUILD_TARGET__: JSON.stringify(api.target)
+      __REAM_BUILD_TARGET__: JSON.stringify(api.target),
     },
   ])
 
@@ -128,24 +133,32 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
     },
   ])
 
-  chain.plugin('print-errors').use(class PrintErrors {
-    apply(compiler: webpack.Compiler) {
-      compiler.hooks.done.tap('print-errors', stats => {
-        if (stats.hasErrors()) {
-          console.log(stats.toString({
-            chunks: false,
-            modules: false,
-            children: false,
-            assets: false,
-            version: false,
-            builtAt: false,
-            colors: true,
-            chunkModules: false
-          }))
-        }
-      })
+  chain.plugin('print-errors').use(
+    class PrintErrors {
+      apply(compiler: webpack.Compiler) {
+        compiler.hooks.done.tap('print-errors', stats => {
+          if (stats.hasErrors()) {
+            console.log(
+              stats.toString({
+                chunks: false,
+                modules: false,
+                children: false,
+                assets: false,
+                version: false,
+                builtAt: false,
+                colors: true,
+                chunkModules: false,
+              })
+            )
+          }
+        })
+      }
     }
-  })
+  )
+
+  if (!isClient) {
+    chain.node.set('__dirname', true).set('__filename', true)
+  }
 
   const config = chain.toConfig()
   config.entry = () => api.getEntry(type)
