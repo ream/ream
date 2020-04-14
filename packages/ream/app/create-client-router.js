@@ -18,6 +18,7 @@ export function createClientRouter() {
       const routes = require('dot-ream/client-routes').routes
       router.options.routes = routes
       router.matcher = createRouter(routes).matcher
+      console.log(router)
     })
   }
 

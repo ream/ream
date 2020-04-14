@@ -27,7 +27,6 @@ export async function useDevMiddlewares(api: Ream, server: Express) {
   })
 
   api.invalidate = () => {
-    devMiddleware.invalidate()
     watching.invalidate()
   }
 

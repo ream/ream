@@ -61,10 +61,10 @@ export class Ream {
 
   get routes(): Route[] {
     // Use pre-generated file in production server
-    const routes: Route[] =
-      this.prepareType === 'serve' && !this.isDev
-        ? require(this.resolveDotReam('routes.json'))
-        : this._routes
+    if (this.prepareType === 'serve' && !this.isDev) {
+      return require(this.resolveDotReam('routes.json'))
+    }
+    const routes: Route[] = [...this._routes]
 
     const ownPagesDir = this.resolveApp('pages')
     const patterns = [
@@ -93,14 +93,6 @@ export class Ream {
     return sortRoutesByScore(routes)
   }
 
-  get _appOutputPathForServer() {
-    return this.resolveDotReam(`server/pages/_app.js`)
-  }
-
-  get _documentOutputPathForServer() {
-    return this.resolveDotReam(`server/pages/_document.js`)
-  }
-
   async getEntry(type: 'client' | 'server') {
     if (type === 'client') {
       return {
@@ -112,21 +104,12 @@ export class Ream {
         ],
       }
     }
-    return this.routes.reduce(
-      (result, route) => {
-        return {
-          ...result,
-          [route.entryName]: route.absolutePath,
-        }
-      },
-      {
-        // Defaults
-        'pages/_app': this.resolveApp('pages/_app.js'),
-        'pages/_document': this.resolveApp('pages/_document.js'),
-        'pages/_error': this.resolveApp('pages/_error.js'),
-        'pages/404': this.resolveApp('pages/404.js'),
+    return this.routes.reduce((result, route) => {
+      return {
+        ...result,
+        [route.entryName]: route.absolutePath,
       }
-    )
+    }, {})
   }
 
   async prepare() {

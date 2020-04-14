@@ -18,7 +18,7 @@ export async function prepareFiles(api: Ream) {
 
   const writeRoutes = async () => {
     api._routes = pathToRoutes([...files], cwd)
-  
+
     const routes = api.routes
     let appPath: string
     let errorPath: string
@@ -95,7 +95,7 @@ export async function prepareFiles(api: Ream) {
     ) {
       await outputFile(
         api.resolveDotReam('routes.json'),
-        JSON.stringify(api._routes, null, 2),
+        JSON.stringify(api.routes, null, 2),
         'utf8'
       )
     }
