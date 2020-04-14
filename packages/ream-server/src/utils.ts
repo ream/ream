@@ -4,8 +4,8 @@ import { Request, Response } from 'express'
 import { createRenderer } from 'vue-server-renderer'
 import devalue from 'devalue'
 import { Route } from '@ream/common/dist/route'
-import { createServerRouter } from './create-server-router'
 import { useMeta } from './use-meta'
+import { createServerApp } from './create-server-app'
 
 useMeta()
 
@@ -64,7 +64,7 @@ export type RenderContext = {
 export async function renderToHTML(
   page: PageInterface,
   {
-    route,
+    pageEntryName,
     clientManifest,
     _app,
     _document,
@@ -72,9 +72,10 @@ export async function renderToHTML(
     dev,
     path,
     getServerSidePropsContext,
-    getStaticPropsContext
+    getStaticPropsContext,
+    initialPageProps
   }: {
-    route: Route
+    pageEntryName: string
     clientManifest: any
     _app: any
     _document: any
@@ -83,6 +84,7 @@ export async function renderToHTML(
     path: string
     getServerSidePropsContext: GetServerSidePropsContext | false
     getStaticPropsContext: GetStaticPropsContext | false
+    initialPageProps?: Obj
   }
 ) {
   const ssrContext: { [k: string]: any } = {}
@@ -90,44 +92,22 @@ export async function renderToHTML(
     // @ts-ignore wrong type
     clientManifest,
   })
-  const App = _app.createApp()
-  const pageProps = await getPageProps(page, {
-    buildDir,
-    getServerSidePropsContext,
-    getStaticPropsContext,
-    pageEntryName: route.entryName,
-    dev,
-  })
-  const router = createServerRouter(path, {
-    // @ts-ignore
-    render(h: any) {
-      return h(App, {
-        props: {
-          Component: page.default,
-          pageProps,
-        },
-      })
-    },
-  })
-  const app = new Vue({
-    router,
-    // @ts-ignore
-    head: {},
-    render(h) {
-      return h(
-        'div',
-        {
-          attrs: {
-            id: '_ream',
-          },
-        },
-        [h('router-view')]
-      )
-    },
-  })
-  if (_app.onCreated) {
-    _app.onCreated({ app, router })
+  const pageProps = {
+    ...initialPageProps,
+    ...(await getPageProps(page, {
+      buildDir,
+      getServerSidePropsContext,
+      getStaticPropsContext,
+      pageEntryName,
+      dev,
+    })),
   }
+  const app = createServerApp({
+    path,
+    page,
+    pageProps,
+    _app
+  })
   const main = await renderer.renderToString(app, ssrContext)
   const meta = app.$meta().inject()
   const html = await _document.default({
@@ -218,9 +198,11 @@ export function getServerAssets(buildDir: string) {
   ))
   const _app = require(join(buildDir, `server/pages/_app`))
   const _document = require(join(buildDir, `server/pages/_document`))
+  const _error = require(join(buildDir, `server/pages/_error`))
   return {
     clientManifest,
     _app,
-    _document
+    _document,
+    _error
   }
 }

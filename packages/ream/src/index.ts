@@ -93,7 +93,8 @@ export class Ream {
       {
         // Defaults
         'pages/_app': this.resolveApp('pages/_app.js'),
-        'pages/_document': this.resolveApp('pages/_document.js')
+        'pages/_document': this.resolveApp('pages/_document.js'),
+        'pages/_error': this.resolveApp('pages/_error.js')
       }
     )
   }

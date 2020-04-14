@@ -120,28 +120,70 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
       `server/${route.entryName}`
     ))
     const { clientManifest, _app, _document } = getServerAssets(buildDir)
-    const html = await renderToHTML(page, {
-      route,
-      clientManifest,
-      _app,
-      _document,
-      buildDir,
-      dev,
-      path: req.path,
-      getServerSidePropsContext: {
-        req,
-        res,
-        params,
-        query: req.query,
+    try {
+      const html = await renderToHTML(page, {
+        pageEntryName: route.entryName,
+        clientManifest,
+        _app,
+        _document,
+        buildDir,
+        dev,
         path: req.path,
-      },
-      getStaticPropsContext: {
-        params,
-      },
-    })
-
-    res.end(`<!DOCTYPE html>${html}`)
+        getServerSidePropsContext: {
+          req,
+          res,
+          params,
+          query: req.query,
+          path: req.path,
+        },
+        getStaticPropsContext: {
+          params,
+        },
+      })
+      res.end(`<!DOCTYPE html>${html}`)
+    } catch (err) {
+      next(err)
+    }
   })
+
+  server.use(
+    async (err: Error, req: Request, res: Response, next: NextFunction) => {
+      if (dev) {
+        console.error(err)
+      }
+      res.statusCode =
+        !req.statusCode || req.statusCode < 400 ? 500 : req.statusCode
+      const { _error, _app, _document, clientManifest } = getServerAssets(
+        buildDir
+      )
+      const html = await renderToHTML(_error, {
+        pageEntryName: `pages/_error`,
+        _app,
+        _document,
+        clientManifest,
+        buildDir,
+        path: req.path,
+        getServerSidePropsContext: {
+          req,
+          res,
+          params: req.params,
+          query: req.query,
+          path: req.path,
+        },
+        getStaticPropsContext: {
+          params: req.params,
+        },
+        initialPageProps: {
+          __ream_error__: true,
+          error: {
+            statusCode: res.statusCode,
+            stack: dev ? err.stack : '',
+          },
+        },
+      })
+      res.send(`<!DOCTYPE html>${html}`)
+    }
+  )
 
   return server
 }

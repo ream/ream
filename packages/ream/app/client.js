@@ -50,9 +50,3 @@ router.onReady(() => {
       })
   })
 }, console.error)
-
-if (module.hot) {
-  module.hot.accept('dot-ream/client-routes', () => {
-    _app = require('dot-ream/client-routes')._app
-  })
-}

@@ -20,6 +20,7 @@ export default {
 }
 
 export const getServerSideProps = () => {
+  throw new Error('fuck!!sdf!!!')
   return {
     props: {
       hello: 'hello world'

@@ -15,12 +15,25 @@ export async function prepareFiles(api: Ream) {
   api._routes = pathToRoutes([...files], cwd)
 
   const writeRoutes = async () => {
-    const appRoute = api._routes.find(route => route.routePath === '/_app')
-    const appPath = appRoute
-      ? appRoute.absolutePath
-      : api.resolveApp('pages/_app')
+    let appPath: string | undefined
+    let errorPath: string | undefined
+    for (const route of api._routes) {
+      if (route.routePath === '/_app') {
+        appPath = route.absolutePath
+      } else if (route.routePath === '/_error') {
+        errorPath = route.absolutePath
+      }
+    }
+    if (!appPath) {
+      appPath = api.resolveApp('pages/_app')
+    }
+    if (!errorPath) {
+      errorPath = api.resolveApp('pages/_error')
+    }
+
     const clientRoutes = `
     var _app = require(${JSON.stringify(appPath)})
+    var _error = require(${JSON.stringify(errorPath)})
 
     var App = _app.createApp()
 
@@ -30,10 +43,15 @@ export async function prepareFiles(api: Ream) {
         getServerSideProps: page[${JSON.stringify(GET_SERVER_SIDE_PROPS_INDICATOR)}],
         getStaticProps: page[${JSON.stringify(GET_STATIC_PROPS_INDICATOR)}],
         render(h, ctx) {
+          var pageProps = ctx.parent.$root.$options.pageProps
+          var Component = page.default
+          if (pageProps && pageProps.__ream_error__) {
+            Component = _error.default
+          }
           return h(App, {
             props: {
-              Component: page.default,
-              pageProps: ctx.parent.$root.$options.pageProps
+              Component: Component,
+              pageProps: pageProps
             }
           })
         }

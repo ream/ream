@@ -43,7 +43,7 @@ export async function writeStaticFiles(api: Ream) {
     const buildDir = api.resolveDotReam()
     const { _document, _app, clientManifest } = getServerAssets(buildDir)
     const html = await renderToHTML(page, {
-      route,
+      pageEntryName: route.entryName,
       path,
       clientManifest,
       _app,
