@@ -60,9 +60,11 @@ export class Ream {
   }
 
   get routes(): Route[] {
-    const routes: Route[] = this.isDev
-      ? this._routes
-      : require(this.resolveDotReam('routes.json'))
+    // Use pre-generated file in production server
+    const routes: Route[] =
+      this.prepareType === 'serve' && !this.isDev
+        ? require(this.resolveDotReam('routes.json'))
+        : this._routes
 
     const ownPagesDir = this.resolveApp('pages')
     const patterns = [
