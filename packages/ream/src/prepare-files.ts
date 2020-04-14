@@ -2,7 +2,10 @@ import glob from 'fast-glob'
 import { pathToRoutes } from './utils/path-to-routes'
 import { outputFile } from 'fs-extra'
 import { Ream } from '.'
-import { GET_SERVER_SIDE_PROPS_INDICATOR, GET_STATIC_PROPS_INDICATOR } from './babel/plugins/page-exports-transforms'
+import {
+  GET_SERVER_SIDE_PROPS_INDICATOR,
+  GET_STATIC_PROPS_INDICATOR,
+} from './babel/plugins/page-exports-transforms'
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
@@ -12,35 +15,33 @@ export async function prepareFiles(api: Ream) {
       cwd,
     })
   )
-  api._routes = pathToRoutes([...files], cwd)
 
   const writeRoutes = async () => {
-    let appPath: string | undefined
-    let errorPath: string | undefined
-    for (const route of api._routes) {
-      if (route.routePath === '/_app') {
+    api._routes = pathToRoutes([...files], cwd)
+  
+    const routes = api.routes
+    let appPath: string
+    let errorPath: string
+    for (const route of routes) {
+      if (route.entryName === 'pages/_app') {
         appPath = route.absolutePath
-      } else if (route.routePath === '/_error') {
+      } else if (route.entryName === 'pages/_error') {
         errorPath = route.absolutePath
       }
     }
-    if (!appPath) {
-      appPath = api.resolveApp('pages/_app')
-    }
-    if (!errorPath) {
-      errorPath = api.resolveApp('pages/_error')
-    }
 
     const clientRoutes = `
-    var _app = require(${JSON.stringify(appPath)})
-    var _error = require(${JSON.stringify(errorPath)})
+    var _app = require(${JSON.stringify(appPath!)})
+    var _error = require(${JSON.stringify(errorPath!)})
 
     var App = _app.createApp()
 
     var wrapPage = function(page) {
       return {
         functional: true,
-        getServerSideProps: page[${JSON.stringify(GET_SERVER_SIDE_PROPS_INDICATOR)}],
+        getServerSideProps: page[${JSON.stringify(
+          GET_SERVER_SIDE_PROPS_INDICATOR
+        )}],
         getStaticProps: page[${JSON.stringify(GET_STATIC_PROPS_INDICATOR)}],
         render(h, ctx) {
           var pageProps = ctx.parent.$root.$options.pageProps
@@ -59,7 +60,7 @@ export async function prepareFiles(api: Ream) {
     }
 
     var routes = [
-      ${api._routes
+      ${routes
         .filter(route => route.isClientRoute)
         .map(route => {
           return `{
@@ -87,7 +88,11 @@ export async function prepareFiles(api: Ream) {
     )
 
     // Write out routes.json for later use by `ream start`
-    if (api.prepareType === 'build') {
+    // Also emit the file when running in dev server for debug purpose
+    if (
+      api.prepareType === 'build' ||
+      (api.prepareType === 'serve' && api.isDev)
+    ) {
       await outputFile(
         api.resolveDotReam('routes.json'),
         JSON.stringify(api._routes, null, 2),
@@ -106,13 +111,11 @@ export async function prepareFiles(api: Ream) {
     })
       .on('add', async file => {
         files.add(file)
-        api._routes = pathToRoutes([...files], cwd)
         await writeRoutes()
         api.invalidate()
       })
       .on('unlink', async file => {
         files.delete(file)
-        api._routes = pathToRoutes([...files], cwd)
         await writeRoutes()
         api.invalidate()
       })

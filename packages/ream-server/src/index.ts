@@ -16,10 +16,6 @@ import {
   getServerAssets,
 } from './utils'
 
-function render404(res: Response) {
-  return res.status(404).end('404')
-}
-
 export function createPagePropsHandler(
   getRoutes: () => Route[],
   buildDir: string,
@@ -35,7 +31,7 @@ export function createPagePropsHandler(
 
     const { route, params } = findMatchedRoute(routes, req.path)
     if (!route) {
-      return render404(res)
+      return res.status(404).end('404')
     }
     req.params = params
 
@@ -96,11 +92,21 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
 
   server.get('*', async (req, res, next) => {
     const routes = getRoutes()
-    const { route, params } = findMatchedRoute(routes, req.path)
+    let { route, params } = findMatchedRoute(routes, req.path)
     req.params = params
 
     if (!route) {
-      return render404(res)
+      route = {
+        routePath: req.path,
+        entryName: 'pages/404',
+        absolutePath: 'nope',
+        relativePath: 'nope',
+        isClientRoute: true,
+        isApiRoute: false,
+        score: 0,
+        index: 0
+      }
+      res.statusCode = 404
     }
 
     if (
@@ -139,6 +145,9 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
         getStaticPropsContext: {
           params,
         },
+        initialPageProps: route.entryName === 'pages/404' ? {
+          __404__: true
+        } : {}
       })
       res.end(`<!DOCTYPE html>${html}`)
     } catch (err) {

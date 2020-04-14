@@ -10,4 +10,5 @@ test('rank routes', () => {
   expect(rankRoute(`/:foo(.*)`)).toMatchInlineSnapshot(`-1`)
   expect(rankRoute(`/foo/:foo(.*)`)).toMatchInlineSnapshot(`6`)
   expect(rankRoute(`/foo/:bar/:foo(.*)`)).toMatchInlineSnapshot(`12`)
+  expect(rankRoute(`/:404(.*)`)).toMatchInlineSnapshot(`-9996`)
 })

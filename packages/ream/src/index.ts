@@ -1,6 +1,8 @@
 import 'source-map-support/register'
 import { resolve } from 'path'
 import { Route } from '@ream/common/dist/route'
+import { pathToRoute } from './utils/path-to-routes'
+import { sortRoutesByScore } from './utils/rank-routes'
 
 export type BuildTarget = 'server' | 'static'
 export interface Options {
@@ -24,7 +26,7 @@ export class Ream {
   serverOptions: ServerOptions
   /**
    * Routes metadata
-   * This property won't be available in a production server, use `.routes` instead
+   * This property won't be available in a production server and isn't actual routes, use `.routes` instead
    */
   _routes: Route[]
   prepareType?: 'serve' | 'build'
@@ -58,10 +60,35 @@ export class Ream {
   }
 
   get routes(): Route[] {
-    if (this.isDev) {
-      return this._routes
+    const routes: Route[] = this.isDev
+      ? this._routes
+      : require(this.resolveDotReam('routes.json'))
+
+    const ownPagesDir = this.resolveApp('pages')
+    const patterns = [
+      {
+        require: (route: Route) => route.entryName === 'pages/_error',
+        filename: '_error.js',
+      },
+      {
+        require: (route: Route) => route.entryName === 'pages/_app',
+        filename: '_app.js',
+      },
+      {
+        require: (route: Route) => route.entryName === 'pages/_document',
+        filename: '_document.js',
+      },
+      {
+        require: (route: Route) => route.entryName === 'pages/404',
+        filename: '404.js',
+      },
+    ]
+    for (const pattern of patterns) {
+      if (!routes.some(pattern.require)) {
+        routes.push(pathToRoute(pattern.filename, ownPagesDir, routes.length))
+      }
     }
-    return require(this.resolveDotReam('routes.json'))
+    return sortRoutesByScore(routes)
   }
 
   get _appOutputPathForServer() {
@@ -94,7 +121,8 @@ export class Ream {
         // Defaults
         'pages/_app': this.resolveApp('pages/_app.js'),
         'pages/_document': this.resolveApp('pages/_document.js'),
-        'pages/_error': this.resolveApp('pages/_error.js')
+        'pages/_error': this.resolveApp('pages/_error.js'),
+        'pages/404': this.resolveApp('pages/404.js'),
       }
     )
   }

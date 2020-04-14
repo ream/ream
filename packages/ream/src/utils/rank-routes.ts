@@ -1,8 +1,11 @@
+import { Route } from '@ream/common/dist/route'
+
 const SEGMENT_POINTS = 4
 const STATIC_POINTS = 3
 const DYNAMIC_POINTS = 2
-const SPLAT_PENALTY = 1
+const CATCH_ALL_PENALTY = 1
 const ROOT_POINTS = 10000
+const NOT_FOUND_PENALTY = 10000
 
 const paramRe = /^:(.+)/
 
@@ -15,15 +18,19 @@ const segmentize = (uri: string) =>
 const isRootSegment = (segment: string) => segment === ''
 
 const isDynamic = (segment: string) => paramRe.test(segment)
-const isSplat = (segment: string) => segment.includes('(.*)')
+const isCatchAll = (segment: string) =>
+  segment.includes('(.*)') && !segment.startsWith(':404')
+const isNotFound = (segment: string) => segment === ':404(.*)'
 
 export function rankRoute(route: string) {
   return segmentize(route).reduce((score, segment) => {
     score += SEGMENT_POINTS
     if (isRootSegment(segment)) {
       score += ROOT_POINTS
-    } else if (isSplat(segment)) {
-      score -= SEGMENT_POINTS + SPLAT_PENALTY
+    } else if (isNotFound(segment)) {
+      score -= NOT_FOUND_PENALTY
+    } else if (isCatchAll(segment)) {
+      score -= SEGMENT_POINTS + CATCH_ALL_PENALTY
     } else if (isDynamic(segment)) {
       score += DYNAMIC_POINTS
     } else {
@@ -31,4 +38,10 @@ export function rankRoute(route: string) {
     }
     return score
   }, 0)
+}
+
+export function sortRoutesByScore(routes: Route[]) {
+  return routes.sort((a, b) => {
+    return a.score < b.score ? 1 : a.score > b.score ? -1 : a.index - b.index
+  })
 }
