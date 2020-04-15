@@ -5,7 +5,7 @@ import createDevMiddleware from 'webpack-dev-middleware'
 import createHotMiddleware from 'webpack-hot-middleware'
 import { getWebpackConfig } from  '../webpack/get-webpack-config'
 
-export async function useDevMiddlewares(api: Ream, server: Express) {
+export function createDevMiddlewares(api: Ream) {
 
   const clientConfig = getWebpackConfig('client', api)
   const clientCompiler = webpack(clientConfig)
@@ -30,6 +30,8 @@ export async function useDevMiddlewares(api: Ream, server: Express) {
     watching.invalidate()
   }
 
-  server.use(devMiddleware)
-  server.use(hotMiddleware)
+  return [
+    devMiddleware,
+    hotMiddleware
+  ]
 }

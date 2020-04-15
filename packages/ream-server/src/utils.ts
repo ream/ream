@@ -67,7 +67,6 @@ export async function renderToHTML(
     clientManifest,
     _app,
     _document,
-    buildDir,
     dev,
     path,
     originalPath,
@@ -80,7 +79,6 @@ export async function renderToHTML(
     clientManifest: any
     _app: any
     _document: any
-    buildDir: string
     dev?: boolean
     /** The path that's actually being visted */
     path: string
@@ -101,7 +99,6 @@ export async function renderToHTML(
   const pageProps = {
     ...initialPageProps,
     ...(await getPageProps(page, {
-      buildDir,
       getServerSidePropsContext,
       getStaticPropsContext,
       pageEntryName,
@@ -159,13 +156,10 @@ export async function renderToHTML(
 export async function getPageProps(
   page: PageInterface,
   {
-    buildDir,
     getServerSidePropsContext,
     getStaticPropsContext,
     pageEntryName,
-    dev,
   }: {
-    buildDir: string
     pageEntryName: string
     dev?: boolean
     getServerSidePropsContext: GetServerSidePropsContext | false
@@ -184,13 +178,13 @@ export async function getPageProps(
   }
 
   if (page.getStaticProps && getStaticPropsContext) {
-    if (dev) {
+    if (__DEV__) {
       const result = await page.getStaticProps(getStaticPropsContext)
       Object.assign(props, result?.props)
     } else {
       Object.assign(
         props,
-        require(join(buildDir, `staticprops/${pageEntryName}.json`))
+        __non_webpack_require__(join(__REAM_BUILD_DIR__, `staticprops/${pageEntryName}.json`))
       )
     }
   }
@@ -198,14 +192,14 @@ export async function getPageProps(
   return props
 }
 
-export function getServerAssets(buildDir: string) {
-  const clientManifest = require(join(
-    buildDir,
+export function getServerAssets() {
+  const clientManifest = __non_webpack_require__(join(
+    __REAM_BUILD_DIR__,
     'client/vue-ssr-client-manifest.json'
   ))
-  const _app = require(join(buildDir, `server/pages/_app`))
-  const _document = require(join(buildDir, `server/pages/_document`))
-  const _error = require(join(buildDir, `server/pages/_error`))
+  const _app = __non_webpack_require__(join(__REAM_BUILD_DIR__, `server/pages/_app`))
+  const _document = __non_webpack_require__(join(__REAM_BUILD_DIR__, `server/pages/_document`))
+  const _error = __non_webpack_require__(join(__REAM_BUILD_DIR__, `server/pages/_error`))
   return {
     clientManifest,
     _app,

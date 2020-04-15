@@ -18,8 +18,6 @@ import {
 
 export function createPagePropsHandler(
   getRoutes: () => Route[],
-  buildDir: string,
-  dev?: boolean
 ): RequestHandler {
   return async (req, res) => {
     const routes = getRoutes()
@@ -35,10 +33,9 @@ export function createPagePropsHandler(
     }
     req.params = params
 
-    const page = require(join(buildDir, `server/${route.entryName}`))
+    const page = __non_webpack_require__(join(__REAM_BUILD_DIR__, `server/${route.entryName}`))
 
     const pageProps = await getPageProps(page, {
-      buildDir,
       pageEntryName: route.entryName,
       getServerSidePropsContext: {
         req,
@@ -50,7 +47,6 @@ export function createPagePropsHandler(
       getStaticPropsContext: {
         params,
       },
-      dev,
     })
 
     res.send(pageProps)
@@ -58,10 +54,6 @@ export function createPagePropsHandler(
 }
 
 export type CreateServerOptions = {
-  /**
-   * Disable production middlewares and optimizations
-   */
-  dev?: boolean
   beforeMiddlewares?: (server: Express) => void
   getRoutes?: () => Route[]
 }
@@ -69,25 +61,24 @@ export type CreateServerOptions = {
 /**
  * @param dir Absolute path to your project root
  */
-export function createServer(dir: string, options: CreateServerOptions = {}) {
+export function createServer(options: CreateServerOptions = {}) {
   const server = express()
-  const buildDir = join(dir, '.ream')
 
-  const { dev, beforeMiddlewares } = options
+  const { beforeMiddlewares } = options
 
   if (beforeMiddlewares) {
     beforeMiddlewares(server)
   }
 
-  if (!dev) {
-    server.use('/_ream', express.static(join(buildDir, 'client')))
+  if (!__DEV__) {
+    server.use('/_ream', express.static(join(__REAM_BUILD_DIR__, 'client')))
   }
 
-  const getRoutes = options.getRoutes || (() => prodReadRoutes(buildDir))
+  const getRoutes = options.getRoutes || (() => __non_webpack_require__(join(__REAM_BUILD_DIR__, 'routes.json')))
 
   server.get(
     '*.pageprops.json',
-    createPagePropsHandler(getRoutes, buildDir, dev)
+    createPagePropsHandler(getRoutes)
   )
 
   server.get('*', async (req, res, next) => {
@@ -110,7 +101,7 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
     }
 
     if (
-      renderApiRoute(route, buildDir, {
+      renderApiRoute(route, {
         req,
         res,
         next,
@@ -122,19 +113,17 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
     res.setHeader('content-type', 'text/html')
     // @ts-ignore TODO
     req.__route_path__ = route.routePath
-    const page: PageInterface = require(join(
-      buildDir,
+    const page: PageInterface = __non_webpack_require__(join(
+      __REAM_BUILD_DIR__,
       `server/${route.entryName}`
     ))
-    const { clientManifest, _app, _document } = getServerAssets(buildDir)
+    const { clientManifest, _app, _document } = getServerAssets()
     try {
       const html = await renderToHTML(page, {
         pageEntryName: route.entryName,
         clientManifest,
         _app,
         _document,
-        buildDir,
-        dev,
         path: req.path,
         url: req.url,
         originalPath: route.routePath,
@@ -160,20 +149,18 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
 
   server.use(
     async (err: Error, req: Request, res: Response, next: NextFunction) => {
-      if (dev) {
+      if (__DEV__) {
         console.error(err)
       }
       res.statusCode =
         !req.statusCode || req.statusCode < 400 ? 500 : req.statusCode
       const { _error, _app, _document, clientManifest } = getServerAssets(
-        buildDir
       )
       const html = await renderToHTML(_error, {
         pageEntryName: `pages/_error`,
         _app,
         _document,
         clientManifest,
-        buildDir,
         path: req.path,
         url: req.url,
         // @ts-ignore
@@ -192,7 +179,7 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
           __ream_error__: true,
           error: {
             statusCode: res.statusCode,
-            stack: dev ? err.stack : '',
+            stack: __DEV__ ? err.stack : '',
           },
         },
       })
@@ -205,11 +192,10 @@ export function createServer(dir: string, options: CreateServerOptions = {}) {
 
 export function renderApiRoute(
   route: Route,
-  buildDir: string,
   { req, res, next }: { req: Request; res: Response; next: NextFunction }
 ) {
   if (route.isApiRoute) {
-    const page = require(join(buildDir, `server/${route.entryName}.js`))
+    const page = __non_webpack_require__(join(__REAM_BUILD_DIR__, `server/${route.entryName}.js`))
     page.default(req, res, next)
     return true
   }

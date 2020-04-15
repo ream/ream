@@ -1,11 +1,15 @@
-import { createServer as createProductionServer } from 'ream-server'
+import * as ReamServer from 'ream-server'
 import { Ream } from '../'
-import { createDevServer } from './create-dev-server'
 
-export function createServer(api: Ream) {
-  const server = api.isDev
-    ? createDevServer(api)
-    : createProductionServer(api.resolveRoot())
+export async function createServer(api: Ream) {
+  if (api.isDev) {
+    const { createDevServer } = await import('./create-dev-server')
+    return createDevServer(api)
+  }
 
-  return server
+  const reamServer: typeof ReamServer = require(api.resolveDotReam(
+    'server/ream-server.js'
+  ))
+
+  return reamServer.createServer()
 }

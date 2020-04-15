@@ -54,7 +54,11 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
     chain.target('node')
     chain.externals([
       require('webpack-node-externals')({
-        whitelist: [/\.(?!(?:jsx?|json)$).{1,5}$/i],
+        whitelist: [
+          /\.(?!(?:jsx?|json)$).{1,5}$/i,
+          // Bundle Ream server
+          'ream-server',
+        ],
       }),
     ])
   }
@@ -123,6 +127,8 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
       ),
       GET_STATIC_PROPS_INDICATOR: JSON.stringify(GET_STATIC_PROPS_INDICATOR),
       __REAM_BUILD_TARGET__: JSON.stringify(api.target),
+      __REAM_BUILD_DIR__: JSON.stringify(api.resolveDotReam()),
+      __DEV__: JSON.stringify(api.isDev),
     },
   ])
 

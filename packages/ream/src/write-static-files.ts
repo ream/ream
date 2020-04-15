@@ -1,20 +1,17 @@
 import { join } from 'path'
 import { Ream } from '.'
-import {
-  GetStaticPropsResult,
-  PageInterface,
-  getServerAssets,
-  renderToHTML,
-} from 'ream-server'
+import * as ReamServer from 'ream-server'
 import { outputFile, copy } from 'fs-extra'
 import { compileToPath } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
 
 export async function writeStaticFiles(api: Ream) {
+  const reamServer: typeof ReamServer = require(api.resolveDotReam('server/ream-server.js'))
+
   // Emit files to store results of getStaticProps
   const writeStaticProps = async (
     entryName: string,
-    result: GetStaticPropsResult
+    result: ReamServer.GetStaticPropsResult
   ) => {
     await outputFile(
       api.resolveDotReam(`staticprops/${entryName}.json`),
@@ -32,7 +29,7 @@ export async function writeStaticFiles(api: Ream) {
     params,
   }: {
     path: string
-    page: PageInterface
+    page: ReamServer.PageInterface
     route: Route
     params: any
   }) => {
@@ -41,8 +38,8 @@ export async function writeStaticFiles(api: Ream) {
     }
 
     const buildDir = api.resolveDotReam()
-    const { _document, _app, clientManifest } = getServerAssets(buildDir)
-    const html = await renderToHTML(page, {
+    const { _document, _app, clientManifest } = reamServer.getServerAssets()
+    const html = await reamServer.renderToHTML(page, {
       pageEntryName: route.entryName,
       path,
       originalPath: route.routePath,
@@ -50,7 +47,6 @@ export async function writeStaticFiles(api: Ream) {
       clientManifest,
       _app,
       _document,
-      buildDir,
       getServerSidePropsContext: false,
       getStaticPropsContext: {
         params,
@@ -74,7 +70,7 @@ export async function writeStaticFiles(api: Ream) {
     if (!route.isClientRoute) {
       continue
     }
-    const page: PageInterface = require(api.resolveDotReam(
+    const page: ReamServer.PageInterface = require(api.resolveDotReam(
       `server/${route.entryName}`
     ))
     const { getStaticProps, getStaticPaths } = page
