@@ -1,4 +1,3 @@
-import { join } from 'path'
 import express, {
   Express,
   RequestHandler,
@@ -16,7 +15,7 @@ import {
 } from './utils'
 
 export function createPagePropsHandler(
-  getRoutes: () => Route[],
+  getRoutes: () => Route[]
 ): RequestHandler {
   return async (req, res) => {
     const routes = getRoutes()
@@ -32,7 +31,9 @@ export function createPagePropsHandler(
     }
     req.params = params
 
-    const page = __non_webpack_require__(join(__REAM_BUILD_DIR__, `server/${route.entryName}`))
+    const page = __non_webpack_require__(
+      `${__REAM_BUILD_DIR__}/server/${route.entryName}`
+    )
 
     const pageProps = await getPageProps(page, {
       pageEntryName: route.entryName,
@@ -70,15 +71,14 @@ export function createServer(options: CreateServerOptions = {}) {
   }
 
   if (!__DEV__) {
-    server.use('/_ream', express.static(join(__REAM_BUILD_DIR__, 'client')))
+    server.use('/_ream', express.static(`${__REAM_BUILD_DIR__}/client`))
   }
 
-  const getRoutes = options.getRoutes || (() => __non_webpack_require__(join(__REAM_BUILD_DIR__, 'routes.json')))
+  const getRoutes =
+    options.getRoutes ||
+    (() => __non_webpack_require__(`${__REAM_BUILD_DIR__}/routes.json`))
 
-  server.get(
-    '*.pageprops.json',
-    createPagePropsHandler(getRoutes)
-  )
+  server.get('*.pageprops.json', createPagePropsHandler(getRoutes))
 
   server.get('*', async (req, res, next) => {
     const routes = getRoutes()
@@ -94,7 +94,7 @@ export function createServer(options: CreateServerOptions = {}) {
         isClientRoute: true,
         isApiRoute: false,
         score: 0,
-        index: 0
+        index: 0,
       }
       res.statusCode = 404
     }
@@ -112,10 +112,9 @@ export function createServer(options: CreateServerOptions = {}) {
     res.setHeader('content-type', 'text/html')
     // @ts-ignore TODO
     req.__route_path__ = route.routePath
-    const page: PageInterface = __non_webpack_require__(join(
-      __REAM_BUILD_DIR__,
-      `server/${route.entryName}`
-    ))
+    const page: PageInterface = __non_webpack_require__(
+      `${__REAM_BUILD_DIR__}/server/${route.entryName}`
+    )
     const { clientManifest, _app, _document } = getServerAssets()
     try {
       const html = await renderToHTML(page, {
@@ -136,9 +135,12 @@ export function createServer(options: CreateServerOptions = {}) {
         getStaticPropsContext: {
           params,
         },
-        initialPageProps: route.entryName === 'pages/404' ? {
-          __404__: true
-        } : {}
+        initialPageProps:
+          route.entryName === 'pages/404'
+            ? {
+                __404__: true,
+              }
+            : {},
       })
       res.end(`<!DOCTYPE html>${html}`)
     } catch (err) {
@@ -153,8 +155,7 @@ export function createServer(options: CreateServerOptions = {}) {
       }
       res.statusCode =
         !req.statusCode || req.statusCode < 400 ? 500 : req.statusCode
-      const { _error, _app, _document, clientManifest } = getServerAssets(
-      )
+      const { _error, _app, _document, clientManifest } = getServerAssets()
       const html = await renderToHTML(_error, {
         pageEntryName: `pages/_error`,
         _app,
@@ -194,7 +195,9 @@ export function renderApiRoute(
   { req, res, next }: { req: Request; res: Response; next: NextFunction }
 ) {
   if (route.isApiRoute) {
-    const page = __non_webpack_require__(join(__REAM_BUILD_DIR__, `server/${route.entryName}.js`))
+    const page = __non_webpack_require__(
+      `${__REAM_BUILD_DIR__}/server/${route.entryName}.js`
+    )
     page.default(req, res, next)
     return true
   }

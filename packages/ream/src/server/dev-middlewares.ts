@@ -1,12 +1,10 @@
 import { Ream } from '..'
-import { Express } from 'express'
 import webpack from 'webpack'
 import createDevMiddleware from 'webpack-dev-middleware'
 import createHotMiddleware from 'webpack-hot-middleware'
 import { getWebpackConfig } from  '../webpack/get-webpack-config'
 
 export function createDevMiddlewares(api: Ream) {
-
   const clientConfig = getWebpackConfig('client', api)
   const clientCompiler = webpack(clientConfig)
 
