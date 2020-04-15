@@ -1,10 +1,13 @@
 {
   "version": "0.0.0",
   "name": "ream-server",
+  "description": "Run generated Ream app in production",
   "files": [
-    "dist"
+    "dist",
+    "/cli.js"
   ],
   "main": "dist/index.js",
+  "bin": "cli.js",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c --watch",
@@ -13,6 +16,7 @@
   "license": "MIT",
   "dependencies": {
     "@ream/common": "0.0.0",
+    "cac": "^6.5.8",
     "devalue": "^2.0.1",
     "express": "^4.17.1",
     "vue": "^2.6.11",

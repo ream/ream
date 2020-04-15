@@ -78,12 +78,12 @@ export async function writeStaticFiles(api: Ream) {
       route.routePath = '/404.html'
     }
     const hasParams = route.routePath.includes(':')
-    if (hasParams && !getStaticPaths) {
+    if (hasParams && (getStaticProps && !getStaticPaths)) {
       throw new Error(
         `Route "${route.routePath}" uses dynamic paramter but you didn't export "getStaticPaths" in the page component`
       )
     }
-    if (hasParams && getStaticPaths) {
+    if (hasParams && getStaticProps && getStaticPaths) {
       const { paths } = await getStaticPaths()
       for (const path of paths) {
         if (getStaticProps) {

@@ -10,3 +10,5 @@ declare const __REAM_BUILD_DIR__: string
 declare const __DEV__: string
 
 declare const __non_webpack_require__: (mod: string) => any
+
+declare const __REAM_SERVER_VERSION__: string

@@ -3,7 +3,7 @@ import typescript from 'rollup-plugin-typescript2'
 export default {
   input: {
     index: 'src/index.ts',
-    'use-meta': 'src/use-meta.ts'
+    'use-meta': 'src/use-meta.ts',
   },
   output: {
     dir: 'dist',
@@ -13,9 +13,9 @@ export default {
     typescript({
       tsconfigOverride: {
         compilerOptions: {
-          module: 'esnext'
-        }
-      }
-    })
-  ]
+          module: 'esnext',
+        },
+      },
+    }),
+  ],
 }
