@@ -199,12 +199,12 @@ export function getServerAssets() {
   const clientManifest = __non_webpack_require__(
     `${__REAM_BUILD_DIR__}/client/vue-ssr-client-manifest.json`
   )
-  const _app = __non_webpack_require__(`${__REAM_BUILD_DIR__}server/pages/_app`)
+  const _app = __non_webpack_require__(`${__REAM_BUILD_DIR__}/server/pages/_app`)
   const _document = __non_webpack_require__(
-    `__REAM_BUILD_DIR__/server/pages/_document`
+    `${__REAM_BUILD_DIR__}/server/pages/_document`
   )
   const _error = __non_webpack_require__(
-    `__REAM_BUILD_DIR__/server/pages/_error`
+    `${__REAM_BUILD_DIR__}/server/pages/_error`
   )
   return {
     clientManifest,

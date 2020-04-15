@@ -110,7 +110,7 @@ export class Ream {
         [route.entryName]: route.absolutePath,
       }
     }, {
-      'ream-server': require.resolve('ream-server/dist/index')
+      'ream-server': 'ream-server'
     })
   }
 
