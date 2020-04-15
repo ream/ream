@@ -7,7 +7,6 @@ import express, {
   NextFunction,
 } from 'express'
 import { findMatchedRoute } from '@ream/common/dist/route-helpers'
-import { prodReadRoutes } from '@ream/common/dist/prod-read-routes'
 import { Route } from '@ream/common/dist/route'
 import {
   renderToHTML,
