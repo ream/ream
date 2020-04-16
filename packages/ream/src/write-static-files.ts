@@ -6,7 +6,15 @@ import { compileToPath } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
 
 export async function writeStaticFiles(api: Ream) {
-  const reamServer: typeof ReamServer = require(api.resolveDotReam('server/ream-server.js'))
+  const reamServer: typeof ReamServer = require(api.resolveDotReam(
+    'server/ream-server.js'
+  ))
+
+  const staticOutDir = api.resolveRoot('out')
+  const staticPropsDir =
+    api.config.target === 'static'
+      ? staticOutDir
+      : api.resolveDotReam('staticprops')
 
   // Emit files to store results of getStaticProps
   const writeStaticProps = async (
@@ -14,13 +22,11 @@ export async function writeStaticFiles(api: Ream) {
     result: ReamServer.GetStaticPropsResult
   ) => {
     await outputFile(
-      api.resolveDotReam(`staticprops/${entryName}.json`),
+      join(staticPropsDir, `${entryName}.json`),
       JSON.stringify(result.props),
       'utf8'
     )
   }
-
-  const staticOutDir = api.resolveRoot('out')
 
   const writeHtmlFile = async ({
     path,
@@ -78,7 +84,7 @@ export async function writeStaticFiles(api: Ream) {
       route.routePath = '/404.html'
     }
     const hasParams = route.routePath.includes(':')
-    if (hasParams && (getStaticProps && !getStaticPaths)) {
+    if (hasParams && getStaticProps && !getStaticPaths) {
       throw new Error(
         `Route "${route.routePath}" uses dynamic paramter but you didn't export "getStaticPaths" in the page component`
       )
