@@ -34,8 +34,9 @@ cli.command('build [dir]', 'Build a directory for production', {
   const app = new Ream({
     dir,
     dev: false,
-    target: options.target,
     cache: options.cache
+  }, {
+    target: options.target,
   })
   await app.build()
 })

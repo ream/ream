@@ -33,7 +33,7 @@ export async function writeStaticFiles(api: Ream) {
     route: Route
     params: any
   }) => {
-    if (api.target !== 'static') {
+    if (api.config.target !== 'static') {
       return
     }
 
@@ -61,7 +61,7 @@ export async function writeStaticFiles(api: Ream) {
     await outputFile(outputPath, `<!DOCTYPE html>${html}`, 'utf8')
   }
 
-  if (api.target === 'static') {
+  if (api.config.target === 'static') {
     await copy(api.resolveDotReam('client'), join(staticOutDir, '_ream'))
   }
 

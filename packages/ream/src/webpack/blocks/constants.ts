@@ -9,9 +9,15 @@ export function defineConstants(
 ) {
   chain.plugin('constants').use(DefinePlugin, [
     {
+      ...Object.keys(api.config.env).reduce((result, name) => {
+        return {
+          ...result,
+          [`process.env.${name}`]: JSON.stringify(api.config.env[name]),
+        }
+      }, {}),
       'process.browser': JSON.stringify(isClient),
       'process.server': JSON.stringify(!isClient),
-      __REAM_BUILD_TARGET__: JSON.stringify(api.target),
+      __REAM_BUILD_TARGET__: JSON.stringify(api.config.target),
       __REAM_BUILD_DIR__: JSON.stringify(api.resolveDotReam()),
       __DEV__: JSON.stringify(api.isDev),
     },

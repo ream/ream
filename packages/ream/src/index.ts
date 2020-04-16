@@ -3,6 +3,7 @@ import { resolve } from 'path'
 import { Route } from '@ream/common/dist/route'
 import { pathToRoute } from './utils/path-to-routes'
 import { sortRoutesByScore } from './utils/rank-routes'
+import { loadConfig } from './utils/load-config'
 
 export type BuildTarget = 'server' | 'static'
 export interface Options {
@@ -19,6 +20,13 @@ type ServerOptions = {
   port: number | string
 }
 
+export type ReamConfig = {
+  env?: {
+    [k: string]: string | boolean | number
+  }
+  target?: BuildTarget
+}
+
 export class Ream {
   dir: string
   isDev: boolean
@@ -30,9 +38,9 @@ export class Ream {
    */
   _routes: Route[]
   prepareType?: 'serve' | 'build'
-  target: BuildTarget
+  config: Required<ReamConfig>
 
-  constructor(options: Options = {}) {
+  constructor(options: Options = {}, configOverride?: ReamConfig) {
     this.dir = resolve(options.dir || '.')
     this.isDev = Boolean(options.dev)
     this.shouldCache = options.cache !== false
@@ -40,7 +48,15 @@ export class Ream {
       port: options.server?.port || '3000',
     }
     this._routes = []
-    this.target = options.target || 'server'
+
+    const { data: projectConfig } = loadConfig(this.dir)
+    this.config = {
+      env: {
+        ...projectConfig?.env,
+        ...configOverride?.env,
+      },
+      target: configOverride?.target || projectConfig?.target || 'server',
+    }
   }
 
   invalidate() {
@@ -104,14 +120,17 @@ export class Ream {
         ],
       }
     }
-    return this.routes.reduce((result, route) => {
-      return {
-        ...result,
-        [route.entryName]: route.absolutePath,
+    return this.routes.reduce(
+      (result, route) => {
+        return {
+          ...result,
+          [route.entryName]: route.absolutePath,
+        }
+      },
+      {
+        'ream-server': 'ream-server',
       }
-    }, {
-      'ream-server': 'ream-server'
-    })
+    )
   }
 
   async prepare() {
