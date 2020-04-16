@@ -1,3 +1,4 @@
+/** @type {import('ream').ReamConfig} */
 module.exports = {
   plugins: [
     [

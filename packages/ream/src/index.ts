@@ -8,6 +8,7 @@ import { loadConfig } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
 import { normalizePluginsArray } from './utils/normalize-plugins-array'
 import { Store, store } from './store'
+import { ChainWebpack } from './types'
 
 export type BuildTarget = 'server' | 'static'
 export interface Options {
@@ -35,6 +36,7 @@ export type ReamConfig = {
   }
   target?: BuildTarget
   plugins?: Array<ReamPluginConfigItem>
+  chainWebpack?: ChainWebpack
 }
 
 export class Ream {
@@ -52,7 +54,7 @@ export class Ream {
   configPath?: string
   store: Store
 
-  constructor(options: Options = {}, configOverride?: ReamConfig) {
+  constructor(options: Options = {}, configOverride: ReamConfig = {}) {
     this.dir = resolve(options.dir || '.')
     this.isDev = Boolean(options.dev)
     this.shouldCache = options.cache !== false
@@ -62,18 +64,26 @@ export class Ream {
     this._routes = []
     this.store = store
 
-    const { data: projectConfig, path: configPath } = loadConfig(this.dir)
+    const { data: projectConfig = {}, path: configPath } = loadConfig(this.dir)
     this.configPath = configPath
     this.config = {
       env: {
-        ...projectConfig?.env,
-        ...configOverride?.env,
+        ...projectConfig.env,
+        ...configOverride.env,
       },
       target: configOverride?.target || projectConfig?.target || 'server',
       plugins: [
-        ...(configOverride?.plugins || []),
-        ...(projectConfig?.plugins || []),
+        ...(configOverride.plugins || []),
+        ...(projectConfig.plugins || []),
       ],
+      chainWebpack(chain, options) {
+        if (projectConfig.chainWebpack) {
+          projectConfig.chainWebpack(chain, options)
+        }
+        if (configOverride.chainWebpack) {
+          configOverride.chainWebpack(chain, options)
+        }
+      }
     }
   }
 

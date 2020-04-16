@@ -1,5 +1,4 @@
 import { Ream } from '.'
-import consola from 'consola'
 import { resolveFiles } from './utils/resolve-files'
 import { store } from './store'
 

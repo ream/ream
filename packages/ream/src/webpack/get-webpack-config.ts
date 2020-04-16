@@ -11,6 +11,7 @@ import { defineConstants } from './blocks/constants'
 import { useProgressBar } from './blocks/progress-bar'
 import { printErrors } from './blocks/print-errors'
 import { store } from '../store'
+import { ChainWebpack, ChainWebpackOptions } from '../types'
 
 export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
   const chain = new WebpackChain()
@@ -43,10 +44,12 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
 
   printErrors(chain)
 
+  const chainWebpackOptions: ChainWebpackOptions = { isClient, isDev: api.isDev }
   for (const chainWebpackPath of store.state.pluginsFiles['chain-webpack']) {
-    const chainWebpack = require(chainWebpackPath)
-    chainWebpack(chain, { isClient, isDev: api.isDev })
+    const chainWebpack: ChainWebpack = require(chainWebpackPath)
+    chainWebpack(chain, chainWebpackOptions)
   }
+  api.config.chainWebpack(chain, chainWebpackOptions)
 
   const config = chain.toConfig()
   // webpack-chain itself doesn't support async entry
