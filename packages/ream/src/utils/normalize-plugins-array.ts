@@ -8,14 +8,14 @@ export function normalizePluginsArray(
 ) {
   return plugins.map(plugin => {
     if (typeof plugin === 'string') {
-      const pkgPath = resolveFrom(cwd, `${plugin}/package.json`)
-      return { pluginDir: dirname(pkgPath), pkgPath }
+      const modulePath = resolveFrom(cwd, plugin)
+      return { pluginDir: dirname(modulePath), modulePath }
     }
     if (Array.isArray(plugin)) {
-      const pkgPath = resolveFrom(cwd, `${plugin[0]}/package.json`)
+      const modulePath = resolveFrom(cwd, plugin[0])
       return {
-        pluginDir: dirname(pkgPath),
-        pkgPath,
+        pluginDir: dirname(modulePath),
+        modulePath,
         options: plugin[1],
       }
     }

@@ -6,6 +6,7 @@ import {
   GET_SERVER_SIDE_PROPS_INDICATOR,
   GET_STATIC_PROPS_INDICATOR,
 } from './babel/plugins/page-exports-transforms'
+import { store } from './store'
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
@@ -91,9 +92,11 @@ export async function prepareFiles(api: Ream) {
       'utf8'
     )
 
-    await outputFile(api.resolveDotReam('enhance-app.js'), `
+    await outputFile(
+      api.resolveDotReam('enhance-app.js'),
+      `
     var files = [
-      ${api.enhanceApp.files.map(file => {
+      ${[...store.state.pluginsFiles['enhance-app']].map(file => {
         return `require(${JSON.stringify(file)})`
       })}
     ]
@@ -110,8 +113,9 @@ export async function prepareFiles(api: Ream) {
     export function onCreatedApp(context) {
       exec('onCreatedApp', context)
     }
-    `,'utf8')
-    
+    `,
+      'utf8'
+    )
   }
 
   await writeRoutes()

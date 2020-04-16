@@ -1,8 +1,10 @@
 module.exports = {
   plugins: [
-    '@ream/plugin-google-analytics'
+    [
+      '@ream/plugin-google-analytics',
+      {
+        trackingId: 'UA-54857209-24',
+      },
+    ],
   ],
-  env: {
-    GA_TRACKING_ID: 'UA-54857209-24'
-  }
 }

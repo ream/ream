@@ -60,6 +60,6 @@ cli.help()
 cli.parse()
 
 function handleError(error: Error) {
-  console.error(error)
+  require('consola').error(error)
   process.exit(1)
 }

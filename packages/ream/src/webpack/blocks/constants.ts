@@ -9,6 +9,7 @@ export function defineConstants(
 ) {
   chain.plugin('constants').use(DefinePlugin, [
     {
+      ...api.store.state.constants,
       ...Object.keys(api.config.env).reduce((result, name) => {
         return {
           ...result,

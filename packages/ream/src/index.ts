@@ -5,9 +5,9 @@ import { Route } from '@ream/common/dist/route'
 import { pathToRoute } from './utils/path-to-routes'
 import { sortRoutesByScore } from './utils/rank-routes'
 import { loadConfig } from './utils/load-config'
-import { EnhanceApp } from './enhance-app'
 import { loadPlugins } from './load-plugins'
 import { normalizePluginsArray } from './utils/normalize-plugins-array'
+import { Store, store } from './store'
 
 export type BuildTarget = 'server' | 'static'
 export interface Options {
@@ -50,7 +50,7 @@ export class Ream {
   prepareType?: 'serve' | 'build'
   config: Required<ReamConfig>
   configPath?: string
-  enhanceApp: EnhanceApp
+  store: Store
 
   constructor(options: Options = {}, configOverride?: ReamConfig) {
     this.dir = resolve(options.dir || '.')
@@ -60,7 +60,7 @@ export class Ream {
       port: options.server?.port || '3000',
     }
     this._routes = []
-    this.enhanceApp = new EnhanceApp()
+    this.store = store
 
     const { data: projectConfig, path: configPath } = loadConfig(this.dir)
     this.configPath = configPath

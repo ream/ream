@@ -10,6 +10,7 @@ import { useCSS } from './blocks/css'
 import { defineConstants } from './blocks/constants'
 import { useProgressBar } from './blocks/progress-bar'
 import { printErrors } from './blocks/print-errors'
+import { store } from '../store'
 
 export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
   const chain = new WebpackChain()
@@ -41,6 +42,11 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
   useProgressBar(chain, isClient)
 
   printErrors(chain)
+
+  for (const chainWebpackPath of store.state.pluginsFiles['chain-webpack']) {
+    const chainWebpack = require(chainWebpackPath)
+    chainWebpack(chain, { isClient, isDev: api.isDev })
+  }
 
   const config = chain.toConfig()
   // webpack-chain itself doesn't support async entry

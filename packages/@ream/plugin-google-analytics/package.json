@@ -7,12 +7,5 @@
   "files": ["/*.js"],
   "scripts": {
     "test": "echo skip"
-  },
-  "ream-plugin": {
-    "name": "Google Analytics",
-    "required-env": ["GA_TRACKING_ID"],
-    "default-env": {
-      "GA_ANONYMIZE_IP": false
-    }
   }
 }
