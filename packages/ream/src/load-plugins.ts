@@ -33,7 +33,7 @@ export async function loadPlugins(api: Ream) {
       }
     }
     const enhanceAppPath = await resolveFiles(
-      ['src/enhance-app.js', 'src/enhance-app.ts'],
+      ['enhance-app.js', 'enhance-app.ts'],
       plugin.pluginDir
     )
     if (enhanceAppPath) {

@@ -4,7 +4,7 @@ import { Ream } from 'ream/src'
 export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
   const transpileDirs = [
     api.resolveApp(),
-    ...api.plugins.map(plugin => `${plugin.pluginDir}/src`),
+    ...api.plugins.map(plugin => plugin.pluginDir),
   ]
 
   chain.module

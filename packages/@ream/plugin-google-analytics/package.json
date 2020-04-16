@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["src"],
+  "files": ["/*.js"],
   "scripts": {
     "test": "echo skip"
   },
