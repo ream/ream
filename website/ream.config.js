@@ -1,5 +1,6 @@
 /** @type {import('ream').ReamConfig} */
 module.exports = {
+  target: 'static',
   plugins: [
     [
       '@ream/plugin-google-analytics',
