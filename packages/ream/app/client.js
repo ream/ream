@@ -2,6 +2,7 @@ import Vue from 'vue'
 import { useMeta } from 'ream-server/dist/use-meta'
 import { createClientRouter } from './create-client-router'
 import { _app } from 'dot-ream/client-routes'
+import { onCreatedApp } from 'dot-ream/enhance-app'
 
 useMeta()
 
@@ -25,11 +26,7 @@ const app = new Vue({
   },
 })
 
-_app.onCreated &&
-  _app.onCreated({
-    app,
-    router,
-  })
+onCreatedApp({ app, router })
 
 router.onReady(() => {
   app.$mount('#_ream')
@@ -50,3 +47,4 @@ router.onReady(() => {
       })
   })
 }, console.error)
+ 

@@ -34,8 +34,6 @@ export async function prepareFiles(api: Ream) {
     var _app = require(${JSON.stringify(appPath!)})
     var _error = require(${JSON.stringify(errorPath!)})
 
-    var App = _app.createApp()
-
     var wrapPage = function(page) {
       return {
         functional: true,
@@ -49,7 +47,7 @@ export async function prepareFiles(api: Ream) {
           if (pageProps && pageProps.__ream_error__) {
             Component = _error.default
           }
-          return h(App, {
+          return h(_app.default, {
             props: {
               Component: Component,
               pageProps: pageProps
@@ -87,18 +85,33 @@ export async function prepareFiles(api: Ream) {
       'utf8'
     )
 
-    // Write out routes.json for later use by `ream start`
-    // Also emit the file when running in dev server for debug purpose
-    if (
-      api.prepareType === 'build' ||
-      (api.prepareType === 'serve' && api.isDev)
-    ) {
-      await outputFile(
-        api.resolveDotReam('routes.json'),
-        JSON.stringify(api.routes, null, 2),
-        'utf8'
-      )
+    await outputFile(
+      api.resolveDotReam('routes.json'),
+      JSON.stringify(api.routes, null, 2),
+      'utf8'
+    )
+
+    await outputFile(api.resolveDotReam('enhance-app.js'), `
+    var files = [
+      ${api.enhanceApp.files.map(file => {
+        return `require(${JSON.stringify(file)})`
+      })}
+    ]
+
+    var exec = function(name, context) {
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i]
+        if (file[name]) {
+          file[name](context)
+        }
+      }
     }
+
+    export function onCreatedApp(context) {
+      exec('onCreatedApp', context)
+    }
+    `,'utf8')
+    
   }
 
   await writeRoutes()

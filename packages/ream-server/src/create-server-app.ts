@@ -13,11 +13,10 @@ export function createServerApp({
   pageProps: any
   _app: any
 }) {
-  const App = _app.createApp()
   const router = createServerRouter(originalPath, {
     // @ts-ignore
     render(h: any) {
-      return h(App, {
+      return h(_app.default, {
         props: {
           Component: page.default,
           pageProps,

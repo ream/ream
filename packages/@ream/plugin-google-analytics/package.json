@@ -1,0 +1,13 @@
+{
+  "name": "@ream/plugin-google-analytics",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["src"],
+  "ream-plugin": {
+    "name": "Google Analytics",
+    "optional-env": ["GA_ANONYMIZE_IP"],
+    "required-env": ["GA_TRACKING_ID"]
+  }
+}

@@ -21,7 +21,7 @@ cli
         port: options.port
       },
     })
-    await app.serve()
+    await app.serve().catch(handleError)
   })
 
 cli.command('build [dir]', 'Build a directory for production', {
@@ -38,7 +38,7 @@ cli.command('build [dir]', 'Build a directory for production', {
   }, {
     target: options.target,
   })
-  await app.build()
+  await app.build().catch(handleError)
 })
 
 cli.command('start [dir]', 'Start a production server')
@@ -58,3 +58,8 @@ cli.command('start [dir]', 'Start a production server')
 cli.version(require('../package').version)
 cli.help()
 cli.parse()
+
+function handleError(error: Error) {
+  console.error(error)
+  process.exit(1)
+}

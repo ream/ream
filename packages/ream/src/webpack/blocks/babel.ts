@@ -2,11 +2,16 @@ import WebpackChain from 'webpack-chain'
 import { Ream } from 'ream/src'
 
 export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
+  const transpileDirs = [
+    api.resolveApp(),
+    ...api.plugins.map(plugin => `${plugin.pluginDir}/src`),
+  ]
+
   chain.module
     .rule('js')
     .test([/\.jsx?$/, /\.tsx?$/])
     .include.add(filepath => {
-      if (filepath.startsWith(api.resolveApp())) {
+      if (transpileDirs.some(dir => filepath.startsWith(dir))) {
         return true
       }
       if (filepath.includes('node_modules')) {
