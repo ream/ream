@@ -5,6 +5,9 @@
     "access": "public"
   },
   "files": ["src"],
+  "scripts": {
+    "test": "echo skip"
+  },
   "ream-plugin": {
     "name": "Google Analytics",
     "optional-env": ["GA_ANONYMIZE_IP"],
