@@ -113,4 +113,6 @@ export async function writeStaticFiles(api: Ream) {
       })
     }
   }
+
+  await copy(api.resolveDotReam('staticprops'), staticOutDir)
 }
