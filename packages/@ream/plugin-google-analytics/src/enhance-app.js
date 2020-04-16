@@ -1,6 +1,6 @@
 /* eslint-disable */
 // Google analytics integration for Vue.js renderer
-export default function({ router }) {
+export function onCreatedApp({ router }) {
   if (process.browser && !__DEV__ && process.env.GA_TRACKING_ID) {
     function doNotTrackEnabled() {
       const dntNumber = parseInt(
