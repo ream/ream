@@ -36,7 +36,7 @@ export function createPagePropsHandler(
     )
 
     const pageProps = await getPageProps(page, {
-      pageEntryName: route.entryName,
+      path: req.path,
       getServerSidePropsContext: {
         req,
         res,

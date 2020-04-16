@@ -102,7 +102,7 @@ export async function renderToHTML(
     ...(await getPageProps(page, {
       getServerSidePropsContext,
       getStaticPropsContext,
-      pageEntryName,
+      path,
       dev,
     })),
   }
@@ -159,9 +159,9 @@ export async function getPageProps(
   {
     getServerSidePropsContext,
     getStaticPropsContext,
-    pageEntryName,
+    path,
   }: {
-    pageEntryName: string
+    path: string
     dev?: boolean
     getServerSidePropsContext: GetServerSidePropsContext | false
     getStaticPropsContext: GetStaticPropsContext | false
@@ -186,7 +186,7 @@ export async function getPageProps(
       Object.assign(
         props,
         __non_webpack_require__(
-          `${__REAM_BUILD_DIR__}/staticprops/${pageEntryName}.json`
+          `${__REAM_BUILD_DIR__}/staticprops${path === '/' ? '/index' : path}.pageprops.json`
         )
       )
     }
