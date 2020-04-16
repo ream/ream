@@ -25,6 +25,7 @@ export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
     .options({
       customLoaderOptions: {
         isClient,
+        isDev: api.isDev,
         cwd: api.resolveRoot(),
         buildDir: api.resolveDotReam(),
         buildTarget: api.config.target,

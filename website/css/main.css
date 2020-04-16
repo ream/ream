@@ -1,0 +1,30 @@
+:root {
+  --header-height: 70px;
+}
+
+.container {
+  max-width: 1080px;
+  padding: 0 10px;
+}
+
+.main {
+  margin-top: var(--header-height);
+  padding: 30px 0;
+}
+
+.markdown-body pre {
+  @apply bg-gray-900;
+  @apply text-gray-100;
+  @apply p-5;
+  @apply rounded-lg;
+  @apply my-5;
+}
+
+.markdown-body p {
+  @apply my-5;
+}
+
+.markdown-body h2 {
+  @apply text-3xl;
+  @apply my-5;
+}

@@ -25,6 +25,7 @@ export default babelLoader.custom((babel: any) => {
               cacheIdentifier: JSON.stringify({
                 key: CACHE_KEY,
                 isClient: custom.isClient,
+                isDev: custom.isDev,
                 buildTarget: custom.buildTarget,
                 config: babel.loadPartialConfig({
                   filename,
@@ -64,7 +65,7 @@ export default babelLoader.custom((babel: any) => {
         options.plugins.push([
           require.resolve('../../babel/plugins/page-exports-transforms'),
           {
-            buildTarget: customOptions.buildTarget
+            buildTarget: customOptions.buildTarget,
           },
         ])
       }
@@ -75,6 +76,9 @@ export default babelLoader.custom((babel: any) => {
             require('../../babel/preset'),
             {
               isServer: !customOptions.isClient,
+              tsAllExtensions:
+                filename.endsWith('.vue') &&
+                /&lang=ts/.test(this.resourceQuery),
             },
           ],
           {

@@ -206,3 +206,5 @@ export class Ream {
     return res.build(this)
   }
 }
+
+export * from './types'

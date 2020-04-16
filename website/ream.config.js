@@ -7,5 +7,6 @@ module.exports = {
         trackingId: 'UA-54857209-24',
       },
     ],
+    './plugin'
   ],
 }

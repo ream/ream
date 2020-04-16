@@ -3,7 +3,7 @@ import { dirname } from 'path'
 const env = process.env.BABEL_ENV || process.env.NODE_ENV
 const isEnvTest = env === 'test'
 
-type Options = { isServer?: boolean }
+type Options = { isServer?: boolean, tsAllExtensions?: boolean }
 
 export default (_: any, options: Options = {}) => {
   const { isServer } = options
@@ -25,7 +25,9 @@ export default (_: any, options: Options = {}) => {
             exclude: ['transform-typeof-symbol'],
           },
     ],
-    [require('@babel/preset-typescript')],
+    [require('@babel/preset-typescript'), {
+      allExtensions: options.tsAllExtensions
+    }],
   ]
 
   const plugins = [

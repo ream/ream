@@ -1,5 +1,6 @@
 import http from 'http'
 import { Express } from 'express'
+import resolveFrom from 'resolve-from'
 import { createDevMiddlewares } from './dev-middlewares'
 import { Ream } from '..'
 import * as ReamServer from 'ream-server'
@@ -26,9 +27,13 @@ export function createDevServer(api: Ream) {
   return http.createServer((req, res) => {
     clearRequireCache()
 
-    const reamServer: typeof ReamServer = require(api.resolveDotReam(
-      'server/ream-server.js'
-    ))
+    const reamServerPath = resolveFrom.silent(api.resolveDotReam(), './server/ream-server.js')
+
+    if (!reamServerPath) {
+      return res.end(`Wait until bundle finishes..`)
+    }
+
+    const reamServer: typeof ReamServer = require(reamServerPath)
 
     server =
       server ||

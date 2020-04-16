@@ -35,8 +35,8 @@ router.onReady(() => {
     if (!to.matched || to.matched.length === 0) {
       return next()
     }
-    const { getServerSideProps } = to.matched[0].components.default
-    if (!getServerSideProps) {
+    const { getServerSideProps, getStaticProps } = to.matched[0].components.default
+    if (!getServerSideProps && !getStaticProps) {
       return next()
     }
     fetch(`${to.path === '/' ? '/index' : to.path}.pageprops.json`)
