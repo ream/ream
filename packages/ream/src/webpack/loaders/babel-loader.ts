@@ -24,7 +24,7 @@ export default babelLoader.custom((babel: any) => {
               ),
               cacheIdentifier: JSON.stringify({
                 key: CACHE_KEY,
-                type: custom.type,
+                isClient: custom.isClient,
                 buildTarget: custom.buildTarget,
                 config: babel.loadPartialConfig({
                   filename,
@@ -58,11 +58,11 @@ export default babelLoader.custom((babel: any) => {
 
       // Replace ssr exports for pages in client build
       if (
-        customOptions.type === 'client' &&
+        customOptions.isClient &&
         filename.startsWith(customOptions.pagesDir)
       ) {
         options.plugins.push([
-          require.resolve('../babel/plugins/page-exports-transforms'),
+          require.resolve('../../babel/plugins/page-exports-transforms'),
           {
             buildTarget: customOptions.buildTarget
           },
@@ -72,9 +72,9 @@ export default babelLoader.custom((babel: any) => {
       options.presets.unshift(
         babel.createConfigItem(
           [
-            require('../babel/preset'),
+            require('../../babel/preset'),
             {
-              isServer: customOptions.type === 'server',
+              isServer: !customOptions.isClient,
             },
           ],
           {

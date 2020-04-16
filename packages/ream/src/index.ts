@@ -93,8 +93,8 @@ export class Ream {
     return sortRoutesByScore(routes)
   }
 
-  async getEntry(type: 'client' | 'server') {
-    if (type === 'client') {
+  async getEntry(isClient: boolean) {
+    if (isClient) {
       return {
         main: [
           ...(this.isDev
