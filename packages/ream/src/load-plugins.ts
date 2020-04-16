@@ -3,7 +3,9 @@ import { resolveFiles } from './utils/resolve-files'
 
 type PluginConfig = {
   name: string
-  'optional-env'?: string[]
+  'default-env'?: {
+    [name: string]: any
+  }
   'required-env'?: string[]
 }
 
@@ -18,12 +20,8 @@ export async function loadPlugins(api: Ream) {
         `${plugin.pluginDir} is not a Ream plugin, maybe you forgot to define "ream-plugin" key in its package.json`
       )
     }
-    if (config['optional-env']) {
-      for (const name of config['optional-env']) {
-        if (api.config.env[name] === undefined) {
-          api.config.env[name] = 'undefined'
-        }
-      }
+    if (config['default-env']) {
+      api.config.env = Object.assign({}, config['default-env'], api.config.env)
     }
     if (config['required-env']) {
       for (const name of config['required-env']) {

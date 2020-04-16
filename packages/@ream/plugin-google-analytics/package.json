@@ -10,7 +10,9 @@
   },
   "ream-plugin": {
     "name": "Google Analytics",
-    "optional-env": ["GA_ANONYMIZE_IP"],
-    "required-env": ["GA_TRACKING_ID"]
+    "required-env": ["GA_TRACKING_ID"],
+    "default-env": {
+      "GA_ANONYMIZE_IP": false
+    }
   }
 }
