@@ -15,9 +15,12 @@
 import { join } from 'path'
 import fs from 'fs'
 import marked from 'marked'
+import glob from 'fast-glob'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
-import { GetStaticProps } from 'ream-server'
+import { GetStaticProps, GetStaticPaths } from 'ream-server'
+
+const docsDir = join(__dirname, '../../docs')
 
 export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
   const renderer = new marked.Renderer()
@@ -32,7 +35,7 @@ export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
   }
 
   const content = await fs.promises.readFile(
-    join(__dirname, '../../docs', `${slug}.md`),
+    join(docsDir, `${slug}.md`),
     'utf8'
   )
   const html = marked(content, { renderer })
@@ -41,6 +44,19 @@ export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
       content: html,
       title: env.title,
     },
+  }
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const files = await glob('**/*.md', {
+    cwd: docsDir,
+  })
+  return {
+    paths: files.map(file => ({
+      params: {
+        slug: file.replace(/\.md$/, ''),
+      },
+    })),
   }
 }
 
