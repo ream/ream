@@ -20,6 +20,7 @@
     "puppeteer": "3.0.0"
   },
   "devDependencies": {
-    "@types/puppeteer": "^2.0.1"
+    "@types/puppeteer": "^2.0.1",
+    "ream": "0.0.0"
   }
 }
