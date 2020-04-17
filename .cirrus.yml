@@ -5,8 +5,11 @@ task:
   node_modules_cache:
     folder: node_modules
     fingerprint_script: cat yarn.lock
-    populate_script: yarn install
+    populate_script: yarn
 
   matrix:
+    - name: Install
+      install_script: yarn
+
     - name: Test
       test_script: yarn test
