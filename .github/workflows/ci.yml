@@ -36,8 +36,10 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Install deps
+      uses: ianwalter/puppeteer@3.0.0
       run: yarn
 
     # Runs a set of commands using the runners shell
     - name: Test
+      uses: ianwalter/puppeteer@3.0.0
       run: yarn test

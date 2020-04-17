@@ -2,7 +2,7 @@ import { join } from 'path'
 import { remove } from 'fs-extra'
 import { Ream } from 'ream'
 import getPort from 'get-port'
-import puppeteer from 'puppeteer'
+import puppeteer from 'puppeteer-core'
 
 export type ProductionApp = {
   teardown: () => Promise<void>
@@ -27,7 +27,9 @@ export async function buildAndLaunch({
   })
   await ream.build()
   const server: any = await ream.serve()
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    executablePath: 'google-chrome-stable'
+  })
   return {
     async teardown() {
       server.close()
