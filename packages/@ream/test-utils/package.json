@@ -17,10 +17,10 @@
   "dependencies": {
     "get-port": "5.1.1",
     "fs-extra": "9.0.0",
-    "puppeteer-core": "3.0.0"
+    "puppeteer": "3.0.0"
   },
   "devDependencies": {
-    "@types/puppeteer-core": "2.0.0",
+    "@types/puppeteer": "^2.0.1",
     "ream": "0.0.0"
   }
 }
