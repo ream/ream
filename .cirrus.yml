@@ -1,5 +1,5 @@
 container:
-  image: buildkite/puppeteer:latest
+  image: circleci/node:12-browsers
 
 task:
   node_modules_cache:
@@ -9,4 +9,4 @@ task:
 
   matrix:
     - name: Test
-      lint_script: yarn test
+      test_script: yarn test
