@@ -13,7 +13,9 @@ describe(`Custom 404 page`, () => {
     })
 
     afterAll(async done => {
-      await app.teardown()
+      if (app) {
+        await app.teardown()
+      }
       done()
     })
 
