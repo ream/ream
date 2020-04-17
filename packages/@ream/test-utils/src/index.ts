@@ -27,7 +27,10 @@ export async function buildAndLaunch({
   })
   await ream.build()
   const server: any = await ream.serve()
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    ignoreDefaultArgs: ['--disable-extensions'],
+    args: ['--no-sandbox'],
+  })
   return {
     async teardown() {
       server.close()
