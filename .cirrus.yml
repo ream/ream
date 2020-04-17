@@ -1,0 +1,12 @@
+container:
+  image: buildkite/puppeteer:latest
+
+task:
+  node_modules_cache:
+    folder: node_modules
+    fingerprint_script: cat yarn.lock
+    populate_script: yarn install
+
+  matrix:
+    - name: Test
+      lint_script: yarn test
