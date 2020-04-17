@@ -1,4 +1,4 @@
-import { rankRoute } from '../../src/utils/rank-routes'
+import { rankRoute } from 'ream/src/utils/rank-routes'
 
 test('rank routes', () => {
   expect(rankRoute(`/`)).toMatchInlineSnapshot(`10004`)

@@ -115,6 +115,10 @@ export function createServer(options: CreateServerOptions = {}) {
     const page: PageInterface = __non_webpack_require__(
       `${__REAM_BUILD_DIR__}/server/${route.entryName}`
     )
+    const is404 = route.entryName === 'pages/404'
+    if (is404) {
+      res.statusCode = 404
+    }
     const { clientManifest, _app, _document } = getServerAssets()
     try {
       const html = await renderToHTML(page, {
@@ -136,7 +140,7 @@ export function createServer(options: CreateServerOptions = {}) {
           params,
         },
         initialPageProps:
-          route.entryName === 'pages/404'
+          is404
             ? {
                 __404__: true,
               }

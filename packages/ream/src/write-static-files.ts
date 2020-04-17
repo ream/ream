@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { Ream } from '.'
 import * as ReamServer from 'ream-server'
-import { outputFile, copy } from 'fs-extra'
+import { outputFile, copy, pathExists } from 'fs-extra'
 import { compileToPath } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
 
@@ -16,7 +16,9 @@ export async function writeStaticFiles(api: Ream) {
     result: ReamServer.GetStaticPropsResult
   ) => {
     await outputFile(
-      api.resolveDotReam(`staticprops${path === '/' ? '/index' : path}.pageprops.json`),
+      api.resolveDotReam(
+        `staticprops${path === '/' ? '/index' : path}.pageprops.json`
+      ),
       JSON.stringify(result.props),
       'utf8'
     )
@@ -117,5 +119,10 @@ export async function writeStaticFiles(api: Ream) {
     }
   }
 
-  await copy(api.resolveDotReam('staticprops'), staticOutDir)
+  if (api.config.target === 'static') {
+    const staticPropsDir = api.resolveDotReam('staticprops')
+    if (await pathExists(staticPropsDir)) {
+      await copy(staticPropsDir, staticOutDir)
+    }
+  }
 }

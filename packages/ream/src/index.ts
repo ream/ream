@@ -9,6 +9,7 @@ import { loadPlugins } from './load-plugins'
 import { normalizePluginsArray } from './utils/normalize-plugins-array'
 import { Store, store } from './store'
 import { ChainWebpack } from './types'
+import { createServer } from 'http'
 
 export type BuildTarget = 'server' | 'static'
 export interface Options {
@@ -194,9 +195,11 @@ export class Ream {
   }
 
   async serve() {
-    const server = await this.getRequestHandler()
+    const handler = await this.getRequestHandler()
+    const server = createServer(handler)
     server.listen(this.serverOptions.port)
     console.log(`> http://localhost:${this.serverOptions.port}`)
+    return server
   }
 
   async build() {

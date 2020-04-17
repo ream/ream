@@ -1,4 +1,4 @@
-import { pathToRoutes } from '../../src/utils/path-to-routes'
+import { pathToRoutes } from 'ream/src/utils/path-to-routes'
 
 test(`compile static paths to routes`, () => {
   const routes = pathToRoutes(['bar/zoo.js', 'foo.vue'], '/pages')

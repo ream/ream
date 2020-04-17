@@ -1,7 +1,7 @@
 import { transformSync } from '@babel/core'
 import pageExportsTransforms, {
   PluginOpts,
-} from '../../src/babel/plugins/page-exports-transforms'
+} from 'ream/src/babel/plugins/page-exports-transforms'
 
 const compile = (input: string, opts?: PluginOpts) => {
   return (

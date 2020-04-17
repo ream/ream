@@ -1,11 +1,11 @@
-import http from 'http'
+import { RequestListener } from 'http'
 import { Express } from 'express'
 import resolveFrom from 'resolve-from'
 import { createDevMiddlewares } from './dev-middlewares'
 import { Ream } from '..'
 import * as ReamServer from 'ream-server'
 
-export function createDevServer(api: Ream) {
+export function createDevServer(api: Ream): RequestListener {
   const clearRequireCache = () => {
     if (api.isDev && require.cache) {
       for (const key of Object.keys(require.cache)) {
@@ -24,7 +24,7 @@ export function createDevServer(api: Ream) {
 
   const devMiddlewares = createDevMiddlewares(api)
 
-  return http.createServer((req, res) => {
+  return (req, res) => {
     clearRequireCache()
 
     const reamServerPath = resolveFrom.silent(api.resolveDotReam(), './server/ream-server.js')
@@ -47,5 +47,5 @@ export function createDevServer(api: Ream) {
       })
 
     return server(req, res)
-  })
+  }
 }
