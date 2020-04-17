@@ -40,4 +40,4 @@ jobs:
 
     # Runs a set of commands using the runners shell
     - name: Test
-      run: yarn build && yarn workspaces run test
+      run: yarn test

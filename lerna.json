@@ -5,5 +5,6 @@
     "packages/@ream/*"
   ],
   "version": "0.0.0",
-  "npmClient": "yarn"
+  "npmClient": "yarn",
+  "useWorkspaces": true
 }
