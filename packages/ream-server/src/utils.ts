@@ -80,7 +80,7 @@ export async function renderToHTML(
   context.pageProps = pageProps
   const main = await renderer.renderToString(context)
   const _document = await routes['pages/_document']()
-  const { meta } = context
+  const meta = context.meta.inject()
   const html = await _document.default({
     main() {
       return main

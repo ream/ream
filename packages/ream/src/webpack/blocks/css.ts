@@ -156,13 +156,15 @@ export function useCSS(api: Ream, chain: WebpackChain, isClient: boolean) {
       },
     })
 
-    const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
-    chain.plugin('optimize-css').use(OptimizeCSSPlugin, [
-      {
-        sourceMap,
-        cssnanoOptions,
-      },
-    ])
+    if (!api.isDev) {
+      const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
+      chain.plugin('optimize-css').use(OptimizeCSSPlugin, [
+        {
+          sourceMap,
+          cssnanoOptions,
+        },
+      ])
+    }
   }
 
   createCSSRule('css', /\.css$/)

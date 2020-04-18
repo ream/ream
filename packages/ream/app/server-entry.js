@@ -14,7 +14,7 @@ export default async (context) => {
 
   await routerReady(router)
 
-  context.meta = app.$meta().inject()
+  context.meta = app.$meta()
 
   return app
 }
