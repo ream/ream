@@ -22,6 +22,9 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 12.x
+        
+    - name: Install
+      run: yarn
 
     # Runs a set of commands using the runners shell
     - name: Build and Test
@@ -35,6 +38,8 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 12.x
+    - name: Install
+      run: yarn
     - name: Release
       run: npm run release --if-present
       
