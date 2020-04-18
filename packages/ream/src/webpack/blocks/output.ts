@@ -1,6 +1,7 @@
 import { resolve, relative } from 'path'
 import { Ream } from 'ream/src'
 import WebpackChain from 'webpack-chain'
+import { getAssetFileName } from '../../utils/asset-filename'
 
 export function setOutput(api: Ream, chain: WebpackChain, isClient: boolean) {
   chain.output.devtoolModuleFilenameTemplate(
@@ -13,6 +14,12 @@ export function setOutput(api: Ream, chain: WebpackChain, isClient: boolean) {
             '/'
           )
   )
+
+  const filenames = getAssetFileName({
+    isDev: api.isDev,
+    isClient,
+  })
+  chain.output.filename(filenames.js)
 
   chain.output.jsonpFunction(`reamJsonp`)
 

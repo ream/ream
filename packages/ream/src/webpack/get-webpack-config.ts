@@ -36,7 +36,7 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
 
   useVue(chain, isClient)
 
-  useCSS(chain)
+  useCSS(api, chain, isClient)
 
   defineConstants(api, chain, isClient)
 

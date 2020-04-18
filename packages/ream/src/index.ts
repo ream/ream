@@ -179,7 +179,12 @@ export class Ream {
   }
 
   localResolve(name: string) {
-    return resolveFrom(this.dir, name)
+    return resolveFrom.silent(this.dir, name)
+  }
+
+  localRequire(name: string) {
+    const path = this.localResolve(name)
+    return path && require(path)
   }
 
   async getRequestHandler() {
