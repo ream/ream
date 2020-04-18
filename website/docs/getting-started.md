@@ -1,6 +1,8 @@
 # Getting Started
 
-## Setup
+## Project Generator
+
+__NOT YET AVAILABLE__, use manual setup for now.
 
 ```bash
 npm init ream-app my-app
@@ -13,8 +15,7 @@ After the installation is complete, follow the instructions to start the develop
 ### Install via npm
 
 ```bash
-npm install ream -D
-npm install ream-server
+npm install ream
 ```
 
 ### Add npm scripts
@@ -24,7 +25,7 @@ npm install ream-server
   "scripts": {
     "dev": "ream",
     "build": "ream build",
-    "start": "ream-server"
+    "start": "ream start"
   }
 }
 ```

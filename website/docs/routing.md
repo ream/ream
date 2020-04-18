@@ -39,3 +39,15 @@ Multiple dynamic route segments work the same way. The page `pages/post/[pid]/[c
 ```json
 { "pid": "abc", "comment": "a-comment" }
 ```
+
+### Catch all Routes
+
+Dynamic routes can be extended to catch all paths by adding three dots (`...`) inside the brackets. For example:
+
+- `pages/post/[...slug].vue` matches `/post/a`, but also `/post/a/b`, `/post/a/b/c` and so on.
+
+Matched parameters will be sent as a route parameter (`slug` in the example) to the page, and it will always be a string, so, the path `/post/a/b/c` will have the following `params` object:
+
+```json
+{ "slug": "a/b/c" }
+```
