@@ -1,6 +1,7 @@
 import { join } from 'path'
 import { Route } from '@ream/common/dist/route'
 import { rankRoute } from './rank-routes'
+import { normalizePath } from './normalize-path'
 
 const matchApiRoute = (filepath: string) => {
   // **/*.xxx.{js,ts}
@@ -23,6 +24,7 @@ export function pathToRoutes(filepaths: string[], pagesDir: string): Route[] {
 }
 
 export function pathToRoute(file: string, pagesDir: string, index: number) {
+  file = normalizePath(file)
   const routePath = `/${file
     // Dynamic param, e.g. `[slug]` -> `:slug`
     .replace(/\[([^\]\.]+)\]/g, ':$1')
@@ -41,7 +43,7 @@ export function pathToRoute(file: string, pagesDir: string, index: number) {
   return {
     routePath,
     entryName,
-    absolutePath: join(pagesDir, file),
+    absolutePath: normalizePath(join(pagesDir, file)),
     relativePath: file,
     isClientRoute,
     isApiRoute,

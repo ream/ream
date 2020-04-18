@@ -1,3 +1,5 @@
+import { normalizePath } from './utils/normalize-path'
+
 type State = {
   constants: {
     [k: string]: string
@@ -24,7 +26,7 @@ export class Store {
   }
 
   addPluginFile = (type: keyof State['pluginsFiles'], file: string) => {
-    this.state.pluginsFiles[type].add(file)
+    this.state.pluginsFiles[type].add(normalizePath(file))
   }
 }
 
