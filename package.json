@@ -5,7 +5,8 @@
     "test:unit": "jest --testPathPattern test/unit/",
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
     "test": "npm run build && npm run test:unit && npm run test:integration",
-    "build": "lerna run build --ignore website"
+    "build": "lerna run build --ignore website",
+    "ream": "node ./packages/ream/dist/cli"
   },
   "workspaces": [
     "packages/ream",
