@@ -8,7 +8,7 @@ A Vue framework for building servers and static sites.
 
 [Website](https://ream.dev)
 
-[Documentation](https://ream.dev/docs) (WIP)
+[Documentation](https://ream.dev/docs/getting-started) (WIP)
 
 ## License
 
