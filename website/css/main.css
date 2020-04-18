@@ -1,5 +1,5 @@
 :root {
-  --header-height: 70px;
+  --header-height: 60px;
 }
 
 .container {
@@ -26,5 +26,42 @@
 
 .markdown-body h2 {
   @apply text-3xl;
-  @apply my-5;
+  @apply my-8;
+}
+
+.markdown-body h2 code {
+  @apply text-3xl !important;
+}
+
+.markdown-body h3 {
+  @apply text-2xl;
+  @apply my-8;
+}
+
+.markdown-body h3 code {
+  @apply text-2xl !important;
+}
+
+.markdown-body :not(pre) code {
+  @apply bg-blue-50;
+  @apply p-1;
+  @apply rounded;
+  @apply text-sm;
+}
+
+.markdown-body a {
+  @apply text-blue-600;
+}
+
+.markdown-body a:hover {
+  @apply underline;
+}
+
+.markdown-body ul {
+  @apply list-disc;
+  @apply pl-5;
+}
+
+.markdown-body ul li {
+  @apply mb-1;
 }

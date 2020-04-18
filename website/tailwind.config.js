@@ -1,6 +1,10 @@
 module.exports = {
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        ...(require('@egoist/md-colors'))
+      }
+    },
   },
   variants: {},
   plugins: [],

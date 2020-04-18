@@ -13,10 +13,11 @@ router.onReady(() => {
     if (!to.matched || to.matched.length === 0) {
       return next()
     }
+    const matched = to.matched[0].components.default
     const {
       getServerSideProps,
       getStaticProps,
-    } = to.matched[0].components.default
+    } = matched
     if (!getServerSideProps && !getStaticProps) {
       return next()
     }

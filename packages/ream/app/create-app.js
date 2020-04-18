@@ -3,6 +3,8 @@ import { createRouter } from './create-router'
 import './use-meta'
 import { onCreatedApp } from 'dot-ream/enhance-app'
 
+Vue.config.productionTip = false
+
 export const createApp = (context) => {
   const router = createRouter()
 

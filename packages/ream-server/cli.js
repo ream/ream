@@ -11,9 +11,9 @@ cli
   })
   .action((dir = '.', options) => {
     /** @type {import('.')}  */
-    const { createServer } = require(resolve(dir, '.ream/server/ream-server'))
-    const server = createServer()
-
+    const { ReamServer } = require(resolve(dir, '.ream/server/ream-server'))
+    const rs = new ReamServer()
+    const server = rs.createServer()
     server.listen(options.port)
     console.log(`> Listen at http://localhost:${options.port}`)
   })

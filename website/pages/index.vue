@@ -2,7 +2,7 @@
   <div>
     <Header />
     <div class="main">
-      <div class="container mx-auto my-32" style="min-height: 40vh;">
+      <div class="container mx-auto my-32">
         <h2 class="text-4xl">
           A Vue framework for build
           <span class="text-blue-700">server-rendered</span> or

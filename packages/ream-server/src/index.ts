@@ -1,4 +1,4 @@
-import {join} from 'path'
+import { join } from 'path'
 import express, {
   Express,
   RequestHandler,
@@ -41,9 +41,7 @@ export class ReamServer {
     this.renderer =
       this.renderer ||
       createBundleRenderer(
-        __non_webpack_require__(
-          `../ream-server-bundle.json`
-        ),
+        __non_webpack_require__(`../ream-server-bundle.json`),
         {
           basedir: __dirname,
           clientManifest: __non_webpack_require__(
@@ -77,10 +75,7 @@ export class ReamServer {
 
       const renderer = this.createRenderer()
 
-      if (
-        route &&
-        route.isApiRoute
-      ) {
+      if (route && route.isApiRoute) {
         const { routes: allRoutes } = renderer.runner.evaluate('main.js')
         const page = await allRoutes[route.entryName]()
         page.default(req, res, next)
@@ -130,30 +125,27 @@ export class ReamServer {
         if (__DEV__) {
           console.error('Server error', err)
         }
-        res.statusCode =
-          !req.statusCode || req.statusCode < 400 ? 500 : req.statusCode
+        setErrorPageStatusCode(res)
 
-
-        const html = await renderToHTML(renderer, {
-          getServerSidePropsContext: {
-            req,
-            res,
+        const html = await renderToHTML(
+          renderer,
+          {
+            getServerSidePropsContext: {
+              req,
+              res,
+              path: req.path,
+              params: req.params,
+              query: req.query,
+            },
+            getStaticPropsContext: {
+              params: req.params,
+            },
             path: req.path,
-            params: req.params,
-            query: req.query
+            url: req.url,
           },
-          getStaticPropsContext: {
-            params: req.params
-          },
-          path: req.path,
-          url: req.url
-        }, 'pages/_error', {
-          __ream_error__: true,
-          error: {
-            statusCode: res.statusCode,
-            stack: __DEV__ ? err.stack : ''
-          }
-        })
+          'pages/_error',
+          getErrorPageProps(err, res)
+        )
 
         res.send(`<!DOCTYPE html>${html}`)
       }
@@ -163,7 +155,7 @@ export class ReamServer {
   }
 
   createPagePropsHandler(): RequestHandler {
-    return async (req, res) => {
+    return async (req, res, next) => {
       this.renderer = this.createRenderer()
 
       const routes = this.getRoutes()
@@ -175,30 +167,50 @@ export class ReamServer {
 
       const { route, params } = findMatchedRoute(routes, req.path)
       if (!route) {
-        return res.status(404).end('404')
+        return next()
       }
       req.params = params
 
-      const { routes: allRoutes } = this.renderer.runner.evaluate(`main.js`)
-      const page = await allRoutes[route.entryName]()
+      try {
+        const { routes: allRoutes } = this.renderer.runner.evaluate(`main.js`)
+        const page = await allRoutes[route.entryName]()
 
-      const pageProps = await getPageProps(page, {
-        path: req.path,
-        getServerSidePropsContext: {
-          req,
-          res,
-          params,
-          query: req.query,
+        const pageProps = await getPageProps(page, {
           path: req.path,
-        },
-        getStaticPropsContext: {
-          params,
-        },
-      })
+          getServerSidePropsContext: {
+            req,
+            res,
+            params,
+            query: req.query,
+            path: req.path,
+          },
+          getStaticPropsContext: {
+            params,
+          },
+        })
 
-      res.send(pageProps)
+        res.send(pageProps)
+      } catch (err) {
+        setErrorPageStatusCode(res)
+        res.send(getErrorPageProps(err, res))
+      }
     }
   }
 }
 
 export * from './utils'
+
+function getErrorPageProps(err: Error, res: Response) {
+  return {
+    __ream_error__: true,
+    error: {
+      statusCode: res.statusCode,
+      stack: __DEV__ ? err.stack : '',
+    },
+  }
+}
+
+function setErrorPageStatusCode(res: Response) {
+  res.statusCode =
+    !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
+}
