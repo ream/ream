@@ -4,7 +4,7 @@
     <div class="main">
       <div class="container mx-auto my-32">
         <h2 class="text-4xl">
-          A Vue framework for build
+          A Vue framework for building
           <span class="text-blue-700">server-rendered</span> or
           <span class="text-blue-700">static</span> websites.
         </h2>
