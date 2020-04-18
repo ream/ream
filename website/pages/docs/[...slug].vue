@@ -34,7 +34,7 @@ if (process.server) {
   require('prismjs/components/prism-bash')
 }
 
-const docsDir = join(__dirname, '../../docs')
+const docsDir = join(__dirname, '../../../docs')
 
 export const getStaticProps: GetStaticProps = async ({ params: { slug } }) => {
   const renderer = new marked.Renderer()
