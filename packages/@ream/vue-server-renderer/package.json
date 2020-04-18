@@ -1,10 +1,12 @@
 {
   "name": "@ream/vue-server-renderer",
-  "version": "0.0.0",
+  "version": "5.0.0-alpha.0",
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -13,7 +15,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "vue-server-renderer": "2.6.11",
-    "source-map": "0.5.6"
+    "source-map": "0.5.6",
+    "vue-server-renderer": "2.6.11"
   }
 }

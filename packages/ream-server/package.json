@@ -1,5 +1,5 @@
 {
-  "version": "0.0.0",
+  "version": "5.0.0-alpha.0",
   "name": "ream-server",
   "description": "Run generated Ream app in production",
   "files": [
@@ -15,8 +15,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@ream/common": "0.0.0",
-    "@ream/vue-server-renderer": "0.0.0",
+    "@ream/common": "^5.0.0-alpha.0",
+    "@ream/vue-server-renderer": "^5.0.0-alpha.0",
     "cac": "^6.5.8",
     "devalue": "^2.0.1",
     "express": "^4.17.1",

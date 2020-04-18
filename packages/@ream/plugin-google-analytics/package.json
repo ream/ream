@@ -1,10 +1,12 @@
 {
   "name": "@ream/plugin-google-analytics",
-  "version": "0.0.0",
+  "version": "5.0.0-alpha.0",
   "publishConfig": {
     "access": "public"
   },
-  "files": ["/*.js"],
+  "files": [
+    "/*.js"
+  ],
   "scripts": {
     "test": "echo skip"
   }
