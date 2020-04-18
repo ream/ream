@@ -1,11 +1,7 @@
 import Vue from 'vue'
 import { Request, Response } from 'express'
-import { createRenderer } from 'vue-server-renderer'
 import devalue from 'devalue'
-import { useMeta } from './use-meta'
-import { createServerApp } from './create-server-app'
-
-useMeta()
+import { BundleRenderer } from '.'
 
 type Obj = {
   [k: string]: any
@@ -62,59 +58,29 @@ export type RenderContext = {
 }
 
 export async function renderToHTML(
-  page: PageInterface,
-  {
-    pageEntryName,
-    clientManifest,
-    _app,
-    _document,
-    dev,
-    path,
-    originalPath,
-    url,
-    getServerSidePropsContext,
-    getStaticPropsContext,
-    initialPageProps,
-  }: {
-    pageEntryName: string
-    clientManifest: any
-    _app: any
-    _document: any
-    dev?: boolean
-    /** The path that's actually being visted */
-    path: string
-    /** The path that potentiall contains path-to-regexp templates, like `:id`  */
-    originalPath: string
-    /** Full URL, including query  */
+  renderer: BundleRenderer,
+  context: {
     url: string
-    getServerSidePropsContext: GetServerSidePropsContext | false
-    getStaticPropsContext: GetStaticPropsContext | false
-    initialPageProps?: Obj
-  }
+    path: string
+    getServerSidePropsContext: false | GetServerSidePropsContext
+    getStaticPropsContext: false | GetStaticPropsContext
+    [k: string]: any
+  },
+  pageEntryName: string,
+  addtionalPageProps?: any
 ) {
-  const ssrContext: { [k: string]: any } = {}
-  const renderer = createRenderer({
-    // @ts-ignore wrong type
-    clientManifest,
+  const { routes } = renderer.runner.evaluate(`main.js`)
+  const page = await routes[pageEntryName]()
+  const initialPageProps = await getPageProps(page, {
+    path: context.path,
+    getServerSidePropsContext: context.getServerSidePropsContext,
+    getStaticPropsContext: context.getStaticPropsContext,
   })
-  const pageProps = {
-    ...initialPageProps,
-    ...(await getPageProps(page, {
-      getServerSidePropsContext,
-      getStaticPropsContext,
-      path,
-      dev,
-    })),
-  }
-  const app = createServerApp({
-    originalPath,
-    page,
-    pageProps,
-    _app,
-  })
-  app.$router.push(url)
-  const main = await renderer.renderToString(app, ssrContext)
-  const meta = app.$meta().inject()
+  const pageProps = Object.assign({}, initialPageProps, addtionalPageProps)
+  context.pageProps = pageProps
+  const main = await renderer.renderToString(context)
+  const _document = await routes['pages/_document']()
+  const { meta } = context
   const html = await _document.default({
     main() {
       return main
@@ -125,7 +91,7 @@ export async function renderToHTML(
       ${meta.meta.text()}
       ${meta.title.text()}
       ${meta.link.text()}
-      ${ssrContext.renderStyles()}
+      ${context.renderStyles()}
       ${meta.style.text()}
       ${meta.script.text()}
       ${meta.noscript.text()}`
@@ -137,8 +103,8 @@ export async function renderToHTML(
       </script>
       ${meta.script.text({ body: true })}
       ${meta.noscript.text({ body: true })}
-      ${ssrContext.renderState()}
-      ${ssrContext.renderScripts()}
+      ${context.renderState()}
+      ${context.renderScripts()}
       `
     },
     htmlAttrs() {
@@ -162,7 +128,6 @@ export async function getPageProps(
     path,
   }: {
     path: string
-    dev?: boolean
     getServerSidePropsContext: GetServerSidePropsContext | false
     getStaticPropsContext: GetStaticPropsContext | false
   }
@@ -186,30 +151,13 @@ export async function getPageProps(
       Object.assign(
         props,
         __non_webpack_require__(
-          `${__REAM_BUILD_DIR__}/staticprops${path === '/' ? '/index' : path}.pageprops.json`
+          `../staticprops${
+            path === '/' ? '/index' : path
+          }.pageprops.json`
         )
       )
     }
   }
 
   return props
-}
-
-export function getServerAssets() {
-  const clientManifest = __non_webpack_require__(
-    `${__REAM_BUILD_DIR__}/client/vue-ssr-client-manifest.json`
-  )
-  const _app = __non_webpack_require__(`${__REAM_BUILD_DIR__}/server/pages/_app`)
-  const _document = __non_webpack_require__(
-    `${__REAM_BUILD_DIR__}/server/pages/_document`
-  )
-  const _error = __non_webpack_require__(
-    `${__REAM_BUILD_DIR__}/server/pages/_error`
-  )
-  return {
-    clientManifest,
-    _app,
-    _document,
-    _error,
-  }
 }

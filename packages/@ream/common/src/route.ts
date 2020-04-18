@@ -7,4 +7,5 @@ export type Route = {
   isApiRoute: boolean
   index: number
   score: number
+  is404: boolean
 }

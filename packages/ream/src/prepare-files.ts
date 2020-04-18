@@ -7,6 +7,7 @@ import {
   GET_STATIC_PROPS_INDICATOR,
 } from './babel/plugins/page-exports-transforms'
 import { store } from './store'
+import { Route } from '@ream/common/dist/route'
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
@@ -21,21 +22,26 @@ export async function prepareFiles(api: Ream) {
     api._routes = pathToRoutes([...files], cwd)
 
     const routes = api.routes
-    let appPath: string
-    let errorPath: string
+    let appRoute: Route
+    let errorRoute: Route
     for (const route of routes) {
       if (route.entryName === 'pages/_app') {
-        appPath = route.absolutePath
+        appRoute = route
       } else if (route.entryName === 'pages/_error') {
-        errorPath = route.absolutePath
+        errorRoute = route
       }
     }
 
-    const clientRoutes = `
-    var _app = require(${JSON.stringify(appPath!)})
-    var _error = require(${JSON.stringify(errorPath!)})
+    const clientRoutesContent = `
+    var getAppComponent = function() {
+      return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${appRoute!.absolutePath}")
+    }
+    var getErrorComponent = function() {
+      return import(/* webpackChunkName: "${errorRoute!.entryName}" */ "${errorRoute!.absolutePath}")
+    }
 
-    var wrapPage = function(page) {
+    var wrapPage = function(res) {
+      var _app = res[0], _error = res[1], page = res[2]
       return {
         functional: true,
         getServerSideProps: page[${JSON.stringify(
@@ -65,9 +71,13 @@ export async function prepareFiles(api: Ream) {
           return `{
           path: ${JSON.stringify(route.routePath)},
           component: function() {
-            return import(/* webpackChunkName: ${JSON.stringify(
-              route.entryName
-            )} */ ${JSON.stringify(route.absolutePath)}).then(wrapPage)
+            return Promise.all([
+              getAppComponent(),
+              getErrorComponent(),
+              import(/* webpackChunkName: ${JSON.stringify(
+                route.entryName
+              )} */ ${JSON.stringify(route.absolutePath)})
+            ]).then(wrapPage)
           }
         }`
         })
@@ -75,19 +85,42 @@ export async function prepareFiles(api: Ream) {
     ]
 
     export {
-      routes,
-      _app
+      routes
     }
     `
 
     await outputFile(
       api.resolveDotReam('client-routes.js'),
-      clientRoutes,
+      clientRoutesContent,
+      'utf8'
+    )
+
+    const allRoutesContent = `
+    var routes = {}
+    
+    ${routes
+      .map(route => {
+        return `routes[${JSON.stringify(
+          route.entryName
+        )}] = () => import(/* webpackChunkName: "${
+          route.entryName
+        }" */ ${JSON.stringify(route.absolutePath)})`
+      })
+      .join('\n')}
+
+    export {
+      routes
+    }
+    `
+
+    await outputFile(
+      api.resolveDotReam('all-routes.js'),
+      allRoutesContent,
       'utf8'
     )
 
     await outputFile(
-      api.resolveDotReam('routes.json'),
+      api.resolveDotReam('routes-info.json'),
       JSON.stringify(api.routes, null, 2),
       'utf8'
     )

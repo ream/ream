@@ -1,4 +1,4 @@
-import * as ReamServer from 'ream-server'
+import * as ReamServerTypes from 'ream-server'
 import { Ream } from '../'
 
 export async function createServer(api: Ream) {
@@ -7,9 +7,9 @@ export async function createServer(api: Ream) {
     return createDevServer(api)
   }
 
-  const reamServer: typeof ReamServer = require(api.resolveDotReam(
+  const { ReamServer }: typeof ReamServerTypes = require(api.resolveDotReam(
     'server/ream-server.js'
   ))
-
-  return reamServer.createServer()
+  const rs = new ReamServer()
+  return rs.createServer()
 }

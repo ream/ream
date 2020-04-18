@@ -23,8 +23,6 @@ describe(`Custom 404 page`, () => {
       const { statusCode, html } = await app.visit('/')
       expect(statusCode).toBe(404)
       expect(html).toContain(`Custom 404 page`)
-      // The prop that's used to inform client app that this page is 404 page
-      expect(html).toContain(`pageProps: {__404__:true}`)
     })
   })
 })

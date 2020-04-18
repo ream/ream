@@ -19,11 +19,11 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
 
   chain.mode(api.isDev ? 'development' : 'production')
 
-  // Sourcemap is disabled in production
+  // TODO: Sourcemap is currentlydisabled in production for client bundle, change if needed
   if (isClient) {
-    chain.devtool(api.isDev ? '#cheap-module-eval-source-map' : false)
+    chain.devtool(api.isDev ? 'cheap-module-eval-source-map' : false)
   } else {
-    chain.devtool(api.isDev ? '#source-map' : false)
+    chain.devtool('source-map')
   }
 
   setOutput(api, chain, isClient)

@@ -1,19 +1,19 @@
 import { join } from 'path'
 import { Ream } from '.'
-import * as ReamServer from 'ream-server'
+import * as ReamServerTypes from 'ream-server'
 import { outputFile, copy, pathExists } from 'fs-extra'
 import { compileToPath } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
 
 export async function writeStaticFiles(api: Ream) {
-  const reamServer: typeof ReamServer = require(api.resolveDotReam(
-    'server/ream-server.js'
-  ))
+  const { ReamServer, renderToHTML }: typeof ReamServerTypes = require(api.resolveDotReam('server/ream-server.js'))
+  const rs = new ReamServer()
+  const renderer = rs.createRenderer()
 
   // Emit files to store results of getStaticProps
   const writeStaticProps = async (
     path: string,
-    result: ReamServer.GetStaticPropsResult
+    result: ReamServerTypes.GetStaticPropsResult
   ) => {
     await outputFile(
       api.resolveDotReam(
@@ -28,12 +28,10 @@ export async function writeStaticFiles(api: Ream) {
 
   const writeHtmlFile = async ({
     path,
-    page,
     route,
     params,
   }: {
     path: string
-    page: ReamServer.PageInterface
     route: Route
     params: any
   }) => {
@@ -41,20 +39,18 @@ export async function writeStaticFiles(api: Ream) {
       return
     }
 
-    const { _document, _app, clientManifest } = reamServer.getServerAssets()
-    const html = await reamServer.renderToHTML(page, {
-      pageEntryName: route.entryName,
-      path,
-      originalPath: route.routePath,
-      url: path,
-      clientManifest,
-      _app,
-      _document,
-      getServerSidePropsContext: false,
-      getStaticPropsContext: {
-        params,
+    const html = await renderToHTML(
+      renderer,
+      {
+        path,
+        url: path,
+        getServerSidePropsContext: false,
+        getStaticPropsContext: {
+          params,
+        },
       },
-    })
+      route.entryName
+    )
     const filename =
       path === `/`
         ? `/index.html`
@@ -69,54 +65,60 @@ export async function writeStaticFiles(api: Ream) {
     await copy(api.resolveDotReam('client'), join(staticOutDir, '_ream'))
   }
 
-  for (const route of api.routes) {
-    if (!route.isClientRoute) {
-      continue
-    }
-    const page: ReamServer.PageInterface = require(api.resolveDotReam(
-      `server/${route.entryName}`
-    ))
-    const { getStaticProps, getStaticPaths } = page
-    // Use static path for 404 page
-    if (route.entryName === 'pages/404') {
-      route.routePath = '/404.html'
-    }
-    const hasParams = route.routePath.includes(':')
-    if (hasParams && getStaticProps && !getStaticPaths) {
-      throw new Error(
-        `Route "${route.routePath}" uses dynamic paramter but you didn't export "getStaticPaths" in the page component`
-      )
-    }
-    if (hasParams && getStaticProps && getStaticPaths) {
-      const { paths } = await getStaticPaths()
-      for (const path of paths) {
-        const actualPath = compileToPath(route.routePath, path.params)
-        if (getStaticProps) {
-          const result = await getStaticProps({
+  try {
+    const { routes: allRoutes } = renderer.runner.evaluate(`main.js`)
+
+    for (const route of api.routes) {
+      if (!route.isClientRoute) {
+        continue
+      }
+
+      const page: ReamServerTypes.PageInterface = await allRoutes[route.entryName]()
+
+      const { getStaticProps, getStaticPaths } = page
+      // Use static path for 404 page
+      if (route.is404) {
+        route.routePath = '/404.html'
+      }
+      const hasParams = route.routePath.includes(':')
+      if (hasParams && getStaticProps && !getStaticPaths) {
+        throw new Error(
+          `Route "${route.routePath}" uses dynamic paramter but you didn't export "getStaticPaths" in the page component`
+        )
+      }
+      if (hasParams && getStaticProps && getStaticPaths) {
+        const { paths } = await getStaticPaths()
+        for (const path of paths) {
+          const actualPath = compileToPath(route.routePath, path.params)
+          if (getStaticProps) {
+            const result = await getStaticProps({
+              params: path.params,
+            })
+            await writeStaticProps(actualPath, result)
+          }
+          await writeHtmlFile({
+            path: actualPath,
             params: path.params,
+            route,
           })
-          await writeStaticProps(actualPath, result)
+        }
+      }
+      if (!hasParams) {
+        if (getStaticProps) {
+          const result = await getStaticProps({ params: {} })
+          await writeStaticProps(route.entryName, result)
         }
         await writeHtmlFile({
-          page,
-          path: actualPath,
-          params: path.params,
+          path: route.routePath,
+          params: {},
           route,
         })
       }
     }
-    if (!hasParams) {
-      if (getStaticProps) {
-        const result = await getStaticProps({ params: {} })
-        await writeStaticProps(route.entryName, result)
-      }
-      await writeHtmlFile({
-        page,
-        path: route.routePath,
-        params: {},
-        route,
-      })
-    }
+  } catch (err) {
+    renderer.rewriteErrorTrace(err)
+    console.error(err)
+    throw err
   }
 
   if (api.config.target === 'static') {

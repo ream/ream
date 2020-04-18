@@ -1,0 +1,19 @@
+{
+  "name": "@ream/vue-server-renderer",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist"],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "test": "echo skip"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "vue-server-renderer": "2.6.11",
+    "source-map": "0.5.6"
+  }
+}

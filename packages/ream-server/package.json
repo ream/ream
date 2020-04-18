@@ -16,13 +16,13 @@
   "license": "MIT",
   "dependencies": {
     "@ream/common": "0.0.0",
+    "@ream/vue-server-renderer": "0.0.0",
     "cac": "^6.5.8",
     "devalue": "^2.0.1",
     "express": "^4.17.1",
     "vue": "^2.6.11",
     "vue-meta": "^2.3.3",
-    "vue-router": "^3.1.6",
-    "vue-server-renderer": "^2.6.11"
+    "vue-router": "^3.1.6"
   },
   "devDependencies": {
     "rollup": "^2.6.1",

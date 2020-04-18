@@ -45,6 +45,7 @@ export function pathToRoute(file: string, pagesDir: string, index: number) {
     relativePath: file,
     isClientRoute,
     isApiRoute,
+    is404: routePath === '/:404(.*)',
     score: rankRoute(routePath),
     index,
   }

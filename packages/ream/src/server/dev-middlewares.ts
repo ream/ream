@@ -16,7 +16,7 @@ export function createDevMiddlewares(api: Ream) {
     publicPath: clientConfig.output!.publicPath!,
     logLevel: 'silent',
     writeToDisk(filepath) {
-      return /vue-ssr-client-manifest.json$/.test(filepath)
+      return /ream-client-manifest.json$/.test(filepath)
     }
   })
 

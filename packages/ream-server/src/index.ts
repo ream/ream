@@ -1,3 +1,4 @@
+import {join} from 'path'
 import express, {
   Express,
   RequestHandler,
@@ -7,203 +8,196 @@ import express, {
 } from 'express'
 import { findMatchedRoute } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
-import {
-  renderToHTML,
-  PageInterface,
-  getPageProps,
-  getServerAssets,
-} from './utils'
+import { createBundleRenderer } from '@ream/vue-server-renderer'
+import { getPageProps, renderToHTML } from './utils'
 
-export function createPagePropsHandler(
-  getRoutes: () => Route[]
-): RequestHandler {
-  return async (req, res) => {
-    const routes = getRoutes()
-
-    req.url = req.url
-      .replace('.pageprops.json', '')
-      .replace(/\/index$/, '')
-      .replace(/^$/, '/')
-
-    const { route, params } = findMatchedRoute(routes, req.path)
-    if (!route) {
-      return res.status(404).end('404')
-    }
-    req.params = params
-
-    const page = __non_webpack_require__(
-      `${__REAM_BUILD_DIR__}/server/${route.entryName}`
-    )
-
-    const pageProps = await getPageProps(page, {
-      path: req.path,
-      getServerSidePropsContext: {
-        req,
-        res,
-        params,
-        query: req.query,
-        path: req.path,
-      },
-      getStaticPropsContext: {
-        params,
-      },
-    })
-
-    res.send(pageProps)
-  }
-}
+export type BundleRenderer = ReturnType<typeof createBundleRenderer>
 
 export type CreateServerOptions = {
   beforeMiddlewares?: (server: Express) => void
   getRoutes?: () => Route[]
 }
 
-/**
- * @param dir Absolute path to your project root
- */
-export function createServer(options: CreateServerOptions = {}) {
-  const server = express()
+export class ReamServer {
+  options: CreateServerOptions
+  renderer?: BundleRenderer
 
-  const { beforeMiddlewares } = options
-
-  if (beforeMiddlewares) {
-    beforeMiddlewares(server)
+  constructor(options: CreateServerOptions = {}) {
+    this.options = options
   }
 
-  if (!__DEV__) {
-    server.use('/_ream', express.static(`${__REAM_BUILD_DIR__}/client`))
+  setRenderer(renderer: BundleRenderer) {
+    this.renderer = renderer
   }
 
-  const getRoutes =
-    options.getRoutes ||
-    (() => __non_webpack_require__(`${__REAM_BUILD_DIR__}/routes.json`))
+  getRoutes(): Route[] {
+    if (this.options.getRoutes) {
+      return this.options.getRoutes()
+    }
+    return __non_webpack_require__(`../routes-info.json`)
+  }
 
-  server.get('*.pageprops.json', createPagePropsHandler(getRoutes))
+  createRenderer() {
+    this.renderer =
+      this.renderer ||
+      createBundleRenderer(
+        __non_webpack_require__(
+          `../ream-server-bundle.json`
+        ),
+        {
+          basedir: __dirname,
+          clientManifest: __non_webpack_require__(
+            `../ream-client-manifest.json`
+          ),
+        }
+      )
 
-  server.get('*', async (req, res, next) => {
-    const routes = getRoutes()
-    let { route, params } = findMatchedRoute(routes, req.path)
-    req.params = params
+    return this.renderer
+  }
 
-    if (!route) {
-      route = {
-        routePath: req.path,
-        entryName: 'pages/404',
-        absolutePath: 'nope',
-        relativePath: 'nope',
-        isClientRoute: true,
-        isApiRoute: false,
-        score: 0,
-        index: 0,
-      }
-      res.statusCode = 404
+  createServer() {
+    const server = express()
+
+    const { beforeMiddlewares } = this.options
+
+    if (beforeMiddlewares) {
+      beforeMiddlewares(server)
     }
 
-    if (
-      renderApiRoute(route, {
+    if (!__DEV__) {
+      server.use('/_ream', express.static(join(__dirname, '../client')))
+    }
+
+    server.get('*.pageprops.json', this.createPagePropsHandler())
+
+    server.get('*', async (req, res, next) => {
+      const routes = this.getRoutes()
+      let { route, params } = findMatchedRoute(routes, req.path)
+      req.params = params
+
+      const renderer = this.createRenderer()
+
+      if (
+        route &&
+        route.isApiRoute
+      ) {
+        const { routes: allRoutes } = renderer.runner.evaluate('main.js')
+        const page = await allRoutes[route.entryName]()
+        page.default(req, res, next)
+        return
+      }
+
+      res.setHeader('content-type', 'text/html')
+      // @ts-ignore TODO
+      req.__route_path__ = route.routePath
+
+      if (route && route.is404) {
+        res.statusCode = 404
+      }
+
+      const getServerSidePropsContext = {
         req,
         res,
-        next,
-      })
-    ) {
-      return
-    }
-
-    res.setHeader('content-type', 'text/html')
-    // @ts-ignore TODO
-    req.__route_path__ = route.routePath
-    const page: PageInterface = __non_webpack_require__(
-      `${__REAM_BUILD_DIR__}/server/${route.entryName}`
-    )
-    const is404 = route.entryName === 'pages/404'
-    if (is404) {
-      res.statusCode = 404
-    }
-    const { clientManifest, _app, _document } = getServerAssets()
-    try {
-      const html = await renderToHTML(page, {
-        pageEntryName: route.entryName,
-        clientManifest,
-        _app,
-        _document,
+        params,
+        query: req.query,
         path: req.path,
-        url: req.url,
-        originalPath: route.routePath,
-        getServerSidePropsContext: {
-          req,
-          res,
-          params,
-          query: req.query,
-          path: req.path,
-        },
-        getStaticPropsContext: {
-          params,
-        },
-        initialPageProps:
-          is404
-            ? {
-                __404__: true,
-              }
-            : {},
-      })
-      res.end(`<!DOCTYPE html>${html}`)
-    } catch (err) {
-      next(err)
-    }
-  })
-
-  server.use(
-    async (err: Error, req: Request, res: Response, next: NextFunction) => {
-      if (__DEV__) {
-        console.error(err)
       }
-      res.statusCode =
-        !req.statusCode || req.statusCode < 400 ? 500 : req.statusCode
-      const { _error, _app, _document, clientManifest } = getServerAssets()
-      const html = await renderToHTML(_error, {
-        pageEntryName: `pages/_error`,
-        _app,
-        _document,
-        clientManifest,
-        path: req.path,
-        url: req.url,
-        // @ts-ignore
-        originalPath: req.__route_path__ || req.url,
-        getServerSidePropsContext: {
-          req,
-          res,
-          params: req.params,
-          query: req.query,
+
+      const getStaticPropsContext = {
+        params,
+      }
+
+      try {
+        const context = {
+          url: req.url,
           path: req.path,
-        },
-        getStaticPropsContext: {
-          params: req.params,
-        },
-        initialPageProps: {
+          getServerSidePropsContext,
+          getStaticPropsContext,
+        }
+        const html = await renderToHTML(renderer, context, route!.entryName)
+        res.end(`<!DOCTYPE html>${html}`)
+      } catch (err) {
+        next(err)
+      }
+    })
+
+    server.use(
+      async (err: Error, req: Request, res: Response, next: NextFunction) => {
+        const renderer = this.createRenderer()
+
+        renderer.rewriteErrorTrace(err)
+
+        if (__DEV__) {
+          console.error('Server error', err)
+        }
+        res.statusCode =
+          !req.statusCode || req.statusCode < 400 ? 500 : req.statusCode
+
+
+        const html = await renderToHTML(renderer, {
+          getServerSidePropsContext: {
+            req,
+            res,
+            path: req.path,
+            params: req.params,
+            query: req.query
+          },
+          getStaticPropsContext: {
+            params: req.params
+          },
+          path: req.path,
+          url: req.url
+        }, 'pages/_error', {
           __ream_error__: true,
           error: {
             statusCode: res.statusCode,
-            stack: __DEV__ ? err.stack : '',
-          },
+            stack: __DEV__ ? err.stack : ''
+          }
+        })
+
+        res.send(`<!DOCTYPE html>${html}`)
+      }
+    )
+
+    return server
+  }
+
+  createPagePropsHandler(): RequestHandler {
+    return async (req, res) => {
+      this.renderer = this.createRenderer()
+
+      const routes = this.getRoutes()
+
+      req.url = req.url
+        .replace('.pageprops.json', '')
+        .replace(/\/index$/, '')
+        .replace(/^$/, '/')
+
+      const { route, params } = findMatchedRoute(routes, req.path)
+      if (!route) {
+        return res.status(404).end('404')
+      }
+      req.params = params
+
+      const { routes: allRoutes } = this.renderer.runner.evaluate(`main.js`)
+      const page = await allRoutes[route.entryName]()
+
+      const pageProps = await getPageProps(page, {
+        path: req.path,
+        getServerSidePropsContext: {
+          req,
+          res,
+          params,
+          query: req.query,
+          path: req.path,
+        },
+        getStaticPropsContext: {
+          params,
         },
       })
-      res.send(`<!DOCTYPE html>${html}`)
+
+      res.send(pageProps)
     }
-  )
-
-  return server
-}
-
-export function renderApiRoute(
-  route: Route,
-  { req, res, next }: { req: Request; res: Response; next: NextFunction }
-) {
-  if (route.isApiRoute) {
-    const page = __non_webpack_require__(
-      `${__REAM_BUILD_DIR__}/server/${route.entryName}.js`
-    )
-    page.default(req, res, next)
-    return true
   }
 }
 
