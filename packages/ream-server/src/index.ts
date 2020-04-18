@@ -1,4 +1,3 @@
-import { join } from 'path'
 import express, {
   Express,
   RequestHandler,
@@ -63,7 +62,7 @@ export class ReamServer {
     }
 
     if (!__DEV__) {
-      server.use('/_ream', express.static(join(__dirname, '../client')))
+      server.use('/_ream', express.static(`${__REAM_BUILD_DIR__}/client`))
     }
 
     server.get('*.pageprops.json', this.createPagePropsHandler())

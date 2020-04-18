@@ -58,6 +58,9 @@ export class Ream {
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
     this.dir = resolve(options.dir || '.')
     this.isDev = Boolean(options.dev)
+    if (!process.env.NODE_ENV) {
+      process.env.NODE_ENV = this.isDev ? 'development' : 'production'
+    }
     this.shouldCache = options.cache !== false
     this.serverOptions = {
       port: options.server?.port || '3000',

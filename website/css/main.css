@@ -1,5 +1,11 @@
+/* purgecss start ignore */
+
 :root {
   --header-height: 60px;
+}
+
+body {
+  @apply antialiased;
 }
 
 .container {
@@ -65,3 +71,5 @@
 .markdown-body ul li {
   @apply mb-1;
 }
+
+/* purgecss end ignore */
