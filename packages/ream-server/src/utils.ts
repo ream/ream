@@ -88,6 +88,8 @@ export async function renderToHTML(
     head() {
       return `
       <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
       ${meta.meta.text()}
       ${meta.title.text()}
       ${meta.link.text()}
