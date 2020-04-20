@@ -87,7 +87,7 @@ export class ReamServer {
 
         if (staticHtmlRoutes[req.path]) {
           const html = await getStaticHtml(staticHtmlRoutes[req.path])
-          res.send(html)
+          return res.send(html)
         }
 
         const renderer = this.createRenderer()
@@ -138,9 +138,7 @@ export class ReamServer {
 
         renderer.rewriteErrorTrace(err)
 
-        if (__DEV__) {
-          console.error('Server error', err)
-        }
+        console.error('Server error', err)
         setErrorPageStatusCode(res)
 
         const html = await renderToHTML(
