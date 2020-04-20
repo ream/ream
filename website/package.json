@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "ream",
     "build": "ream build",
+    "export": "ream export",
     "test": "echo lol"
   },
   "devDependencies": {
