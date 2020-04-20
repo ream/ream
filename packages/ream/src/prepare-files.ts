@@ -90,7 +90,7 @@ export async function prepareFiles(api: Ream) {
     `
 
     await outputFile(
-      api.resolveDotReam('client-routes.js'),
+      api.resolveDotReam('templates/client-routes.js'),
       clientRoutesContent,
       'utf8'
     )
@@ -114,19 +114,19 @@ export async function prepareFiles(api: Ream) {
     `
 
     await outputFile(
-      api.resolveDotReam('all-routes.js'),
+      api.resolveDotReam('templates/all-routes.js'),
       allRoutesContent,
       'utf8'
     )
 
     await outputFile(
-      api.resolveDotReam('routes-info.json'),
+      api.resolveDotReam('manifest/routes-info.json'),
       JSON.stringify(api.routes, null, 2),
       'utf8'
     )
 
     await outputFile(
-      api.resolveDotReam('enhance-app.js'),
+      api.resolveDotReam('templates/enhance-app.js'),
       `
     var files = [
       ${[...store.state.pluginsFiles['enhance-app']].map(file => {

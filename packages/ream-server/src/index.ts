@@ -33,18 +33,18 @@ export class ReamServer {
     if (this.options.getRoutes) {
       return this.options.getRoutes()
     }
-    return __non_webpack_require__(`../routes-info.json`)
+    return __non_webpack_require__(`../manifest/routes-info.json`)
   }
 
   createRenderer() {
     this.renderer =
       this.renderer ||
       createBundleRenderer(
-        __non_webpack_require__(`../ream-server-bundle.json`),
+        __non_webpack_require__(`../manifest/ream-server-bundle.json`),
         {
           basedir: __dirname,
           clientManifest: __non_webpack_require__(
-            `../ream-client-manifest.json`
+            `../manifest/ream-client-manifest.json`
           ),
         }
       )
@@ -52,13 +52,13 @@ export class ReamServer {
     return this.renderer
   }
 
-  get staticHtmlRoutes(): Set<string> {
+  get staticHtmlRoutes(): { [path: string]: string } {
     if (__DEV__) {
-      return new Set()
+      return {}
     }
 
-    return new Set(
-      __non_webpack_require__(`${__REAM_BUILD_DIR__}/static-html-routes.json`)
+    return __non_webpack_require__(
+      `${__REAM_BUILD_DIR__}/manifest/static-html-routes.json`
     )
   }
 
@@ -85,8 +85,8 @@ export class ReamServer {
         let { route, params } = findMatchedRoute(routes, req.path)
         req.params = params
 
-        if (staticHtmlRoutes.has(req.path)) {
-          const html = await getStaticHtml(req.path)
+        if (staticHtmlRoutes[req.path]) {
+          const html = await getStaticHtml(staticHtmlRoutes[req.path])
           res.send(html)
         }
 

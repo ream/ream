@@ -1,5 +1,5 @@
 import { createApp } from './create-app'
-import { routes } from 'dot-ream/all-routes'
+import { routes } from 'dot-ream/templates/all-routes'
 
 function routerReady(router) {
   return new Promise((resolve, reject) => {

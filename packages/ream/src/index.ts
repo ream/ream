@@ -10,6 +10,7 @@ import { Store, store } from './store'
 import { ChainWebpack } from './types'
 import { createServer } from 'http'
 import { Entry } from 'webpack'
+import { remove } from 'fs-extra'
 export interface Options {
   dir?: string
   dev?: boolean
@@ -108,7 +109,7 @@ export class Ream {
       this.prepareType === 'export' ||
       (this.prepareType === 'serve' && !this.isDev)
     ) {
-      return require(this.resolveDotReam('routes-info.json'))
+      return require(this.resolveDotReam('manifest/routes-info.json'))
     }
     const routes: Route[] = [...this._routes]
 
@@ -165,17 +166,28 @@ export class Ream {
       throw new Error(`You cannot call .prepare() directly`)
     }
 
+    // Plugins are loaded in every situations
+    await loadPlugins(this)
+
+    // Preparing for webpack build process
     if (
-      this.prepareType === 'export' ||
       this.prepareType === 'build' ||
       (this.prepareType === 'serve' && this.isDev)
     ) {
-      await loadPlugins(this)
+      // Remove everything but cache
+      await Promise.all(
+        ['templates', 'manifest', 'server', 'client'].map(name => {
+          return remove(this.resolveDotReam(name))
+        })
+      )
 
-      if (this.prepareType !== 'export') {
-        const { prepareFiles } = await import('./prepare-files')
-        await prepareFiles(this)
-      }
+      const { prepareFiles } = await import('./prepare-files')
+      await prepareFiles(this)
+    }
+
+    // Remove out dir for exporting
+    if (this.prepareType === 'export') {
+      await remove(this.resolveDotReam('out'))
     }
   }
 

@@ -34,7 +34,7 @@ export async function writeStaticFiles(api: Ream) {
   const htmlOutDir = isExporting ? exportDir : api.resolveDotReam('html')
 
   // Used by ream-server to determine whether the visited path is statically exported at build time, if so it loads it static html file instead of rendering the request on the fly.
-  const staticHtmlRoutes: Set<string> = new Set()
+  const staticHtmlRoutes: { [path: string]: string } = {}
 
   const writeHtmlFile = async ({
     path,
@@ -57,16 +57,18 @@ export async function writeStaticFiles(api: Ream) {
       },
       route.entryName
     )
-    const filename =
+    let filename =
       path === `/`
         ? `/index.html`
         : path.endsWith('.html')
         ? path
         : `${path}/index.html`
+    // Remove leading slash
+    filename = filename.replace(/^\//, '')
     const outputPath = join(htmlOutDir, filename)
     await outputFile(outputPath, `<!DOCTYPE html>${html}`, 'utf8')
     if (!isExporting) {
-      staticHtmlRoutes.add(path)
+      staticHtmlRoutes[path] = filename
     }
   }
 
@@ -137,8 +139,8 @@ export async function writeStaticFiles(api: Ream) {
     await copy(api.resolveDotReam('client'), join(exportDir, '_ream'))
   } else {
     await outputFile(
-      api.resolveDotReam('static-html-routes.json'),
-      JSON.stringify([...staticHtmlRoutes]),
+      api.resolveDotReam('manifest/static-html-routes.json'),
+      JSON.stringify(staticHtmlRoutes),
       'utf8'
     )
   }

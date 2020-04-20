@@ -16,7 +16,7 @@ export function createDevMiddlewares(api: Ream) {
     publicPath: clientConfig.output!.publicPath!,
     logLevel: 'silent',
     writeToDisk(filepath) {
-      return /ream-client-manifest.json$/.test(filepath)
+      return /manifest\/ream-client-manifest.json$/.test(filepath)
     }
   })
 

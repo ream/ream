@@ -165,7 +165,7 @@ export async function getPageProps(
   return props
 }
 
-export async function getStaticHtml(path: string) {
-  const filepath = `${__REAM_BUILD_DIR__}${path === '/' ? '/index' : path}.html`
+export async function getStaticHtml(filename: string) {
+  const filepath = `${__REAM_BUILD_DIR__}/${filename}`
   return fs.promises.readFile(filepath, 'utf-8')
 }

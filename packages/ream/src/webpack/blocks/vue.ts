@@ -15,13 +15,13 @@ export function useVue(chain: WebpackChain, isClient: boolean) {
   if (isClient) {
     chain.plugin('ream-client-manifest').use(ClientPlugin, [
       {
-        filename: '../ream-client-manifest.json',
+        filename: '../manifest/ream-client-manifest.json',
       },
     ])
   } else {
     chain.plugin('ream-server-bundle').use(ServerPlugin, [
       {
-        filename: '../ream-server-bundle.json',
+        filename: '../manifest/ream-server-bundle.json',
         exclude: ['ream-server.js'],
       },
     ])

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { createRouter } from './create-router'
 import './use-meta'
-import { onCreatedApp } from 'dot-ream/enhance-app'
+import { onCreatedApp } from 'dot-ream/templates/enhance-app'
 
 Vue.config.productionTip = false
 
