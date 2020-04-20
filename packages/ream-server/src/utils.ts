@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { Request, Response } from 'express'
 import devalue from 'devalue'
+import fs from 'fs'
 import { BundleRenderer } from '.'
 
 type Obj = {
@@ -162,4 +163,9 @@ export async function getPageProps(
   }
 
   return props
+}
+
+export async function getStaticHtml(path: string) {
+  const filepath = `${__REAM_BUILD_DIR__}${path === '/' ? '/index' : path}.html`
+  return fs.promises.readFile(filepath, 'utf-8')
 }

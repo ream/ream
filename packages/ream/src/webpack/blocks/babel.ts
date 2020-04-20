@@ -28,7 +28,6 @@ export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
         isDev: api.isDev,
         cwd: api.resolveRoot(),
         buildDir: api.resolveDotReam(),
-        buildTarget: api.config.target,
         shouldCache: api.shouldCache,
         pagesDir: api.resolveRoot('pages'),
       },

@@ -26,7 +26,6 @@ export default babelLoader.custom((babel: any) => {
                 key: CACHE_KEY,
                 isClient: custom.isClient,
                 isDev: custom.isDev,
-                buildTarget: custom.buildTarget,
                 config: babel.loadPartialConfig({
                   filename,
                   cwd: custom.cwd,
@@ -65,7 +64,6 @@ export default babelLoader.custom((babel: any) => {
         options.plugins.push([
           require.resolve('../../babel/plugins/page-exports-transforms'),
           {
-            buildTarget: customOptions.buildTarget,
           },
         ])
       }

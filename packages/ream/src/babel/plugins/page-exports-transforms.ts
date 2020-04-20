@@ -8,7 +8,6 @@
 
 import { PluginObj, NodePath } from '@babel/core'
 import * as BabelTypes from '@babel/types'
-import { BuildTarget } from 'ream/src'
 
 const EXPORT_GET_SERVER_SIDE_PROPS = `getServerSideProps`
 const EXPORT_GET_STATIC_PROPS = `getStaticProps`
@@ -34,7 +33,6 @@ const exportPatterns = [
 ]
 
 export type PluginOpts = {
-  buildTarget: BuildTarget
 }
 
 function getIdentifier(
@@ -147,10 +145,6 @@ export default function pageExportsTransforms({
           path: NodePath<BabelTypes.ExportNamedDeclaration>,
           exportName: string
         ) => {
-          if (state.opts.buildTarget === 'static' && exportName === GET_SERVER_SIDE_PROPS_INDICATOR) {
-            throw new Error(`You can't use ${EXPORT_GET_SERVER_SIDE_PROPS} when build target is set to "static"`)
-          }
-
           path.insertBefore(
             t.exportNamedDeclaration(
               t.variableDeclaration('var', [

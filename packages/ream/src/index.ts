@@ -10,8 +10,6 @@ import { Store, store } from './store'
 import { ChainWebpack } from './types'
 import { createServer } from 'http'
 import { Entry } from 'webpack'
-
-export type BuildTarget = 'server' | 'static'
 export interface Options {
   dir?: string
   dev?: boolean
@@ -19,7 +17,6 @@ export interface Options {
   server?: {
     port?: number | string
   }
-  target?: BuildTarget
 }
 
 type ServerOptions = {
@@ -35,7 +32,6 @@ export type ReamConfig = {
   env?: {
     [k: string]: string | boolean | number
   }
-  target?: BuildTarget
   plugins?: Array<ReamPluginConfigItem>
   chainWebpack?: ChainWebpack
 }
@@ -50,7 +46,7 @@ export class Ream {
    * This property won't be available in a production server and isn't actual routes, use `.routes` instead
    */
   _routes: Route[]
-  prepareType?: 'serve' | 'build'
+  prepareType?: 'serve' | 'build' | 'export'
   config: Required<ReamConfig>
   configPath?: string
   store: Store
@@ -75,7 +71,6 @@ export class Ream {
         ...projectConfig.env,
         ...configOverride.env,
       },
-      target: configOverride?.target || projectConfig?.target || 'server',
       plugins: [
         ...(configOverride.plugins || []),
         ...(projectConfig.plugins || []),
@@ -108,8 +103,11 @@ export class Ream {
   }
 
   get routes(): Route[] {
-    // Use pre-generated file in production server
-    if (this.prepareType === 'serve' && !this.isDev) {
+    // Use pre-generated file in production server or exporting
+    if (
+      this.prepareType === 'export' ||
+      (this.prepareType === 'serve' && !this.isDev)
+    ) {
       return require(this.resolveDotReam('routes-info.json'))
     }
     const routes: Route[] = [...this._routes]
@@ -158,7 +156,7 @@ export class Ream {
     }
     return {
       main: this.resolveApp('server-entry.js'),
-      'ream-server': require.resolve('ream-server')
+      'ream-server': require.resolve('ream-server'),
     }
   }
 
@@ -168,13 +166,16 @@ export class Ream {
     }
 
     if (
+      this.prepareType === 'export' ||
       this.prepareType === 'build' ||
       (this.prepareType === 'serve' && this.isDev)
     ) {
       await loadPlugins(this)
 
-      const { prepareFiles } = await import('./prepare-files')
-      await prepareFiles(this)
+      if (this.prepareType !== 'export') {
+        const { prepareFiles } = await import('./prepare-files')
+        await prepareFiles(this)
+      }
     }
   }
 
@@ -206,8 +207,15 @@ export class Ream {
   async build() {
     this.prepareType = 'build'
     await this.prepare()
-    const res = await import('./build')
-    return res.build(this)
+    const { build } = await import('./build')
+    return build(this)
+  }
+
+  async export() {
+    this.prepareType = 'export'
+    await this.prepare()
+    const { exportSite } = await import('./export')
+    await exportSite(this)
   }
 }
 

@@ -6,7 +6,13 @@ import { compileToPath } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
 
 export async function writeStaticFiles(api: Ream) {
-  const { ReamServer, renderToHTML }: typeof ReamServerTypes = require(api.resolveDotReam('server/ream-server.js'))
+  const isExporting = api.prepareType === 'export'
+  const {
+    ReamServer,
+    renderToHTML,
+  }: typeof ReamServerTypes = require(api.resolveDotReam(
+    'server/ream-server.js'
+  ))
   const rs = new ReamServer()
   const renderer = rs.createRenderer()
 
@@ -24,7 +30,11 @@ export async function writeStaticFiles(api: Ream) {
     )
   }
 
-  const staticOutDir = api.resolveRoot('out')
+  const exportDir = api.resolveRoot('out')
+  const htmlOutDir = isExporting ? exportDir : api.resolveDotReam('html')
+
+  // Used by ream-server to determine whether the visited path is statically exported at build time, if so it loads it static html file instead of rendering the request on the fly.
+  const staticHtmlRoutes: Set<string> = new Set()
 
   const writeHtmlFile = async ({
     path,
@@ -35,10 +45,6 @@ export async function writeStaticFiles(api: Ream) {
     route: Route
     params: any
   }) => {
-    if (api.config.target !== 'static') {
-      return
-    }
-
     const html = await renderToHTML(
       renderer,
       {
@@ -57,12 +63,11 @@ export async function writeStaticFiles(api: Ream) {
         : path.endsWith('.html')
         ? path
         : `${path}/index.html`
-    const outputPath = join(staticOutDir, filename)
+    const outputPath = join(htmlOutDir, filename)
     await outputFile(outputPath, `<!DOCTYPE html>${html}`, 'utf8')
-  }
-
-  if (api.config.target === 'static') {
-    await copy(api.resolveDotReam('client'), join(staticOutDir, '_ream'))
+    if (!isExporting) {
+      staticHtmlRoutes.add(path)
+    }
   }
 
   try {
@@ -73,7 +78,9 @@ export async function writeStaticFiles(api: Ream) {
         continue
       }
 
-      const page: ReamServerTypes.PageInterface = await allRoutes[route.entryName]()
+      const page: ReamServerTypes.PageInterface = await allRoutes[
+        route.entryName
+      ]()
 
       const { getStaticProps, getStaticPaths } = page
       // Use static path for 404 page
@@ -106,7 +113,7 @@ export async function writeStaticFiles(api: Ream) {
       if (!hasParams) {
         if (getStaticProps) {
           const result = await getStaticProps({ params: {} })
-          await writeStaticProps(route.entryName, result)
+          await writeStaticProps(route.routePath, result)
         }
         await writeHtmlFile({
           path: route.routePath,
@@ -121,10 +128,18 @@ export async function writeStaticFiles(api: Ream) {
     throw err
   }
 
-  if (api.config.target === 'static') {
+  if (isExporting) {
     const staticPropsDir = api.resolveDotReam('staticprops')
     if (await pathExists(staticPropsDir)) {
-      await copy(staticPropsDir, staticOutDir)
+      await copy(staticPropsDir, exportDir)
     }
+    // Copy webpack assets
+    await copy(api.resolveDotReam('client'), join(exportDir, '_ream'))
+  } else {
+    await outputFile(
+      api.resolveDotReam('static-html-routes.json'),
+      JSON.stringify([...staticHtmlRoutes]),
+      'utf8'
+    )
   }
 }

@@ -9,51 +9,59 @@ cli
   })
   .option('--no-cache', 'Disable webpack caching')
   .option('--port <port>', 'Server port')
-  .option('--target <target>', `Build target`)
   .action(async (dir, options) => {
     const { Ream } = await import('./')
     const app = new Ream({
       dir,
       dev: true,
       cache: options.cache,
-      target: options.target,
       server: {
-        port: options.port
+        port: options.port,
       },
     })
     await app.serve().catch(handleError)
   })
 
-cli.command('build [dir]', 'Build a directory for production', {
-  ignoreOptionDefaultValue: true
-})
-.option('--target <target>', `Build target`)
-.option('--no-cache', 'Disable webpack caching')
-.action(async (dir, options) => {
-  const { Ream } = await import('./')
-  const app = new Ream({
-    dir,
-    dev: false,
-    cache: options.cache
-  }, {
-    target: options.target,
+cli
+  .command('build [dir]', 'Build a directory for production', {
+    ignoreOptionDefaultValue: true,
   })
-  await app.build().catch(handleError)
-})
+  .option('--no-cache', 'Disable webpack caching')
+  .action(async (dir, options) => {
+    const { Ream } = await import('./')
+    const app = new Ream({
+      dir,
+      dev: false,
+      cache: options.cache,
+    })
+    await app.build().catch(handleError)
+  })
 
-cli.command('start [dir]', 'Start a production server')
-.option('--port <port>', 'Server port')
-.action(async (dir, options) => {
-  const { Ream } = await import('./')
-  const app = new Ream({
-    dir,
-    dev: false,
-    server: {
-      port: options.port
-    }
+cli
+  .command('export [dir]', 'Export a hybrid site to a static site')
+  .action(async dir => {
+    const { Ream } = await import('./')
+    const app = new Ream({
+      dir,
+      dev: false,
+    })
+    await app.export().catch(handleError)
   })
-  await app.serve()
-})
+
+cli
+  .command('start [dir]', 'Start a production server')
+  .option('--port <port>', 'Server port')
+  .action(async (dir, options) => {
+    const { Ream } = await import('./')
+    const app = new Ream({
+      dir,
+      dev: false,
+      server: {
+        port: options.port,
+      },
+    })
+    await app.serve()
+  })
 
 cli.version(require('../package').version)
 cli.help()

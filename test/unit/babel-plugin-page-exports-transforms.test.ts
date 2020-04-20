@@ -109,19 +109,3 @@ test('keep other exports', () => {
     export var __re0 = true;"
   `)
 })
-
-test(`throw when getServerSideProps is used in static target`, () => {
-  expect(() => {
-    const code = compile(
-      `
-  export const getServerSideProps = () => {}
-  `,
-      {
-        buildTarget: 'static',
-      }
-    )
-    console.log(code)
-  }).toThrowErrorMatchingInlineSnapshot(
-    `"unknown: You can't use getServerSideProps when build target is set to \\"static\\""`
-  )
-})

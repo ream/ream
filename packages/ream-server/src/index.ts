@@ -8,7 +8,7 @@ import express, {
 import { findMatchedRoute } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
 import { createBundleRenderer } from '@ream/vue-server-renderer'
-import { getPageProps, renderToHTML } from './utils'
+import { getPageProps, renderToHTML, getStaticHtml } from './utils'
 
 export type BundleRenderer = ReturnType<typeof createBundleRenderer>
 
@@ -52,6 +52,16 @@ export class ReamServer {
     return this.renderer
   }
 
+  get staticHtmlRoutes(): Set<string> {
+    if (__DEV__) {
+      return new Set()
+    }
+
+    return new Set(
+      __non_webpack_require__(`${__REAM_BUILD_DIR__}/static-html-routes.json`)
+    )
+  }
+
   createServer() {
     const server = express()
 
@@ -67,41 +77,48 @@ export class ReamServer {
 
     server.get('*.pageprops.json', this.createPagePropsHandler())
 
+    const staticHtmlRoutes = this.staticHtmlRoutes
+
     server.get('*', async (req, res, next) => {
-      const routes = this.getRoutes()
-      let { route, params } = findMatchedRoute(routes, req.path)
-      req.params = params
-
-      const renderer = this.createRenderer()
-
-      if (route && route.isApiRoute) {
-        const { routes: allRoutes } = renderer.runner.evaluate('main.js')
-        const page = await allRoutes[route.entryName]()
-        page.default(req, res, next)
-        return
-      }
-
-      res.setHeader('content-type', 'text/html')
-      // @ts-ignore TODO
-      req.__route_path__ = route.routePath
-
-      if (route && route.is404) {
-        res.statusCode = 404
-      }
-
-      const getServerSidePropsContext = {
-        req,
-        res,
-        params,
-        query: req.query,
-        path: req.path,
-      }
-
-      const getStaticPropsContext = {
-        params,
-      }
-
       try {
+        const routes = this.getRoutes()
+        let { route, params } = findMatchedRoute(routes, req.path)
+        req.params = params
+
+        if (staticHtmlRoutes.has(req.path)) {
+          const html = await getStaticHtml(req.path)
+          res.send(html)
+        }
+
+        const renderer = this.createRenderer()
+
+        if (route && route.isApiRoute) {
+          const { routes: allRoutes } = renderer.runner.evaluate('main.js')
+          const page = await allRoutes[route.entryName]()
+          page.default(req, res, next)
+          return
+        }
+
+        res.setHeader('content-type', 'text/html')
+        // @ts-ignore TODO
+        req.__route_path__ = route.routePath
+
+        if (route && route.is404) {
+          res.statusCode = 404
+        }
+
+        const getServerSidePropsContext = {
+          req,
+          res,
+          params,
+          query: req.query,
+          path: req.path,
+        }
+
+        const getStaticPropsContext = {
+          params,
+        }
+
         const context = {
           url: req.url,
           path: req.path,
