@@ -14,6 +14,10 @@ export default [
         text: 'Data Fetching',
         link: '/docs/data-fetching',
       },
+      {
+        text: 'Dynamic or Static',
+        link: '/docs/dynamic-or-static'
+      }
     ],
   },
 ]

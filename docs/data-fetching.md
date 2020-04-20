@@ -7,7 +7,7 @@ In a page, there are two ways to pre-fetch data:
 
 ## `getStaticProps`
 
-If you export a function (or async function) called `getStaticProps` from a page, Ream will execute the function at build time and store the returned props in a JSON file. In runtime your app will never call this function and instead it will load the JSON file.
+If you export a function (or async function) called `getStaticProps` from a page, Ream will execute the function and prerender the page to static HTML file at build time.
 
 ```vue
 <script>
