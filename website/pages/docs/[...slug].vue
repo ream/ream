@@ -3,11 +3,11 @@
     <Header />
     <div class="main">
       <div class="container mx-auto">
-        <div class="flex lg:-mx-5">
-          <div class="hidden lg:block lg:w-4/12 lg:px-5">
+        <div class="flex md:-mx-5">
+          <div class="hidden md:block md:w-4/12 md:px-5">
             <DocsMenu />
           </div>
-          <div class="lg:w-8/12 lg:px-5">
+          <div class="md:w-8/12 md:px-5">
             <h2 class="text-5xl font-semibold mb-5">{{ title }}</h2>
             <div class="markdown-body" v-html="content"></div>
           </div>

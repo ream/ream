@@ -8,6 +8,10 @@ body {
   @apply antialiased;
 }
 
+body[data-no-scroll] {
+  overflow: hidden;
+}
+
 .container {
   max-width: 1080px;
   padding: 0 10px;
