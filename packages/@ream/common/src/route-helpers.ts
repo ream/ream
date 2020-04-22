@@ -1,7 +1,7 @@
 import { Key, pathToRegexp, compile } from 'path-to-regexp'
 import { Route } from './route'
 
-function exec(path: string, regexp: RegExp, keys: Key[]) {
+export function execPathRegexp(path: string, regexp: RegExp, keys: Key[]) {
   let i = 0
   const out: { [k: string]: string } = {}
   const matches = regexp.exec(path)
@@ -23,7 +23,7 @@ export function findMatchedRoute(routes: Route[], path: string) {
       const keys: Key[] = []
       const regexp = pathToRegexp(route.routePath, keys)
       if (regexp.test(path)) {
-        const params = exec(path, regexp, keys)
+        const params = execPathRegexp(path, regexp, keys)
         return {
           params,
           route,
@@ -39,3 +39,5 @@ export function compileToPath(template: string, params: any) {
     encode: encodeURIComponent,
   })(params)
 }
+
+export { pathToRegexp } from 'path-to-regexp'

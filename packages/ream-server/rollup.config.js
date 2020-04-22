@@ -1,6 +1,11 @@
 import typescript from 'rollup-plugin-typescript2'
+import commonjs from '@rollup/plugin-commonjs'
+import builtins from 'builtins'
 
-export default {
+const builtinModules = builtins()
+
+/** @type {import('rollup').RollupOptions} */
+const config = {
   input: {
     index: 'src/index.ts',
   },
@@ -9,6 +14,14 @@ export default {
     format: 'cjs',
   },
   plugins: [
+    {
+      resolveId(source) {
+        if (builtinModules.includes(source)) {
+          return false
+        }
+        return null
+      }
+    },
     typescript({
       tsconfigOverride: {
         compilerOptions: {
@@ -16,5 +29,12 @@ export default {
         },
       },
     }),
-  ],
+    commonjs({
+      namedExports: {
+        'sirv': ['default']
+      }
+    })
+  ]
 }
+
+export default config

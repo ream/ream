@@ -44,6 +44,7 @@ export function createDevServer(api: Ream): RequestListener {
       },
     })
 
-    return rs.createServer()(req, res)
+    const { handler } = rs.createServer()
+    return handler(req, res)
   }
 }

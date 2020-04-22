@@ -1,19 +1,23 @@
-import express, {
-  Express,
-  RequestHandler,
-  Request,
-  Response,
-  NextFunction,
-} from 'express'
+import {
+  Server,
+  ReamServerHandler,
+  ReamServerResponse,
+  ReamServerRequest,
+} from './server'
 import { findMatchedRoute } from '@ream/common/dist/route-helpers'
 import { Route } from '@ream/common/dist/route'
 import { createBundleRenderer } from '@ream/vue-server-renderer'
+import sirv from 'sirv'
 import { getPageProps, renderToHTML, getStaticHtml } from './utils'
+
+export * from './utils'
+
+export { ReamServerHandler, ReamServerResponse, ReamServerRequest }
 
 export type BundleRenderer = ReturnType<typeof createBundleRenderer>
 
 export type CreateServerOptions = {
-  beforeMiddlewares?: (server: Express) => void
+  beforeMiddlewares?: (server: Server) => void
   getRoutes?: () => Route[]
 }
 
@@ -63,7 +67,7 @@ export class ReamServer {
   }
 
   createServer() {
-    const server = express()
+    const server = new Server()
 
     const { beforeMiddlewares } = this.options
 
@@ -72,23 +76,30 @@ export class ReamServer {
     }
 
     if (!__DEV__) {
-      server.use('/_ream', express.static(`${__REAM_BUILD_DIR__}/client`))
+      const serveWebpackAssets = sirv(`${__REAM_BUILD_DIR__}/client`, {
+        maxAge: 86400 // 1 day
+      })
+      server.use('/_ream', (req, res, next) => {
+        req.url = req.url.replace(/^\/_ream\//, '/')
+        return serveWebpackAssets(req, res, next)
+      })
     }
 
-    server.get('*.pageprops.json', this.createPagePropsHandler())
+    const pagePropsHandler = this.createPagePropsHandler()
+    server.use(pagePropsHandler)
 
     const staticHtmlRoutes = this.staticHtmlRoutes
 
-    server.get('*', async (req, res, next) => {
+    server.use(async (req, res, next) => {
       try {
+        const sendHTML = (html: string) => {
+          res.setHeader('content-type', 'text/html')
+          res.end(html)
+        }
+
         const routes = this.getRoutes()
         let { route, params } = findMatchedRoute(routes, req.path)
         req.params = params
-
-        if (staticHtmlRoutes[req.path]) {
-          const html = await getStaticHtml(staticHtmlRoutes[req.path])
-          return res.send(html)
-        }
 
         const renderer = this.createRenderer()
 
@@ -99,7 +110,15 @@ export class ReamServer {
           return
         }
 
-        res.setHeader('content-type', 'text/html')
+        if (req.method !== 'GET') {
+          return next()
+        }
+
+        if (staticHtmlRoutes[req.path]) {
+          const html = await getStaticHtml(staticHtmlRoutes[req.path])
+          return sendHTML(html)
+        }
+
         // @ts-ignore TODO
         req.__route_path__ = route.routePath
 
@@ -126,50 +145,52 @@ export class ReamServer {
           getStaticPropsContext,
         }
         const html = await renderToHTML(renderer, context, route!.entryName)
-        res.end(`<!DOCTYPE html>${html}`)
+        sendHTML(`<!DOCTYPE html>${html}`)
       } catch (err) {
         next(err)
       }
     })
 
-    server.use(
-      async (err: Error, req: Request, res: Response, next: NextFunction) => {
-        const renderer = this.createRenderer()
+    server.onError(async (err, req, res) => {
+      const renderer = this.createRenderer()
 
-        renderer.rewriteErrorTrace(err)
+      renderer.rewriteErrorTrace(err)
 
-        console.error('Server error', err)
-        setErrorPageStatusCode(res)
+      console.error('Server error', err)
+      setErrorPageStatusCode(res)
 
-        const html = await renderToHTML(
-          renderer,
-          {
-            getServerSidePropsContext: {
-              req,
-              res,
-              path: req.path,
-              params: req.params,
-              query: req.query,
-            },
-            getStaticPropsContext: {
-              params: req.params,
-            },
+      const html = await renderToHTML(
+        renderer,
+        {
+          getServerSidePropsContext: {
+            req,
+            res,
             path: req.path,
-            url: req.url,
+            params: req.params,
+            query: req.query,
           },
-          'pages/_error',
-          getErrorPageProps(err, res)
-        )
+          getStaticPropsContext: {
+            params: req.params,
+          },
+          path: req.path,
+          url: req.url,
+        },
+        'pages/_error',
+        getErrorPageProps(err, res)
+      )
 
-        res.send(`<!DOCTYPE html>${html}`)
-      }
-    )
+      res.send(`<!DOCTYPE html>${html}`)
+    })
 
     return server
   }
 
-  createPagePropsHandler(): RequestHandler {
+  createPagePropsHandler(): ReamServerHandler {
     return async (req, res, next) => {
+      if (!req.path.endsWith('.pageprops.json')) {
+        return next()
+      }
+
       this.renderer = this.createRenderer()
 
       const routes = this.getRoutes()
@@ -212,9 +233,7 @@ export class ReamServer {
   }
 }
 
-export * from './utils'
-
-function getErrorPageProps(err: Error, res: Response) {
+function getErrorPageProps(err: Error, res: ReamServerResponse) {
   return {
     __ream_error__: true,
     error: {
@@ -224,7 +243,7 @@ function getErrorPageProps(err: Error, res: Response) {
   }
 }
 
-function setErrorPageStatusCode(res: Response) {
+function setErrorPageStatusCode(res: ReamServerResponse) {
   res.statusCode =
     !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
 }

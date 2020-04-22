@@ -1,7 +1,7 @@
 import * as ReamServerTypes from 'ream-server'
 import { Ream } from '../'
 
-export async function createServer(api: Ream) {
+export async function getRequestHandler(api: Ream) {
   if (api.isDev) {
     const { createDevServer } = await import('./create-dev-server')
     return createDevServer(api)
@@ -11,5 +11,5 @@ export async function createServer(api: Ream) {
     'server/ream-server.js'
   ))
   const rs = new ReamServer()
-  return rs.createServer()
+  return rs.createServer().handler
 }

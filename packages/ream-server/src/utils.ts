@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import { Request, Response } from 'express'
 import devalue from 'devalue'
 import fs from 'fs'
 import { BundleRenderer } from '.'
+import { ReamServerRequest, ReamServerResponse } from './server'
 
 type Obj = {
   [k: string]: any
@@ -21,8 +21,8 @@ export type GetStaticProps = (
 ) => GetStaticPropsResult | Promise<GetStaticPropsResult>
 
 export type GetServerSidePropsContext = {
-  req: Request
-  res: Response
+  req: ReamServerRequest
+  res: ReamServerResponse
   params: Obj
   query: Obj
   path: string

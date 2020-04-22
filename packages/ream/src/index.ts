@@ -15,7 +15,10 @@ import { remove } from 'fs-extra'
 export {
   GetStaticProps,
   GetServerSideProps,
-  GetStaticPaths
+  GetStaticPaths,
+  ReamServerRequest,
+  ReamServerResponse,
+  ReamServerHandler,
 } from 'ream-server'
 export interface Options {
   dir?: string
@@ -209,8 +212,8 @@ export class Ream {
   async getRequestHandler() {
     this.prepareType = 'serve'
     await this.prepare()
-    const { createServer } = await import('./server/create-server')
-    const server = createServer(this)
+    const { getRequestHandler } = await import('./server/create-server')
+    const server = await getRequestHandler(this)
     return server
   }
 
