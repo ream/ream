@@ -1,1 +1,1 @@
-module.exports = require('./app/pages/_document')
+module.exports = require('./vue-app/pages/_document')

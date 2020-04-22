@@ -1,1 +1,1 @@
-module.exports = require('./app/pages/_error')
+module.exports = require('./vue-app/pages/_error')

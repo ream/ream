@@ -34,10 +34,14 @@ export async function prepareFiles(api: Ream) {
 
     const clientRoutesContent = `
     var getAppComponent = function() {
-      return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${appRoute!.absolutePath}")
+      return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${
+      appRoute!.absolutePath
+    }")
     }
     var getErrorComponent = function() {
-      return import(/* webpackChunkName: "${errorRoute!.entryName}" */ "${errorRoute!.absolutePath}")
+      return import(/* webpackChunkName: "${errorRoute!.entryName}" */ "${
+      errorRoute!.absolutePath
+    }")
     }
 
     var wrapPage = function(res) {
@@ -122,6 +126,14 @@ export async function prepareFiles(api: Ream) {
     await outputFile(
       api.resolveDotReam('manifest/routes-info.json'),
       JSON.stringify(api.routes, null, 2),
+      'utf8'
+    )
+
+    await outputFile(
+      api.resolveDotReam('templates/global-imports.js'),
+      `
+      ${api.config.css.map(file => `import ${JSON.stringify(file)}`).join('\n')}
+      `,
       'utf8'
     )
 

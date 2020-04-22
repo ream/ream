@@ -5,7 +5,7 @@ import consola from 'consola'
 
 export function useCSS(api: Ream, chain: WebpackChain, isClient: boolean) {
   // TODO: maybe make these options configurable
-  const extractCSS = true
+  const extractCSS = false
   const loaderOptions: any = {}
   const sourceMap = api.isDev
 
@@ -147,9 +147,7 @@ export function useCSS(api: Ream, chain: WebpackChain, isClient: boolean) {
         styles: {
           name: 'styles',
           // necessary to ensure async chunks are also extracted
-          test: (m: any) => {
-            return m.type && m.type.includes('css/mini-extract')
-          },
+          test: /\.(css|vue)$/,
           chunks: 'all',
           enforce: true,
         },

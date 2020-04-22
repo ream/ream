@@ -1,3 +1,4 @@
+import 'dot-ream/templates/global-imports'
 import { createApp } from './create-app'
 import { routes } from 'dot-ream/templates/all-routes'
 

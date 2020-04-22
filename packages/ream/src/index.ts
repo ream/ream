@@ -44,6 +44,7 @@ export type ReamConfig = {
   }
   plugins?: Array<ReamPluginConfigItem>
   chainWebpack?: ChainWebpack
+  css?: string[]
 }
 
 export class Ream {
@@ -93,6 +94,7 @@ export class Ream {
           configOverride.chainWebpack(chain, options)
         }
       },
+      css: projectConfig.css || []
     }
   }
 
@@ -108,8 +110,8 @@ export class Ream {
     return resolve(this.dir, '.ream', ...args)
   }
 
-  resolveApp(...args: string[]) {
-    return resolve(__dirname, '../app', ...args)
+  resolveVueApp(...args: string[]) {
+    return resolve(__dirname, '../vue-app', ...args)
   }
 
   get routes(): Route[] {
@@ -122,7 +124,7 @@ export class Ream {
     }
     const routes: Route[] = [...this._routes]
 
-    const ownPagesDir = this.resolveApp('pages')
+    const ownPagesDir = this.resolveVueApp('pages')
     const patterns = [
       {
         require: (route: Route) => route.entryName === 'pages/_error',
@@ -160,12 +162,12 @@ export class Ream {
           ...(this.isDev
             ? [require.resolve('webpack-hot-middleware/client')]
             : []),
-          this.resolveApp('client-entry.js'),
+          this.resolveVueApp('client-entry.js'),
         ],
       }
     }
     return {
-      main: this.resolveApp('server-entry.js'),
+      main: this.resolveVueApp('server-entry.js'),
       'ream-server': require.resolve('ream-server'),
     }
   }

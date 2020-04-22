@@ -13,6 +13,10 @@ export function bundleForNode(chain: WebpackChain, isClient: boolean) {
         /\.(?!(?:jsx?|json)$).{1,5}$/i,
         // Bundle Ream server
         'ream-server',
+        'ream/app',
+        'ream/document',
+        'ream/404',
+        'ream/error',
         (name: string) => {
           // Don't externalize ream plugins
           // They should be bundled by webpack

@@ -7,6 +7,10 @@ module.exports = {
         trackingId: 'UA-54857209-24',
       },
     ],
-    './plugin'
   ],
+  css: [
+    'prismjs/themes/prism-tomorrow.css',
+    '@/css/tailwind.css',
+    '@/css/main.css'
+  ]
 }
