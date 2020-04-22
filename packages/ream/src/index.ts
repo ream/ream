@@ -11,6 +11,12 @@ import { ChainWebpack } from './types'
 import { createServer } from 'http'
 import { Entry } from 'webpack'
 import { remove } from 'fs-extra'
+
+export {
+  GetStaticProps,
+  GetServerSideProps,
+  GetStaticPaths
+} from 'ream-server'
 export interface Options {
   dir?: string
   dev?: boolean
