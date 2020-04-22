@@ -5,7 +5,10 @@
   "files": [
     "/dist",
     "/app",
-    "/babel.js"
+    "/404.js",
+    "/app.js",
+    "/document.js",
+    "/error.js"
   ],
   "main": "dist/index.js",
   "bin": "dist/cli.js",
