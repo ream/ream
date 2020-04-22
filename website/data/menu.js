@@ -17,6 +17,10 @@ export default [
       {
         text: 'Dynamic or Static',
         link: '/docs/dynamic-or-static'
+      },
+      {
+        text: 'Configuration',
+        link: '/docs/configuration'
       }
     ],
   },
