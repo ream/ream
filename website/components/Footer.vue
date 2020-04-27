@@ -4,7 +4,7 @@
       class="container mx-auto flex items-center text-gray-700"
     >&copy; 2020 Created by EGOIST (Kevin Titor).</div>
     <div class="container mx-auto mt-5 mb-12">
-      <a href="https://vercel.com" rel="nofollow noreferer" target="_blank"><Vercel /></a>
+      <a href="https://vercel.com?utm_source=reamjs" rel="nofollow noreferer" target="_blank"><Vercel /></a>
     </div>
   </footer>
 </template>

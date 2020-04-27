@@ -12,7 +12,7 @@ A Vue framework for building servers and static sites.
 
 ## Sponsors
 
-[![powered by vercel](https://gist.githubusercontent.com/egoist/40709a330eaec21acefd984e70a726ee/raw/1f4f350e56bf9dd0eec6d4217b50bda80b712342/powered-by-vercel.svg)](https://vercel.com)
+[![powered by vercel](https://gist.githubusercontent.com/egoist/40709a330eaec21acefd984e70a726ee/raw/1f4f350e56bf9dd0eec6d4217b50bda80b712342/powered-by-vercel.svg)](https://vercel.com?utm_source=reamjs)
 
 ## License
 
