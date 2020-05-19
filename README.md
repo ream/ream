@@ -1,3 +1,5 @@
+## ATTENTION: this project is under development, we aim to make it usable when Vue 3 is out. (i.e. it's not going to support Vue 2)
+
 # Ream
 
 A Vue framework for building servers and static sites.
