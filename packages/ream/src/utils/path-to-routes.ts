@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { Route } from '@ream/common/dist/route'
+import { Route } from './route'
 import { rankRoute } from './rank-routes'
 import { normalizePath } from './normalize-path'
 

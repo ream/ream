@@ -1,4 +1,4 @@
-import { Route } from '@ream/common/dist/route'
+import { Route } from './route'
 
 const SEGMENT_POINTS = 4
 const STATIC_POINTS = 3

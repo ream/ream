@@ -1,8 +1,10 @@
+import { h } from 'vue'
+
 export default {
-  functional: true,
-  render(h, { props: { Component, pageProps } }) {
-    return h(Component, {
-      props: pageProps,
-    })
+  setup({ Component, pageProps }) {
+    return () =>
+      h(Component, {
+        props: pageProps,
+      })
   },
 }

@@ -1,15 +1,23 @@
-import * as ReamServerTypes from 'ream-server'
 import { Ream } from '../'
+import { Server } from './server'
 
 export async function getRequestHandler(api: Ream) {
+  const server = new Server()
+
   if (api.isDev) {
-    const { createDevServer } = await import('./create-dev-server')
-    return createDevServer(api)
+    const { createDevMiddlewares } = await import('./dev-middlewares')
+    const devMiddlewares = createDevMiddlewares(api)
+    for (const m of devMiddlewares) {
+      server.use(m)
+    }
   }
 
-  const { ReamServer }: typeof ReamServerTypes = require(api.resolveDotReam(
-    'server/ream-server.js'
-  ))
-  const rs = new ReamServer()
-  return rs.createServer().handler
+  server.use((req, res) => {
+    if (req.method !== 'GET') {
+      return res.end('unsupported metho')
+    }
+    res.end('123')
+  })
+
+  return server.handler
 }

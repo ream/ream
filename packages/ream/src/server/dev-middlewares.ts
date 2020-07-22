@@ -2,9 +2,10 @@ import { Ream } from '..'
 import webpack from 'webpack'
 import createDevMiddleware from 'webpack-dev-middleware'
 import createHotMiddleware from 'webpack-hot-middleware'
-import { getWebpackConfig } from  '../webpack/get-webpack-config'
+import { getWebpackConfig } from '../webpack/get-webpack-config'
+import { ReamServerHandler } from './server'
 
-export function createDevMiddlewares(api: Ream) {
+export function createDevMiddlewares(api: Ream): ReamServerHandler[] {
   const clientConfig = getWebpackConfig('client', api)
   const clientCompiler = webpack(clientConfig)
 
@@ -17,11 +18,11 @@ export function createDevMiddlewares(api: Ream) {
     logLevel: 'silent',
     writeToDisk(filepath) {
       return /manifest\/ream-client-manifest.json$/.test(filepath)
-    }
+    },
   })
 
   const hotMiddleware = createHotMiddleware(clientCompiler, {
-    log: false
+    log: false,
   })
 
   api.invalidate = () => {
@@ -30,6 +31,16 @@ export function createDevMiddlewares(api: Ream) {
 
   return [
     devMiddleware,
-    hotMiddleware
+    hotMiddleware,
+    (req, res, next) => {
+      for (const file of Object.keys(require.cache)) {
+        if (file.startsWith(api.resolveDotReam())) {
+          delete require.cache[file]
+        }
+      }
+      if (next) {
+        next()
+      }
+    },
   ]
 }

@@ -20,5 +20,5 @@ export async function build(api: Ream) {
 
   await Promise.all([runCompiler(clientCompiler), runCompiler(serverCompiler)])
 
-  await writeStaticFiles(api)
+  await writeStaticFiles()
 }

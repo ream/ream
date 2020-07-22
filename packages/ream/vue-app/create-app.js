@@ -1,29 +1,42 @@
-import Vue from 'vue'
-import { createRouter } from './create-router'
-import './use-meta'
+import { h, createApp as createVueApp } from 'vue'
+import { createRouter as createVueRouter } from 'vue-router'
+import { routes } from 'dot-ream/templates/client-routes'
 import { onCreatedApp } from 'dot-ream/templates/enhance-app'
 
-Vue.config.productionTip = false
+export const createApp = (context, history) => {
+  let router = createVueRouter({
+    history,
+    routes,
+  })
 
-export const createApp = (context) => {
-  const router = createRouter()
-
-  const app = new Vue({
+  const app = createVueApp({
     head: {},
-    router,
     pageProps: context.pageProps,
-    render(h) {
-      return h(
-        'div',
-        {
-          attrs: {
-            id: '_ream',
+    setup() {
+      return () =>
+        h(
+          'div',
+          {
+            attrs: {
+              id: '_ream',
+            },
           },
-        },
-        [h('router-view')]
-      )
+          [h('router-view')]
+        )
     },
   })
+
+  if (module.hot) {
+    module.hot.accept('dot-ream/templates/client-routes', () => {
+      const routes = require('dot-ream/templates/client-routes').routes
+      router = createVueRouter({
+        history,
+        routes,
+      })
+    })
+  }
+
+  app.use(router)
 
   onCreatedApp({ app, router })
 

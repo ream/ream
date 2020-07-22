@@ -1,79 +1,75 @@
 # Data Fetching
 
-In a page, there are two ways to pre-fetch data:
-
-- `getStaticProps`
-- `getServerSideProps`
-
-## `getStaticProps`
-
-If you export a function (or async function) called `getStaticProps` from a page, Ream will execute the function and prerender the page to static HTML file at build time.
+Page components can have an optional `preload` function that will load some data that the page depends on
 
 ```vue
 <script>
-export const getStaticProps = async (context) => {
-  const posts = await getPostsFromAnywhere()
+export const preload = async context => {
+  const posts = await context.fetch(
+    `/blog/posts.json?user=${context.query.user}`
+  )
   return {
     // Props will be passed to the component as props
     props: {
-      posts
-    }
+      posts,
+    },
   }
 }
 
 export default {
-  props: ['posts']
+  props: ['posts'],
 }
 </script>
 ```
 
 The `context` parameter is an object containing the following keys:
 
-- `params` contains the route parameters for pages using dynamic routes. For example, if the page name is `[id].vue`, then params will look like `{ id: '...' }`. To learn more, take a look at the [Dynamic Routing documentation](/docs/routing#dynamic-routing). You should use this together with `getStaticPaths`, which we’ll explain later. 
+- `params` contains the route parameters for pages using dynamic routes. For example, if the page name is `[id].vue`, then params will look like `{ id: '...' }`. To learn more, take a look at the [Dynamic Routing documentation](/docs/routing#dynamic-routing). You should use this together with `getStaticPaths`, which we’ll explain later.
 
-### `getStaticPaths`
-
-If a page has dynamic routes ([documentation](/routing#dynamic-routing)) and uses `getStaticProps` it needs to define a list of paths that we can use to get actual path at build time. 
-
-If you export a function called `getStaticPaths` from a page that uses dynamic routes, Ream will statically pre-render all the paths specified by `getStaticPaths`.
+## Caching Props
 
 ```vue
 <script>
-export const getStaticPaths = async () => {
+export const preload = async context => {
+  const posts = await context.fetch(
+    `/blog/posts.json?user=${context.query.user}`
+  )
   return {
-    paths: [
-      { params: {} },
-      { params: {} }
-    ]
-  }
-}
-</script>
-```
-
-## `getServerSideProps`
-
-If you export a function called `getServerSideProps` from a page, Ream will pre-render this page on each request using the props returned by `getServerSideProps`.
-
-```vue
-<script>
-export const getServerSideProps = async (context) => {
-  const posts = await getPostsFromAnywhere()
-  return {
+    cacheProps: 86400 // seconds -> 1 day
     props: {
-      posts
-    }
+      posts,
+    },
   }
 }
 
 export default {
-  props: ['posts']
+  props: ['posts'],
 }
 </script>
 ```
 
-The `context` parameter is an object containing the following keys:
+`preload` function won't be execute until the next day.
 
-- `params`: If this page uses a dynamic route, `params` contains the route parameters. If the page name is `[id].vue` , then params will look like `{ id: '' }`. To learn more, take a look at the [Dynamic Routing documentation](/docs/routing#dynamic-routing)
-- `req`: HTTP IncomingMessage object.
-- `res`: HTTP Response object.
-- `query`: The URL `query` object.
+## Caching Document
+
+You can also cache the entire HTML document, so Ream will simply return cache HTML string instead of doing another round of server-side rendering.
+
+```vue
+<script>
+export const preload = async context => {
+  const posts = await context.fetch(
+    `/blog/posts.json?user=${context.query.user}`
+  )
+  return {
+    cacheDocument: 86400 // seconds -> 1 day
+    props: {
+      posts,
+    },
+  }
+}
+
+export default {
+  props: ['posts'],
+}
+</script>
+```

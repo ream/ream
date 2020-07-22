@@ -1,8 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
 import connect, { NextFunction } from 'connect'
-import { pathToRegexp, execPathRegexp } from '@ream/common/dist/route-helpers'
-import { send } from './send'
+import { pathToRegexp, execPathRegexp } from '../utils/route-helpers'
 
 export type ReamServerHandler = (
   req: ReamServerRequest,
@@ -19,10 +18,7 @@ export interface ReamServerRequest extends IncomingMessage {
   }
 }
 
-export interface ReamServerResponse extends ServerResponse {
-  json: (obj: any) => void
-  send: (obj: any) => void
-}
+export interface ReamServerResponse extends ServerResponse {}
 
 type ReamServerErrorHandler = (
   err: Error,
@@ -53,12 +49,6 @@ export class Server {
             },
           },
         })
-        res.json = (obj: any) => {
-          send(res, 200, obj)
-        }
-        res.send = (obj: any) => {
-          send(res, 200, obj)
-        }
         next()
       }
     )

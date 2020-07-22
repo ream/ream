@@ -1,13 +1,10 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import { createRouter as createVueRouter } from 'vue-router'
 import { routes } from 'dot-ream/templates/client-routes'
 
-Vue.use(Router)
-
-export function createRouter() {
+export function createRouter(history) {
   const __createRouter = () =>
-    new Router({
-      mode: 'history',
+    createVueRouter({
+      history,
       routes,
     })
 

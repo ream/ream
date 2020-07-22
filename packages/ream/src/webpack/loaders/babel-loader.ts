@@ -56,18 +56,6 @@ export default babelLoader.custom((babel: any) => {
         }
       }
 
-      // Replace ssr exports for pages in client build
-      if (
-        customOptions.isClient &&
-        filename.startsWith(customOptions.pagesDir)
-      ) {
-        options.plugins.push([
-          require.resolve('../../babel/plugins/page-exports-transforms'),
-          {
-          },
-        ])
-      }
-
       options.presets.unshift(
         babel.createConfigItem(
           [

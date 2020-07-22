@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import resolveFrom from 'resolve-from'
-import { Route } from '@ream/common/dist/route'
+import { Route } from './utils/route'
 import { pathToRoute } from './utils/path-to-routes'
 import { sortRoutesByScore } from './utils/rank-routes'
 import { loadConfig } from './utils/load-config'
@@ -12,14 +12,6 @@ import { createServer } from 'http'
 import { Entry } from 'webpack'
 import { remove } from 'fs-extra'
 
-export {
-  GetStaticProps,
-  GetServerSideProps,
-  GetStaticPaths,
-  ReamServerRequest,
-  ReamServerResponse,
-  ReamServerHandler,
-} from 'ream-server'
 export interface Options {
   dir?: string
   dev?: boolean
@@ -94,7 +86,7 @@ export class Ream {
           configOverride.chainWebpack(chain, options)
         }
       },
-      css: projectConfig.css || []
+      css: projectConfig.css || [],
     }
   }
 
@@ -168,7 +160,6 @@ export class Ream {
     }
     return {
       main: this.resolveVueApp('server-entry.js'),
-      'ream-server': require.resolve('ream-server'),
     }
   }
 
@@ -187,7 +178,7 @@ export class Ream {
     ) {
       // Remove everything but cache
       await Promise.all(
-        ['templates', 'manifest', 'server', 'client'].map(name => {
+        ['templates', 'manifest', 'server', 'client'].map((name) => {
           return remove(this.resolveDotReam(name))
         })
       )
@@ -238,7 +229,7 @@ export class Ream {
     this.prepareType = 'export'
     await this.prepare()
     const { exportSite } = await import('./export')
-    await exportSite(this)
+    await exportSite()
   }
 }
 

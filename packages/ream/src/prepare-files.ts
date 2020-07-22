@@ -2,12 +2,8 @@ import glob from 'fast-glob'
 import { pathToRoutes } from './utils/path-to-routes'
 import { outputFile } from 'fs-extra'
 import { Ream } from '.'
-import {
-  GET_SERVER_SIDE_PROPS_INDICATOR,
-  GET_STATIC_PROPS_INDICATOR,
-} from './babel/plugins/page-exports-transforms'
 import { store } from './store'
-import { Route } from '@ream/common/dist/route'
+import { Route } from './utils/route'
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
@@ -33,6 +29,8 @@ export async function prepareFiles(api: Ream) {
     }
 
     const clientRoutesContent = `
+    import {h} from 'vue'
+
     var getAppComponent = function() {
       return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${
       appRoute!.absolutePath
@@ -47,22 +45,15 @@ export async function prepareFiles(api: Ream) {
     var wrapPage = function(res) {
       var _app = res[0], _error = res[1], page = res[2]
       return {
-        functional: true,
-        getServerSideProps: page[${JSON.stringify(
-          GET_SERVER_SIDE_PROPS_INDICATOR
-        )}],
-        getStaticProps: page[${JSON.stringify(GET_STATIC_PROPS_INDICATOR)}],
-        render(h, ctx) {
-          var pageProps = ctx.parent.$root.$options.pageProps
+        setup() {
+          var pageProps = this.$root.$options.pageProps
           var Component = page.default
           if (pageProps && pageProps.__ream_error__) {
             Component = _error.default
           }
-          return h(_app.default, {
-            props: {
-              Component: Component,
-              pageProps: pageProps
-            }
+          return () => h(_app.default, {
+            Component: Component,
+            pageProps: pageProps
           })
         }
       }
@@ -70,8 +61,8 @@ export async function prepareFiles(api: Ream) {
 
     var routes = [
       ${routes
-        .filter(route => route.isClientRoute)
-        .map(route => {
+        .filter((route) => route.isClientRoute)
+        .map((route) => {
           return `{
           path: ${JSON.stringify(route.routePath)},
           component: function() {
@@ -103,7 +94,7 @@ export async function prepareFiles(api: Ream) {
     var routes = {}
     
     ${routes
-      .map(route => {
+      .map((route) => {
         return `routes[${JSON.stringify(
           route.entryName
         )}] = () => import(/* webpackChunkName: "${
@@ -132,7 +123,9 @@ export async function prepareFiles(api: Ream) {
     await outputFile(
       api.resolveDotReam('templates/global-imports.js'),
       `
-      ${api.config.css.map(file => `import ${JSON.stringify(file)}`).join('\n')}
+      ${api.config.css
+        .map((file) => `import ${JSON.stringify(file)}`)
+        .join('\n')}
       `,
       'utf8'
     )
@@ -141,7 +134,7 @@ export async function prepareFiles(api: Ream) {
       api.resolveDotReam('templates/enhance-app.js'),
       `
     var files = [
-      ${[...store.state.pluginsFiles['enhance-app']].map(file => {
+      ${[...store.state.pluginsFiles['enhance-app']].map((file) => {
         return `require(${JSON.stringify(file)})`
       })}
     ]
@@ -171,12 +164,12 @@ export async function prepareFiles(api: Ream) {
       cwd,
       ignoreInitial: true,
     })
-      .on('add', async file => {
+      .on('add', async (file) => {
         files.add(file)
         await writeRoutes()
         api.invalidate()
       })
-      .on('unlink', async file => {
+      .on('unlink', async (file) => {
         files.delete(file)
         await writeRoutes()
         api.invalidate()
