@@ -6,7 +6,12 @@ import fetch from '@ream/fetch'
 import { createServer } from 'http'
 import { PromiseQueue } from './utils/promise-queue'
 
-function pathToFile(path: string) {
+function pathToFile(path: string, isApiRoute?: boolean) {
+  if (isApiRoute) {
+    // Remove trailing slash for api routes
+    return path.replace(/(.+)\/$/, '$1')
+  }
+
   return path.endsWith('.html')
     ? path
     : `${path.endsWith('/') ? path.slice(0, -1) : path}/index.html`
@@ -28,21 +33,26 @@ export async function exportSite(api: Ream) {
   // Copy assets
   await copy(api.resolveDotReam('client'), join(exportDir, '_ream'))
 
-  // Export static HTML files
+  // Export static HTML files and API routes
+  api.exportedApiRoutes = new Set()
+
   const staticRoutes = api.routes.filter(
     (route) => route.isClientRoute && !route.routePath.includes(':')
   )
 
-  const exportHander = async (_: string, path: string) => {
-    const file = pathToFile(path)
+  const exportHander = async (
+    _: string,
+    path: string,
+    isApiRoute?: boolean
+  ) => {
+    const file = pathToFile(path, isApiRoute)
     const outPath = join(exportDir, file)
     console.log(`Exporting ${path}`)
     const html = await fetch(path).then((res) => res.text())
 
-    // Extract links
+    // find all `<a>` tags in exported html files and export links that are not yet exported
     let match: RegExpExecArray | null = null
     const LINK_RE = /<a ([\s\S]+?)>/gm
-
     while ((match = LINK_RE.exec(html))) {
       const href = getHref(match[1])
       if (href) {
@@ -64,10 +74,15 @@ export async function exportSite(api: Ream) {
     queue.add(`export ${route.routePath}`, route.routePath)
   }
 
-  // find all `<a>` tags in exported html files and export links that are not yet exported
   await queue.run()
 
-  // TODO: export api routes that are request by pages
+  // export api routes that are request by pages
+  if (api.exportedApiRoutes.size > 0) {
+    for (const path of api.exportedApiRoutes) {
+      queue.add(`export ${path}`, path, true)
+    }
+    await queue.run()
+  }
 
   // Close server
   // Enjoy your static site

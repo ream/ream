@@ -34,10 +34,6 @@ export async function getRequestHandler(api: Ream) {
   }
 
   server.use(async (req, res, next) => {
-    if (req.method !== 'GET') {
-      return res.end('unsupported method')
-    }
-
     if (!clientManifest) {
       return res.end(`Please wait for build to complete..`)
     }
@@ -57,9 +53,24 @@ export async function getRequestHandler(api: Ream) {
     }
 
     if (route.isApiRoute) {
+      if (api.exportedApiRoutes) {
+        if (Object.keys(req.query).length > 0) {
+          throw new Error(
+            `You can't request API routes with query string in exporting mode`
+          )
+        }
+      }
       const handler = await routes[route.entryName]()
       await handler.default(req, res, next)
+      if (api.exportedApiRoutes) {
+        // Keep this path when request succeeds
+        api.exportedApiRoutes.add(req.path)
+      }
       return
+    }
+
+    if (req.method !== 'GET') {
+      return res.end('unsupported method')
     }
 
     const routeComponent = await routes[route.entryName]()
