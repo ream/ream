@@ -1,23 +1,55 @@
 import glob from 'fast-glob'
-import { pathToRoutes } from './utils/path-to-routes'
+import { pathToRoutes, pathToRoute } from './utils/path-to-routes'
 import { outputFile } from 'fs-extra'
 import { Ream } from '.'
 import { store } from './store'
 import { Route } from './utils/route'
+import { sortRoutesByScore } from './utils/rank-routes'
+
+function getRoutes(_routes: Route[], ownPagesDir: string) {
+  const routes: Route[] = [..._routes]
+
+  const patterns = [
+    {
+      require: (route: Route) => route.entryName === 'pages/_error',
+      filename: '_error.js',
+    },
+    {
+      require: (route: Route) => route.entryName === 'pages/_app',
+      filename: '_app.js',
+    },
+    {
+      require: (route: Route) => route.entryName === 'pages/_document',
+      filename: '_document.js',
+    },
+    {
+      require: (route: Route) => route.entryName === 'pages/404',
+      filename: '404.js',
+    },
+  ]
+  for (const pattern of patterns) {
+    if (!routes.some(pattern.require)) {
+      routes.push(pathToRoute(pattern.filename, ownPagesDir, routes.length))
+    }
+  }
+  return sortRoutesByScore(routes)
+}
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
-  const cwd = api.resolveRoot('pages')
+  const pagesDir = api.resolveRoot('pages')
   const files = new Set(
     await glob(pattern, {
-      cwd,
+      cwd: pagesDir,
     })
   )
 
   const writeRoutes = async () => {
-    api._routes = pathToRoutes([...files], cwd)
+    const routes = getRoutes(
+      pathToRoutes([...files], pagesDir),
+      api.resolveVueApp('pages')
+    )
 
-    const routes = api.routes
     let appRoute: Route
     let errorRoute: Route
     for (const route of routes) {
@@ -118,7 +150,7 @@ export async function prepareFiles(api: Ream) {
 
     await outputFile(
       api.resolveDotReam('manifest/routes-info.json'),
-      JSON.stringify(api.routes, null, 2),
+      JSON.stringify(routes, null, 2),
       'utf8'
     )
 
@@ -164,7 +196,7 @@ export async function prepareFiles(api: Ream) {
   if (api.isDev) {
     const { watch } = await import('chokidar')
     watch(pattern, {
-      cwd,
+      cwd: pagesDir,
       ignoreInitial: true,
     })
       .on('add', async (file) => {

@@ -1,8 +1,6 @@
 import { resolve } from 'path'
 import resolveFrom from 'resolve-from'
 import { Route } from './utils/route'
-import { pathToRoute } from './utils/path-to-routes'
-import { sortRoutesByScore } from './utils/rank-routes'
 import { loadConfig } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
 import { normalizePluginsArray } from './utils/normalize-plugins-array'
@@ -44,12 +42,6 @@ export class Ream {
   isDev: boolean
   shouldCache: boolean
   serverOptions: ServerOptions
-  /**
-   * Routes metadata
-   * This property won't be available in a production server and isn't actual routes, use `.routes` instead
-   */
-  _routes: Route[]
-  prepareType?: 'serve' | 'build' | 'export'
   config: Required<ReamConfig>
   configPath?: string
   store: Store
@@ -64,7 +56,6 @@ export class Ream {
     this.serverOptions = {
       port: String(options.server?.port || '3000'),
     }
-    this._routes = []
     this.store = store
 
     process.env.PORT = this.serverOptions.port
@@ -109,40 +100,7 @@ export class Ream {
   }
 
   get routes(): Route[] {
-    // Use pre-generated file in production server or exporting
-    if (
-      this.prepareType === 'export' ||
-      (this.prepareType === 'serve' && !this.isDev)
-    ) {
-      return require(this.resolveDotReam('manifest/routes-info.json'))
-    }
-    const routes: Route[] = [...this._routes]
-
-    const ownPagesDir = this.resolveVueApp('pages')
-    const patterns = [
-      {
-        require: (route: Route) => route.entryName === 'pages/_error',
-        filename: '_error.js',
-      },
-      {
-        require: (route: Route) => route.entryName === 'pages/_app',
-        filename: '_app.js',
-      },
-      {
-        require: (route: Route) => route.entryName === 'pages/_document',
-        filename: '_document.js',
-      },
-      {
-        require: (route: Route) => route.entryName === 'pages/404',
-        filename: '404.js',
-      },
-    ]
-    for (const pattern of patterns) {
-      if (!routes.some(pattern.require)) {
-        routes.push(pathToRoute(pattern.filename, ownPagesDir, routes.length))
-      }
-    }
-    return sortRoutesByScore(routes)
+    return require(this.resolveDotReam('manifest/routes-info.json'))
   }
 
   get plugins() {
@@ -165,33 +123,30 @@ export class Ream {
     }
   }
 
-  async prepare() {
-    if (!this.prepareType) {
-      throw new Error(`You cannot call .prepare() directly`)
-    }
-
+  async prepare({
+    shouldCleanDir,
+    shouldPrepreFiles,
+  }: {
+    shouldCleanDir: boolean
+    shouldPrepreFiles: boolean
+  }) {
     // Plugins are loaded in every situations
+    // TODO: some plugins should only be loaded at build time
     await loadPlugins(this)
 
-    // Preparing for webpack build process
-    if (
-      this.prepareType === 'build' ||
-      (this.prepareType === 'serve' && this.isDev)
-    ) {
+    if (shouldCleanDir) {
       // Remove everything but cache
       await Promise.all(
-        ['templates', 'manifest', 'server', 'client'].map((name) => {
+        ['templates', 'manifest', 'server', 'client', 'export'].map((name) => {
           return remove(this.resolveDotReam(name))
         })
       )
-
-      const { prepareFiles } = await import('./prepare-files')
-      await prepareFiles(this)
     }
 
-    // Remove out dir for exporting
-    if (this.prepareType === 'export') {
-      await remove(this.resolveDotReam('out'))
+    // Preparing for webpack build process
+    if (shouldPrepreFiles) {
+      const { prepareFiles } = await import('./prepare-files')
+      await prepareFiles(this)
     }
   }
 
@@ -205,8 +160,10 @@ export class Ream {
   }
 
   async getRequestHandler() {
-    this.prepareType = 'serve'
-    await this.prepare()
+    await this.prepare({
+      shouldCleanDir: this.isDev,
+      shouldPrepreFiles: this.isDev,
+    })
     const { getRequestHandler } = await import('./server/create-server')
     const server = await getRequestHandler(this)
     return server
@@ -221,17 +178,15 @@ export class Ream {
   }
 
   async build() {
-    this.prepareType = 'build'
-    await this.prepare()
+    await this.prepare({ shouldCleanDir: true, shouldPrepreFiles: true })
     const { build } = await import('./build')
     return build(this)
   }
 
   async export() {
-    this.prepareType = 'export'
-    await this.prepare()
+    await this.prepare({ shouldCleanDir: false, shouldPrepreFiles: false })
     const { exportSite } = await import('./export')
-    await exportSite()
+    await exportSite(this)
   }
 }
 
