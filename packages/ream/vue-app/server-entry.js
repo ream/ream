@@ -9,6 +9,7 @@ export default async (context) => {
   router.push(context.url)
 
   await router.isReady()
+
   return app
 }
 

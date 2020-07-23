@@ -1,0 +1,24 @@
+{
+  "name": "@ream/head",
+  "version": "0.0.0",
+  "description": "Update head tags",
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "unpkg": "dist/iife/index.js",
+  "cdn": "dist/iife/index.js",
+  "jsdelivr": "dist/iffe/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm,iife --global-name Head --external vue --dts",
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "vue": "next"
+  }
+}

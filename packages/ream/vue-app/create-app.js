@@ -1,4 +1,5 @@
 import { h, createSSRApp } from 'vue'
+import { createHead } from '@ream/head'
 import { createRouter as createVueRouter, RouterView } from 'vue-router'
 import { routes } from 'dot-ream/templates/client-routes'
 import { onCreatedApp } from 'dot-ream/templates/enhance-app'
@@ -18,7 +19,10 @@ export const createApp = (context, history) => {
     routes,
   })
 
+  const head = createHead()
+
   app.use(router)
+  app.use(head)
 
   if (module.hot) {
     module.hot.accept('dot-ream/templates/client-routes', () => {

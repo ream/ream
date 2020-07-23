@@ -4,11 +4,8 @@
   "description": "The Vue Framework",
   "files": [
     "/dist",
-    "/vue-app",
-    "/404.js",
-    "/app.js",
-    "/document.js",
-    "/error.js"
+    "/*.js",
+    "/*.d.ts"
   ],
   "main": "dist/index.js",
   "bin": "dist/cli.js",
@@ -62,7 +59,8 @@
     "webpack-dev-middleware": "^3.7.2",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-node-externals": "^1.7.2",
-    "webpackbar": "^4.0.0"
+    "webpackbar": "^4.0.0",
+    "@ream/head": "0.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.1.0",

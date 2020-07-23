@@ -1,5 +1,6 @@
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
+import { Head } from '@ream/head'
 import { Ream } from '../'
 import { Server } from './server'
 import { findMatchedRoute } from '../utils/route-helpers'
@@ -43,11 +44,11 @@ export async function getRequestHandler(api: Ream) {
 
     const app = await createApp(context)
     const appHTML = await renderToString(app)
-
+    const head: Head = app.config.globalProperties.$head
     const { default: getDocument } = await routes['pages/_document']()
     const noop = () => ''
     const html = await getDocument({
-      head: noop,
+      head: () => `${head.title.toString()}`,
       main: () => `<div id="_ream">${appHTML}</div>`,
       script: () => `
       <script>INITIAL_STATE=${serializeJavaScript(
