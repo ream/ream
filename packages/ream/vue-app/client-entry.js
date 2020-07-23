@@ -2,17 +2,21 @@ import 'dot-ream/templates/global-imports'
 import { createWebHistory } from 'vue-router'
 import { createApp } from './create-app'
 
-const state = window.__REAM__
+const state = window.INITIAL_STATE
 
 const { router, app } = createApp(
   {
-    pageProps: state.pageProps,
+    pagePropsStore: state.pagePropsStore,
   },
   createWebHistory()
 )
 
-router.onReady(() => {
-  app.mount('#_ream')
+router.isReady().then(() => {
+  const vm = app.mount('#_ream')
+
+  if (__DEV__) {
+    window.vm = vm
+  }
 
   router.beforeResolve((to, from, next) => {
     if (!to.matched || to.matched.length === 0) {
@@ -23,9 +27,18 @@ router.onReady(() => {
     if (!preload) {
       return next()
     }
-    preload({}).then((res) => {
-      app.$options.pageProps = res.props
+    const fetchProps = (next) => {
+      preload({}).then((res) => {
+        pagePropsStore[to.path] = res.props
+        next && next()
+      })
+    }
+    const pagePropsStore = vm.pagePropsStore
+    if (pagePropsStore[to.path]) {
       next()
-    })
+      fetchProps()
+    } else {
+      fetchProps(next)
+    }
   })
-}, console.error)
+})

@@ -29,7 +29,7 @@ export async function prepareFiles(api: Ream) {
     }
 
     const clientRoutesContent = `
-    import {h} from 'vue'
+    import { h, inject } from 'vue'
 
     var getAppComponent = function() {
       return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${
@@ -44,14 +44,16 @@ export async function prepareFiles(api: Ream) {
 
     var wrapPage = function(res) {
       var _app = res[0], _error = res[1], page = res[2]
+      var Component = page.default
       return {
-        setup() {
-          var pageProps = this.$root.$options.pageProps
-          var Component = page.default
+        preload: page.preload,
+        render: function () {
+          var pagePropsStore = this.$root.pagePropsStore
+          var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
           if (pageProps && pageProps.__ream_error__) {
             Component = _error.default
           }
-          return () => h(_app.default, {
+          return h(_app.default, {
             Component: Component,
             pageProps: pageProps
           })
