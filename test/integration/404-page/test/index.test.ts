@@ -12,7 +12,7 @@ describe(`Custom 404 page`, () => {
       app = await buildAndLaunch({ appDir, dev: false })
     })
 
-    afterAll(async done => {
+    afterAll(async (done) => {
       if (app) {
         await app.teardown()
       }

@@ -1,9 +1,9 @@
 <template>
-  <div>{{msg}}</div>
+  <div>{{ msg }}</div>
 </template>
 
 <script>
-export async function getStaticProps() {
+export async function preload() {
   return {
     props: {
       msg: 'hello world',
