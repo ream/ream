@@ -2,7 +2,7 @@
 
 ## Project Generator
 
-__NOT YET AVAILABLE__, use manual setup for now.
+**NOT YET AVAILABLE**, use manual setup for now.
 
 ```bash
 npm init ream-app my-app
@@ -25,7 +25,10 @@ npm install ream
   "scripts": {
     "dev": "ream",
     "build": "ream build",
-    "start": "ream start"
+    "start": "ream start",
+    "export": "ream export"
   }
 }
 ```
+
+The `export` script is only needed if you want to export static website.

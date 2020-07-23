@@ -2,12 +2,7 @@
 
 ## Server-rendered sites
 
-By default the site produced by Ream needs to be served as a Node.js server, or run in a serverless environment like AWS lambda. However for pages where you don't use [`getServerSideProps`](/docs/data-fetching#getserversideprops), Ream will automatically pre-render them into static HTML files at build time. The default behavior is great for having a site where only specific pages need to be dynamically rendered on each request.
-
-__Notes__:
-
-- You __can__ still use [`getStaticProps`](/docs/data-fetching#getstaicprops) on statically rendered pages to fetch data for prendering. 
-- Route query is only accessible on the client-side, it will be an empty object during pre-rendering at build time.
+By default the site produced by Ream needs to be served as a Node.js server, or run in a serverless environment like AWS lambda. Pages can be cached so they will be only rendered on first request.
 
 ## Static sites
 

@@ -50,6 +50,6 @@ module.exports = {
   chainWebpack(config, { isClient, isDev }) {
     // Disable sourcemaps forever
     config.devtool(false)
-  }
+  },
 }
 ```

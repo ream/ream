@@ -1,24 +1,45 @@
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
+import serveStatic from 'serve-static'
 import { Head } from '@ream/head'
 import { Ream } from '../'
 import { Server } from './server'
 import { findMatchedRoute } from '../utils/route-helpers'
+import { ClientManifest } from '../webpack/plugins/client-manifest'
 
 export async function getRequestHandler(api: Ream) {
   const server = new Server()
 
+  let clientManifest: ClientManifest | undefined
+
   if (api.isDev) {
     const { createDevMiddlewares } = await import('./dev-middlewares')
-    const devMiddlewares = createDevMiddlewares(api)
+    const devMiddlewares = createDevMiddlewares(api, (_clientManifest) => {
+      clientManifest = _clientManifest
+    })
     for (const m of devMiddlewares) {
       server.use(m)
     }
+  } else {
+    clientManifest = require(api.resolveDotReam('client/client-manifest.json'))
+
+    const staticHandler = serveStatic(api.resolveDotReam('client'))
+    server.use((req, res, next) => {
+      if (req.url.startsWith('/_ream/')) {
+        req.url = req.url.replace(/^\/_ream/, '')
+        return staticHandler(req as any, res as any, next)
+      }
+      next()
+    })
   }
 
   server.use(async (req, res, next) => {
     if (req.method !== 'GET') {
       return res.end('unsupported method')
+    }
+
+    if (!clientManifest) {
+      return res.end(`Please wait for build to complete..`)
     }
 
     const context: { url: string; pagePropsStore: any } = {
@@ -64,7 +85,12 @@ export async function getRequestHandler(api: Ream) {
         },
         { isJSON: true }
       )}</script>
-      <script src="/_ream/js/main.js"></script>`,
+      ${clientManifest!.initial
+        .map(
+          (file) =>
+            `<script src="${clientManifest!.publicPath + file}"></script>`
+        )
+        .join('')}`,
       htmlAttrs: noop,
       headAttrs: noop,
       bodyAttrs: noop,

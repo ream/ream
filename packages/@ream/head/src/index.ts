@@ -35,7 +35,7 @@ export const useHead = (fn: () => HeadObject) => {
   if (canUseDOM) {
     const effect = () => {
       const obj = fn()
-      if (obj.title) {
+      if (typeof obj.title === 'string') {
         document.title = obj.title
       }
     }
@@ -46,7 +46,7 @@ export const useHead = (fn: () => HeadObject) => {
       throw new Error(`You may forget to apply app.use(head)`)
     }
     const obj = fn()
-    if (obj.title !== undefined) {
+    if (typeof obj.title === 'string') {
       head.data.title = obj.title
     }
   }

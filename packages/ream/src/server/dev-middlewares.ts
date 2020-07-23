@@ -5,7 +5,10 @@ import createHotMiddleware from 'webpack-hot-middleware'
 import { getWebpackConfig } from '../webpack/get-webpack-config'
 import { ReamServerHandler } from './server'
 
-export function createDevMiddlewares(api: Ream): ReamServerHandler[] {
+export function createDevMiddlewares(
+  api: Ream,
+  updateClientManifest: (clientManifest: any) => void
+): ReamServerHandler[] {
   const clientConfig = getWebpackConfig('client', api)
   const clientCompiler = webpack(clientConfig)
 
@@ -13,12 +16,16 @@ export function createDevMiddlewares(api: Ream): ReamServerHandler[] {
   const serverCompiler = webpack(serverConfig)
   const watching = serverCompiler.watch({}, () => {})
 
+  clientCompiler.hooks.done.tap('update-client-manifest', (stats) => {
+    if (!stats.hasErrors()) {
+      const assets = stats.compilation.assets
+      updateClientManifest(JSON.parse(assets['client-manifest.json'].source()))
+    }
+  })
+
   const devMiddleware = createDevMiddleware(clientCompiler, {
     publicPath: clientConfig.output!.publicPath!,
     logLevel: 'silent',
-    writeToDisk(filepath) {
-      return /manifest\/ream-client-manifest.json$/.test(filepath)
-    },
   })
 
   const hotMiddleware = createHotMiddleware(clientCompiler, {

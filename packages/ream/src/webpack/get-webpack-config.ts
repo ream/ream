@@ -12,6 +12,7 @@ import { useProgressBar } from './blocks/progress-bar'
 import { printErrors } from './blocks/print-errors'
 import { store } from '../store'
 import { ChainWebpack, ChainWebpackOptions } from '../types'
+import { ClientManifestPlugin } from './plugins/client-manifest'
 
 export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
   const chain = new WebpackChain()
@@ -44,7 +45,12 @@ export function getWebpackConfig(type: 'client' | 'server', api: Ream) {
 
   printErrors(chain)
 
-  const chainWebpackOptions: ChainWebpackOptions = { isClient, isDev: api.isDev }
+  chain.plugin('client-manifest').use(ClientManifestPlugin)
+
+  const chainWebpackOptions: ChainWebpackOptions = {
+    isClient,
+    isDev: api.isDev,
+  }
   for (const chainWebpackPath of store.state.pluginsFiles['chain-webpack']) {
     const chainWebpack: ChainWebpack = require(chainWebpackPath)
     chainWebpack(chain, chainWebpackOptions)
