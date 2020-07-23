@@ -1,13 +1,20 @@
 import { Ream } from '.'
 import { join, relative } from 'path'
+import { parse as parseUrl } from 'url'
 import { outputFile, copy, remove } from 'fs-extra'
 import fetch from '@ream/fetch'
 import { createServer } from 'http'
+import { PromiseQueue } from './utils/promise-queue'
 
 function pathToFile(path: string) {
   return path.endsWith('.html')
     ? path
     : `${path.endsWith('/') ? path.slice(0, -1) : path}/index.html`
+}
+
+function getHref(attrs: string) {
+  const match = /href\s*=\s*(?:"(.*?)"|'(.*?)'|([^\s>]*))/.exec(attrs)
+  return match && (match[1] || match[2] || match[3])
 }
 
 export async function exportSite(api: Ream) {
@@ -25,17 +32,40 @@ export async function exportSite(api: Ream) {
   const staticRoutes = api.routes.filter(
     (route) => route.isClientRoute && !route.routePath.includes(':')
   )
-  await Promise.all(
-    staticRoutes.map(async (route) => {
-      const file = pathToFile(route.routePath)
-      const outPath = join(exportDir, file)
-      console.log(`Exporting ${route.routePath}`)
-      const html = await fetch(route.routePath).then((res) => res.text())
-      await outputFile(outPath, html, 'utf8')
-    })
-  )
 
-  // TODO: find all `<a>` tags in exported html files and export links that are not yet exported
+  const exportHander = async (_: string, path: string) => {
+    const file = pathToFile(path)
+    const outPath = join(exportDir, file)
+    console.log(`Exporting ${path}`)
+    const html = await fetch(path).then((res) => res.text())
+
+    // Extract links
+    let match: RegExpExecArray | null = null
+    const LINK_RE = /<a ([\s\S]+?)>/gm
+
+    while ((match = LINK_RE.exec(html))) {
+      const href = getHref(match[1])
+      if (href) {
+        const parsed = parseUrl(href)
+        if (!parsed.host) {
+          queue.add(`export ${parsed.pathname}`, parsed.pathname)
+        }
+      }
+    }
+
+    await outputFile(outPath, html, 'utf8')
+  }
+
+  const queue = new PromiseQueue(exportHander, {
+    maxConcurrent: 100,
+  })
+
+  for (const route of staticRoutes) {
+    queue.add(`export ${route.routePath}`, route.routePath)
+  }
+
+  // find all `<a>` tags in exported html files and export links that are not yet exported
+  await queue.run()
 
   // TODO: export api routes that are request by pages
 
