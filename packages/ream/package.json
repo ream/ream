@@ -33,6 +33,8 @@
     "@babel/runtime": "^7.9.2",
     "@egoist/postcss-loader": "^3.0.2",
     "@ream/common": "^5.0.0-alpha.0",
+    "@ream/head": "0.0.0",
+    "@ream/fetch": "0.0.0",
     "@vue/compiler-sfc": "^3.0.0-rc.4",
     "@vue/server-renderer": "^3.0.0-rc.4",
     "babel-loader": "^8.1.0",
@@ -59,8 +61,7 @@
     "webpack-dev-middleware": "^3.7.2",
     "webpack-hot-middleware": "^2.25.0",
     "webpack-node-externals": "^1.7.2",
-    "webpackbar": "^4.0.0",
-    "@ream/head": "0.0.0"
+    "webpackbar": "^4.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.1.0",

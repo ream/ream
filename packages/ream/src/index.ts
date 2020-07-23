@@ -22,7 +22,7 @@ export interface Options {
 }
 
 type ServerOptions = {
-  port: number | string
+  port: string
 }
 
 export type ReamPluginConfigItem =
@@ -62,10 +62,12 @@ export class Ream {
     }
     this.shouldCache = options.cache !== false
     this.serverOptions = {
-      port: options.server?.port || '3000',
+      port: String(options.server?.port || '3000'),
     }
     this._routes = []
     this.store = store
+
+    process.env.PORT = this.serverOptions.port
 
     const { data: projectConfig = {}, path: configPath } = loadConfig(this.dir)
     this.configPath = configPath

@@ -16,7 +16,7 @@ export async function getRequestHandler(api: Ream) {
     }
   }
 
-  server.use(async (req, res) => {
+  server.use(async (req, res, next) => {
     if (req.method !== 'GET') {
       return res.end('unsupported method')
     }
@@ -35,9 +35,16 @@ export async function getRequestHandler(api: Ream) {
       return res.end('404')
     }
 
+    if (route.isApiRoute) {
+      const handler = await routes[route.entryName]()
+      await handler.default(req, res, next)
+      return
+    }
+
     const routeComponent = await routes[route.entryName]()
+    const preloadContext = { params }
     const preloadResult =
-      routeComponent.preload && (await routeComponent.preload({ params }))
+      routeComponent.preload && (await routeComponent.preload(preloadContext))
     context.pagePropsStore = {
       [req.path]: preloadResult?.props || {},
     }
