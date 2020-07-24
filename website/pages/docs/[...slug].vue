@@ -30,10 +30,11 @@ import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import DocsMenu from '@/components/DocsMenu.vue'
 
-export const preload: PreloadFunction = async (ctx) => {
-  const res = await fetch('/docs/:slug')
+export const preload: PreloadFunction = async ({ params }) => {
+  const res = await fetch(`/docs/${params.slug}.json`)
+  const props = await res.json()
   return {
-    props: await res.json(),
+    props,
   }
 }
 
@@ -45,16 +46,7 @@ export default defineComponent({
     Head,
   },
 
-  props: {
-    title: {
-      type: String,
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true,
-    },
-  },
+  props: ['title', 'content'],
 
   setup({ title }) {
     return {

@@ -873,10 +873,10 @@
     postcss-load-config "^2.0.0"
     schema-utils "^1.0.0"
 
-"@egoist/vue-head@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@egoist/vue-head/-/vue-head-0.1.2.tgz#da4020f5186eb9dae1d51e4cc06e6a7c352bd748"
-  integrity sha512-j9WAMHF2Zu+fxK5ixIKqW8hj0H49oVXjGSRBafkS85mmr7+S8vfcbMkNePBxjaEGXd0SM1mOQdiLGRu4UabcEQ==
+"@egoist/vue-head@^0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@egoist/vue-head/-/vue-head-0.1.5.tgz#54bff98a3406f4deb1a3bf76a29a1c5e3aad4262"
+  integrity sha512-mbhFp7OuLlgy8MS0T2o0GdsaiIjgdSMviRO9Ur4M6OcReR2H9u5k14LqJh0DSrzgLCfoqlcEhBGbue4q5qLV5g==
 
 "@evocateur/libnpmaccess@^3.1.2":
   version "3.1.2"

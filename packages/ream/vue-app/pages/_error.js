@@ -1,6 +1,7 @@
 import { h } from 'vue'
 
 export default {
+  name: 'DefaultError',
   props: ['error'],
   setup({ error }) {
     return () =>

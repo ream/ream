@@ -2,8 +2,9 @@ import { join } from 'path'
 import fs from 'fs'
 import marked from 'marked'
 import Prism from 'prismjs'
+import { ReamServerHandler } from 'ream'
 
-if (process.server) {
+if (!process.browser) {
   require('prismjs/components/prism-json')
   require('prismjs/components/prism-bash')
 }
@@ -15,7 +16,7 @@ const handler: ReamServerHandler = async (req, res) => {
   const renderer = new marked.Renderer()
   const heading = renderer.heading
   const env = { title: '' }
-  renderer.heading = function(text, level, raw, slugger) {
+  renderer.heading = function (text, level, raw, slugger) {
     if (level === 1) {
       env.title = text
       return ''
@@ -38,10 +39,12 @@ const handler: ReamServerHandler = async (req, res) => {
       return Prism.highlight(input, prismLang, lang)
     },
   })
-  return {
-    content: html,
-    title: env.title,
-  }
+  res.end(
+    JSON.stringify({
+      content: html,
+      title: env.title,
+    })
+  )
 }
 
 export default handler

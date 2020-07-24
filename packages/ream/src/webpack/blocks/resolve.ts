@@ -7,6 +7,7 @@ export function setResolve(api: Ream, chain: WebpackChain) {
     alias: {
       'dot-ream': api.resolveDotReam(),
       '@': api.resolveRoot(),
+      '#vue-app': api.resolveVueApp(),
     },
   })
 }

@@ -1,6 +1,7 @@
 import { h } from 'vue'
 
 export default {
+  name: 'Default404',
   render() {
     return h(
       'div',

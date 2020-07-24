@@ -1,6 +1,6 @@
 <template>
   <Head>
-    <body :data-no-scroll="showDropdown" />
+    <!-- <body :data-no-scroll="showDropdown" /> -->
   </Head>
   <header class="header bg-blue-600 text-white fixed w-full top-0">
     <div class="container mx-auto flex h-full items-center justify-between">
