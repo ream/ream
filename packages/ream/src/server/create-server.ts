@@ -49,7 +49,13 @@ export async function getRequestHandler(api: Ream) {
     const { params, route } = findMatchedRoute(api.routes, req.path)
 
     if (!route) {
-      return res.end('404')
+      // This actuall will never be reached
+      // Since we have a catchAll page as 404 page
+      throw new Error(`Page not found`)
+    }
+
+    if (route.is404) {
+      res.statusCode = 404
     }
 
     if (route.isApiRoute) {
@@ -109,6 +115,12 @@ export async function getRequestHandler(api: Ream) {
 
     res.setHeader('content-type', 'text/html')
     res.end(`<!DOCTYPE html>${html}`)
+  })
+
+  server.onError((err, req, res) => {
+    res.statusCode =
+      !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
+    res.end(err.stack)
   })
 
   return server.handler

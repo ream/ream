@@ -147,6 +147,7 @@ export class Ream {
 
     // Preparing for webpack build process
     if (shouldPrepreFiles) {
+      console.log('Preparing Ream files')
       const { prepareFiles } = await import('./prepare-files')
       await prepareFiles(this)
     }

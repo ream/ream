@@ -75,17 +75,16 @@ export class Server {
 
     for (const handler of handlers) {
       this.app.use(async (req: any, res: any, next: NextFunction) => {
-        if (regexp && regexp.test(req.path)) {
-          const params = execPathRegexp(req.path, regexp, keys)
-          req.params = params
-          try {
-            await handler(req, res, next)
-          } catch (err) {
-            next(err)
+        try {
+          if (regexp && regexp.test(req.path)) {
+            const params = execPathRegexp(req.path, regexp, keys)
+            req.params = params
+          } else {
+            req.params = {}
           }
-        } else {
-          req.params = req.params || {}
           await handler(req, res, next)
+        } catch (err) {
+          next(err)
         }
       })
     }
