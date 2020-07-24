@@ -1,6 +1,6 @@
 import { join } from 'path'
 import { remove } from 'fs-extra'
-import { Ream } from 'ream'
+import { Ream } from 'ream/dist/node'
 import getPort from 'get-port'
 import puppeteer from 'puppeteer'
 
