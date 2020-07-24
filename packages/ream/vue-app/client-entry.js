@@ -1,6 +1,7 @@
 import 'dot-ream/templates/global-imports'
 import { createWebHistory } from 'vue-router'
-import { createApp, getBeforeRouteUpdate } from './create-app'
+import { createApp } from './create-app'
+import { getBeforeRouteUpdate } from '#vue-app/get-before-route-update'
 
 const state = window.INITIAL_STATE
 

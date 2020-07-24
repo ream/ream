@@ -5,7 +5,7 @@ import consola from 'consola'
 
 export function useCSS(api: Ream, chain: WebpackChain, isClient: boolean) {
   // TODO: maybe make these options configurable
-  const extractCSS = false
+  const extractCSS = true
   const loaderOptions: any = {}
   const sourceMap = api.isDev
 

@@ -61,8 +61,8 @@ export async function prepareFiles(api: Ream) {
     }
 
     const clientRoutesContent = `
-    import { h, inject } from 'vue'
-    import { getBeforeRouteUpdate } from '#vue-app/create-app'
+    import { h } from 'vue'
+    import { getBeforeRouteUpdate } from '#vue-app/get-before-route-update'
 
     var getAppComponent = function() {
       return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${

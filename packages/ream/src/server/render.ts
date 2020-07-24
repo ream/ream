@@ -110,8 +110,20 @@ export async function renderPage(
   const headHTML = await renderToString(h(Fragment, head.headTags))
   const { default: getDocument } = await routes['pages/_document']()
   const noop = () => ''
+  const addPublicPath = (file: string) => clientManifest.publicPath + file
+  const scripts =
+    clientManifest?.initial
+      .filter((file) => file.endsWith('.js'))
+      .map(addPublicPath) || []
+  const styles =
+    clientManifest?.initial
+      .filter((file) => file.endsWith('.css'))
+      .map(addPublicPath) || []
   const html = await getDocument({
-    head: () => headHTML,
+    head: () =>
+      `${headHTML}${styles.map(
+        (file) => `<link rel="stylesheet" href="${file}">`
+      )}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
     script: () => `
       <script>INITIAL_STATE=${serializeJavaScript(
@@ -120,12 +132,7 @@ export async function renderPage(
         },
         { isJSON: true }
       )}</script>
-      ${clientManifest.initial
-        .map(
-          (file) =>
-            `<script src="${clientManifest.publicPath + file}"></script>`
-        )
-        .join('')}`,
+      ${scripts.map((file) => `<script src="${file}"></script>`).join('')}`,
     htmlAttrs: noop,
     headAttrs: noop,
     bodyAttrs: noop,
