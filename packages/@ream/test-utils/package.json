@@ -15,13 +15,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "chrome-finder": "^1.0.7",
     "fs-extra": "9.0.0",
     "get-port": "5.1.1",
-    "puppeteer-core": "3.0.0"
+    "puppeteer": "5.2.1"
   },
   "devDependencies": {
-    "@types/puppeteer-core": "2.0.0",
+    "@types/puppeteer": "3.0.1",
     "ream": "^5.0.0-alpha.0"
   }
 }
