@@ -31,7 +31,7 @@ export class PromiseQueue {
   }
 
   add(job: string, ...args: any[]) {
-    if (this.processing.has(job)) {
+    if (this.processing.has(job) || this.processed.has(job)) {
       return
     }
 

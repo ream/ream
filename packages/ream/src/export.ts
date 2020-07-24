@@ -47,18 +47,20 @@ export async function exportSite(api: Ream) {
   ) => {
     const file = pathToFile(path, isApiRoute)
     const outPath = join(exportDir, file)
-    console.log(`Exporting ${path}`)
+    console.log(`Exporting ${isApiRoute ? 'api' : 'page'} ${path}`)
     const html = await fetch(path).then((res) => res.text())
 
-    // find all `<a>` tags in exported html files and export links that are not yet exported
-    let match: RegExpExecArray | null = null
-    const LINK_RE = /<a ([\s\S]+?)>/gm
-    while ((match = LINK_RE.exec(html))) {
-      const href = getHref(match[1])
-      if (href) {
-        const parsed = parseUrl(href)
-        if (!parsed.host) {
-          queue.add(`export ${parsed.pathname}`, parsed.pathname)
+    if (!isApiRoute) {
+      // find all `<a>` tags in exported html files and export links that are not yet exported
+      let match: RegExpExecArray | null = null
+      const LINK_RE = /<a ([\s\S]+?)>/gm
+      while ((match = LINK_RE.exec(html))) {
+        const href = getHref(match[1])
+        if (href) {
+          const parsed = parseUrl(href)
+          if (!parsed.host && parsed.pathname) {
+            queue.add(`export ${parsed.pathname}`, parsed.pathname)
+          }
         }
       }
     }

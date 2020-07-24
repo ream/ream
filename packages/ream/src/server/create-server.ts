@@ -36,6 +36,7 @@ export async function getRequestHandler(api: Ream) {
   })
 
   server.onError(async (err, req, res, next) => {
+    console.error('server error', err)
     const response = (err as FetchError).response as Response | undefined
     if (response) {
       res.statusCode = response.status
