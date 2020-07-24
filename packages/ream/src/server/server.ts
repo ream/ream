@@ -23,7 +23,8 @@ export interface ReamServerResponse extends ServerResponse {}
 type ReamServerErrorHandler = (
   err: Error,
   req: ReamServerRequest,
-  res: ReamServerResponse
+  res: ReamServerResponse,
+  next: NextFunction
 ) => void
 
 export class Server {
@@ -93,7 +94,7 @@ export class Server {
   onError(errorHandler: ReamServerErrorHandler) {
     this.app.use((err, req, res, next) => {
       // @ts-ignore
-      errorHandler(err, req, res)
+      errorHandler(err, req, res, next)
     })
   }
 

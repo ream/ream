@@ -1,1 +1,1 @@
-module.exports = require('@ream/head')
+module.exports = require('@egoist/vue-head')

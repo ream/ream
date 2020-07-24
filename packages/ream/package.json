@@ -9,6 +9,7 @@
   ],
   "main": "dist/index.js",
   "bin": "dist/cli.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo skip",
     "watch": "tsc --watch",
@@ -32,9 +33,9 @@
     "@babel/preset-typescript": "^7.9.0",
     "@babel/runtime": "^7.9.2",
     "@egoist/postcss-loader": "^3.0.2",
+    "@egoist/vue-head": "^0.1.2",
     "@ream/common": "^5.0.0-alpha.0",
     "@ream/fetch": "0.0.0",
-    "@ream/head": "0.0.0",
     "@vue/compiler-sfc": "^3.0.0-rc.4",
     "@vue/server-renderer": "^3.0.0-rc.4",
     "babel-loader": "^8.1.0",

@@ -1,4 +1,4 @@
-import { Ream } from '.'
+import { Ream } from './node'
 import { getWebpackConfig } from './webpack/get-webpack-config'
 import webpack from 'webpack'
 

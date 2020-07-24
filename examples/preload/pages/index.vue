@@ -1,4 +1,7 @@
 <template>
+  <Head>
+    <title>{{ title }}</title>
+  </Head>
   <div class="page">
     <h1>{{ message }}</h1>
     <Nav />
@@ -8,7 +11,7 @@
 
 <script>
 import { ref, watch } from 'vue'
-import { useHead } from 'ream/head'
+import { Head } from 'ream/head'
 import Nav from '../components/Nav.vue'
 import { sleep } from '../utils/sleep'
 
@@ -26,16 +29,15 @@ export default {
 
   components: {
     Nav,
+    Head,
   },
 
   setup(props) {
     const count = ref(0)
-    useHead(() => ({
-      title: `${count.value} - ${props.message}`,
-    }))
 
     return {
       count,
+      title: `${count.value} - ${props.message}`,
     }
   },
 }

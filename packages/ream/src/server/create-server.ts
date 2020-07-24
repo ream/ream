@@ -1,11 +1,9 @@
-import { renderToString } from '@vue/server-renderer'
-import serializeJavaScript from 'serialize-javascript'
 import serveStatic from 'serve-static'
-import { Head } from '@ream/head'
-import { Ream } from '../'
+import { FetchError } from 'ream/fetch'
+import { Ream } from '../node'
 import { Server } from './server'
-import { findMatchedRoute } from '../utils/route-helpers'
 import { ClientManifest } from '../webpack/plugins/client-manifest'
+import { render, renderPage, getErrorComponent } from './render'
 
 export async function getRequestHandler(api: Ream) {
   const server = new Server()
@@ -34,93 +32,24 @@ export async function getRequestHandler(api: Ream) {
   }
 
   server.use(async (req, res, next) => {
-    if (!clientManifest) {
-      return res.end(`Please wait for build to complete..`)
-    }
-
-    const context: { url: string; pagePropsStore: any } = {
-      url: req.url,
-      pagePropsStore: {},
-    }
-    const { default: createApp, routes } = require(api.resolveDotReam(
-      'server/main.js'
-    ))
-
-    const { params, route } = findMatchedRoute(api.routes, req.path)
-
-    if (!route) {
-      // This actuall will never be reached
-      // Since we have a catchAll page as 404 page
-      throw new Error(`Page not found`)
-    }
-
-    if (route.is404) {
-      res.statusCode = 404
-    }
-
-    if (route.isApiRoute) {
-      if (api.exportedApiRoutes) {
-        if (Object.keys(req.query).length > 0) {
-          throw new Error(
-            `You can't request API routes with query string in exporting mode`
-          )
-        }
-      }
-      const handler = await routes[route.entryName]()
-      await handler.default(req, res, next)
-      if (api.exportedApiRoutes) {
-        // Keep this path when request succeeds
-        api.exportedApiRoutes.add(req.path)
-      }
-      return
-    }
-
-    if (req.method !== 'GET') {
-      return res.end('unsupported method')
-    }
-
-    const routeComponent = await routes[route.entryName]()
-    const preloadContext = { params }
-    const preloadResult =
-      routeComponent.preload && (await routeComponent.preload(preloadContext))
-    context.pagePropsStore = {
-      [req.path]: preloadResult?.props || {},
-    }
-
-    const app = await createApp(context)
-    const appHTML = await renderToString(app)
-    const head: Head = app.config.globalProperties.$head
-    const { default: getDocument } = await routes['pages/_document']()
-    const noop = () => ''
-    const html = await getDocument({
-      head: () => `${head.title.toString()}`,
-      main: () => `<div id="_ream">${appHTML}</div>`,
-      script: () => `
-      <script>INITIAL_STATE=${serializeJavaScript(
-        {
-          pagePropsStore: context.pagePropsStore,
-        },
-        { isJSON: true }
-      )}</script>
-      ${clientManifest!.initial
-        .map(
-          (file) =>
-            `<script src="${clientManifest!.publicPath + file}"></script>`
-        )
-        .join('')}`,
-      htmlAttrs: noop,
-      headAttrs: noop,
-      bodyAttrs: noop,
-    })
-
-    res.setHeader('content-type', 'text/html')
-    res.end(`<!DOCTYPE html>${html}`)
+    await render(api, req, res, next, { clientManifest })
   })
 
-  server.onError((err, req, res) => {
-    res.statusCode =
-      !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
-    res.end(err.stack)
+  server.onError(async (err, req, res, next) => {
+    const response = (err as FetchError).response as Response | undefined
+    if (response) {
+      res.statusCode = response.status
+    } else {
+      res.statusCode =
+        !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
+    }
+    const Component = getErrorComponent(api)
+    await renderPage(api, req, res, clientManifest!, Component, {
+      error: {
+        statusCode: res.statusCode,
+        stack: api.isDev ? err.stack : undefined,
+      },
+    })
   })
 
   return server.handler

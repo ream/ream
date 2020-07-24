@@ -1,5 +1,5 @@
 import WebpackChain from 'webpack-chain'
-import { Ream } from 'ream/src'
+import { Ream } from 'ream/src/node'
 
 export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
   const transpileDirs = [

@@ -1,5 +1,5 @@
 import { h, createSSRApp } from 'vue'
-import { createHead } from '@ream/head'
+import { createHead } from 'ream/head'
 import { createRouter as createVueRouter, RouterView } from 'vue-router'
 import { routes } from 'dot-ream/templates/client-routes'
 import { onCreatedApp } from 'dot-ream/templates/enhance-app'

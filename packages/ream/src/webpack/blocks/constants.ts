@@ -1,6 +1,6 @@
 import { DefinePlugin } from 'webpack'
 import WebpackChain from 'webpack-chain'
-import { Ream } from 'ream/src'
+import { Ream } from 'ream/src/node'
 
 export function defineConstants(
   api: Ream,

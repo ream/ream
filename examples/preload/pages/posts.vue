@@ -1,4 +1,7 @@
 <template>
+  <Head
+    <title>Posts</title>
+  </Head>
   <div class="posts">
     <h1>Posts</h1>
     <h2>{{ date }}</h2>
@@ -14,7 +17,7 @@
 <script>
 import Nav from '../components/Nav.vue'
 import { sleep } from '../utils/sleep'
-import { useHead } from 'ream/head'
+import { Head } from 'ream/head'
 
 export const preload = async () => {
   const arr = new Array(100).fill(null)
@@ -32,12 +35,7 @@ export default {
 
   components: {
     Nav,
-  },
-
-  setup() {
-    useHead(() => ({
-      title: 'Posts',
-    }))
+    Head
   },
 }
 </script>

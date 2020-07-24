@@ -1,4 +1,4 @@
-import { Ream } from 'ream/src'
+import { Ream } from 'ream/src/node'
 import WebpackChain from 'webpack-chain'
 
 export function setResolve(api: Ream, chain: WebpackChain) {

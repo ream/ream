@@ -1,5 +1,5 @@
 import WebpackChain from 'webpack-chain'
-import { Ream } from '../'
+import { Ream } from '../node'
 import { setOutput } from './blocks/output'
 import { setResolve } from './blocks/resolve'
 import { setHotReloading } from './blocks/hot-reload'

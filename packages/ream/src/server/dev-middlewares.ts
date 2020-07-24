@@ -1,4 +1,4 @@
-import { Ream } from '..'
+import { Ream } from '../node'
 import webpack from 'webpack'
 import createDevMiddleware from 'webpack-dev-middleware'
 import createHotMiddleware from 'webpack-hot-middleware'

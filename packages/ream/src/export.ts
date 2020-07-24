@@ -1,8 +1,8 @@
-import { Ream } from '.'
+import { fetch } from 'ream/fetch'
+import { Ream } from './node'
 import { join, relative } from 'path'
 import { parse as parseUrl } from 'url'
 import { outputFile, copy, remove } from 'fs-extra'
-import fetch from '@ream/fetch'
 import { createServer } from 'http'
 import { PromiseQueue } from './utils/promise-queue'
 

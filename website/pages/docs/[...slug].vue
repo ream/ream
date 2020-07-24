@@ -1,4 +1,7 @@
 <template>
+  <Head>
+    <title>{{ title }}</title>
+  </Head>
   <div>
     <Header />
     <div class="main">
@@ -19,33 +22,44 @@
 </template>
 
 <script lang="ts">
-import { join } from 'path'
-
+import { defineComponent } from 'vue'
 import { PreloadFunction } from 'ream'
+import { fetch } from 'ream/fetch'
+import { Head } from 'ream/head'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import DocsMenu from '@/components/DocsMenu.vue'
 
-export const preload: PreloadFunction = async ctx => {
-  const res = await ctx.fetch('/docs/:slug')
+export const preload: PreloadFunction = async (ctx) => {
+  const res = await fetch('/docs/:slug')
   return {
-    props: res.json(),
+    props: await res.json(),
   }
 }
 
-export default {
+export default defineComponent({
   components: {
     Header,
     Footer,
     DocsMenu,
+    Head,
   },
 
-  props: ['content', 'title'],
+  props: {
+    title: {
+      type: String,
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+    },
+  },
 
-  head() {
+  setup({ title }) {
     return {
-      title: `${this.title} - Ream Documentation`,
+      title: `${title} - Ream Documentation`,
     }
   },
-}
+})
 </script>

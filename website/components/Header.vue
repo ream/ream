@@ -1,11 +1,19 @@
 <template>
+  <Head>
+    <body :data-no-scroll="showDropdown" />
+  </Head>
   <header class="header bg-blue-600 text-white fixed w-full top-0">
     <div class="container mx-auto flex h-full items-center justify-between">
       <h1 class="text-2xl font-bold">
         <router-link to="/">Ream</router-link>
       </h1>
       <div class="hidden md:flex">
-        <a target="_blank" rel="nofollow noreferer" href="https://github.com/ream/ream">GitHub</a>
+        <a
+          target="_blank"
+          rel="nofollow noreferer"
+          href="https://github.com/ream/ream"
+          >GitHub</a
+        >
       </div>
       <div class="flex md:hidden">
         <button @click="showDropdown = !showDropdown">
@@ -44,7 +52,10 @@
           </svg>
         </button>
       </div>
-      <div class="dropdown fixed bottom-0 left-0 right-0 text-black bg-white overflow-auto" v-if="showDropdown">
+      <div
+        class="dropdown fixed bottom-0 left-0 right-0 text-black bg-white overflow-auto"
+        v-if="showDropdown"
+      >
         <div class="px-2 py-5">
           <a href="https://github.com/ream/ream">GitHub</a>
         </div>
@@ -58,33 +69,33 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, watch, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { Head } from 'ream/head'
 import DocsMenu from './DocsMenu.vue'
 
-export default {
+export default defineComponent({
   components: {
     DocsMenu,
+    Head,
   },
 
-  data() {
+  setup() {
+    const route = useRoute()
+    const showDropdown = ref(false)
+
+    watch(
+      () => route.path,
+      () => {
+        showDropdown.value = false
+      }
+    )
+
     return {
-      showDropdown: false,
+      showDropdown,
     }
   },
-
-  head() {
-    return {
-      bodyAttrs: {
-        'data-no-scroll': this.showDropdown,
-      },
-    }
-  },
-
-  mounted() {
-    this.$watch('$route.path', () => {
-      this.showDropdown = false
-    })
-  }
-}
+})
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
 import glob from 'fast-glob'
 import { pathToRoutes, pathToRoute } from './utils/path-to-routes'
 import { outputFile } from 'fs-extra'
-import { Ream } from '.'
+import { Ream } from './node'
 import { store } from './store'
 import { Route } from './utils/route'
 import { sortRoutesByScore } from './utils/rank-routes'
@@ -82,7 +82,7 @@ export async function prepareFiles(api: Ream) {
         render: function () {
           var pagePropsStore = this.$root.pagePropsStore
           var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
-          if (pageProps && pageProps.__ream_error__) {
+          if (pageProps && pageProps.error) {
             Component = _error.default
           }
           return h(_app.default, {

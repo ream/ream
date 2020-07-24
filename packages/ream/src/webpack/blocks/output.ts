@@ -1,5 +1,5 @@
 import { resolve, relative } from 'path'
-import { Ream } from 'ream/src'
+import { Ream } from 'ream/src/node'
 import WebpackChain from 'webpack-chain'
 import { getAssetFileName } from '../../utils/asset-filename'
 

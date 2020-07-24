@@ -1,6 +1,8 @@
 var fetch = require('unfetch')
-var { handleError } = require('./shared')
+var { handleError, FetchError } = require('./shared')
 
-module.exports = window.fetch = function (url, opts) {
+exports.fetch = function (url, opts) {
   return fetch.default(url, opts).then(handleError)
 }
+
+exports.FetchError = FetchError

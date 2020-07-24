@@ -1,1 +1,1 @@
-export * from '@ream/head'
+export * from '@egoist/vue-head'

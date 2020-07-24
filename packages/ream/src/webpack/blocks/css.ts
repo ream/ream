@@ -1,5 +1,5 @@
 import WebpackChain, { Rule } from 'webpack-chain'
-import { Ream } from 'ream/src'
+import { Ream } from 'ream/src/node'
 import { getAssetFileName } from '../../utils/asset-filename'
 import consola from 'consola'
 

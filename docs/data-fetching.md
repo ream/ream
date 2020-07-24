@@ -4,6 +4,8 @@ Page components can have an optional `preload` function that will load some data
 
 ```vue
 <script>
+import { fetch } from 'ream/fetch'
+
 export const preload = async ({ params }) => {
   const posts = await fetch(`/blog/posts.json?user=${params.user}`)
   return {
@@ -28,10 +30,10 @@ The `context` parameter is an object containing the following keys:
 
 ```vue
 <script>
+import { fetch } from 'ream/fetch'
+
 export const preload = async (context) => {
-  const posts = await context.fetch(
-    `/blog/posts.json?user=${context.query.user}`
-  )
+  const posts = await fetch(`/blog/posts.json?user=${context.query.user}`)
   return {
     cache: true, // <-- this!
     props: {
