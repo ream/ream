@@ -1,11 +1,9 @@
 /**
- * Execute `preload` in router-level `beforeResolve` and component-level `beforeRouteUpdate`
- * @param {*} vm `vm` is optional  
-                  In `beforeResolve` we pass root instance to this function  
-                  In `beforeRouteUpdate` we can use `this` instance
+ * Execute `preload` in router-level `beforeResolve`
+ * @param {import('vue').App} vm vm is the root Vue app instance
  */
-export const getBeforeRouteUpdate = (vm) =>
-  function (to, from, next) {
+export const getBeforeResolve = (vm) =>
+  function beforeResolve(to, from, next) {
     if (!to.matched || to.matched.length === 0) {
       return next()
     }
@@ -14,7 +12,6 @@ export const getBeforeRouteUpdate = (vm) =>
     if (!preload) {
       return next()
     }
-    vm = vm || this
     const fetchProps = (next) => {
       preload({ params: to.params }).then((res) => {
         pagePropsStore[to.path] = res.props
@@ -25,6 +22,7 @@ export const getBeforeRouteUpdate = (vm) =>
     }
     const pagePropsStore = vm.$root.pagePropsStore
     if (pagePropsStore[to.path]) {
+      // Page props already exist, use cache and reinvalidate
       next()
       fetchProps()
     } else {

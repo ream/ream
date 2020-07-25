@@ -6,30 +6,30 @@ import { store } from './store'
 import { Route } from './utils/route'
 import { sortRoutesByScore } from './utils/rank-routes'
 
-function getRoutes(_routes: Route[], ownPagesDir: string) {
+function getRoutes(_routes: Route[], ownRoutesDir: string) {
   const routes: Route[] = [..._routes]
 
   const patterns = [
     {
-      require: (route: Route) => route.entryName === 'pages/_error',
+      require: (route: Route) => route.entryName === 'routes/_error',
       filename: '_error.js',
     },
     {
-      require: (route: Route) => route.entryName === 'pages/_app',
+      require: (route: Route) => route.entryName === 'routes/_app',
       filename: '_app.js',
     },
     {
-      require: (route: Route) => route.entryName === 'pages/_document',
+      require: (route: Route) => route.entryName === 'routes/_document',
       filename: '_document.js',
     },
     {
-      require: (route: Route) => route.entryName === 'pages/404',
+      require: (route: Route) => route.entryName === 'routes/404',
       filename: '404.js',
     },
   ]
   for (const pattern of patterns) {
     if (!routes.some(pattern.require)) {
-      routes.push(pathToRoute(pattern.filename, ownPagesDir, routes.length))
+      routes.push(pathToRoute(pattern.filename, ownRoutesDir, routes.length))
     }
   }
   return sortRoutesByScore(routes)
@@ -37,32 +37,31 @@ function getRoutes(_routes: Route[], ownPagesDir: string) {
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
-  const pagesDir = api.resolveRoot('pages')
+  const routesDir = api.resolveRoot('routes')
   const files = new Set(
     await glob(pattern, {
-      cwd: pagesDir,
+      cwd: routesDir,
     })
   )
 
   const writeRoutes = async () => {
     const routes = getRoutes(
-      pathToRoutes([...files], pagesDir),
-      api.resolveVueApp('pages')
+      pathToRoutes([...files], routesDir),
+      api.resolveVueApp('routes')
     )
 
     let appRoute: Route
     let errorRoute: Route
     for (const route of routes) {
-      if (route.entryName === 'pages/_app') {
+      if (route.entryName === 'routes/_app') {
         appRoute = route
-      } else if (route.entryName === 'pages/_error') {
+      } else if (route.entryName === 'routes/_error') {
         errorRoute = route
       }
     }
 
     const clientRoutesContent = `
     import { h } from 'vue'
-    import { getBeforeRouteUpdate } from '#vue-app/get-before-route-update'
 
     var getAppComponent = function() {
       return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${
@@ -75,14 +74,11 @@ export async function prepareFiles(api: Ream) {
     }")
     }
 
-    var beforeRouteUpdate = getBeforeRouteUpdate()
-
     var wrapPage = function(res) {
       var _app = res[0], _error = res[1], page = res[2]
       var Component = page.default
       return {
         preload: page.preload,
-        beforeRouteUpdate,
         render: function () {
           var pagePropsStore = this.$root.pagePropsStore
           var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
@@ -201,7 +197,7 @@ export async function prepareFiles(api: Ream) {
   if (api.isDev) {
     const { watch } = await import('chokidar')
     watch(pattern, {
-      cwd: pagesDir,
+      cwd: routesDir,
       ignoreInitial: true,
     })
       .on('add', async (file) => {

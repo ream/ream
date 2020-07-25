@@ -1,7 +1,7 @@
 import 'dot-ream/templates/global-imports'
 import { createWebHistory } from 'vue-router'
 import { createApp } from './create-app'
-import { getBeforeRouteUpdate } from '#vue-app/get-before-route-update'
+import { getBeforeResolve } from './get-before-resolve'
 
 const state = window.INITIAL_STATE
 
@@ -19,5 +19,5 @@ router.isReady().then(() => {
     window.__vm__ = vm
   }
 
-  router.beforeResolve(getBeforeRouteUpdate(vm))
+  router.beforeResolve(getBeforeResolve(vm))
 })

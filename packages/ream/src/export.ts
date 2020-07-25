@@ -6,8 +6,8 @@ import { outputFile, copy, remove } from 'fs-extra'
 import { createServer } from 'http'
 import { PromiseQueue } from './utils/promise-queue'
 
-function pathToFile(path: string, isApiRoute?: boolean) {
-  if (isApiRoute) {
+function pathToFile(path: string, isServerRoute?: boolean) {
+  if (isServerRoute) {
     // Remove trailing slash for api routes
     return path.replace(/(.+)\/$/, '$1')
   }
@@ -43,14 +43,14 @@ export async function exportSite(api: Ream) {
   const exportHander = async (
     _: string,
     path: string,
-    isApiRoute?: boolean
+    isServerRoute?: boolean
   ) => {
-    const file = pathToFile(path, isApiRoute)
+    const file = pathToFile(path, isServerRoute)
     const outPath = join(exportDir, file)
-    console.log(`Exporting ${isApiRoute ? 'api' : 'page'} ${path}`)
+    console.log(`Exporting ${isServerRoute ? 'server route' : 'page'} ${path}`)
     const html = await fetch(path).then((res) => res.text())
 
-    if (!isApiRoute) {
+    if (!isServerRoute) {
       // find all `<a>` tags in exported html files and export links that are not yet exported
       let match: RegExpExecArray | null = null
       const LINK_RE = /<a ([\s\S]+?)>/gm
@@ -78,7 +78,7 @@ export async function exportSite(api: Ream) {
 
   await queue.run()
 
-  // export api routes that are request by pages
+  // export server routes that are request by pages
   if (api.exportedApiRoutes.size > 0) {
     for (const path of api.exportedApiRoutes) {
       queue.add(`export ${path}`, path, true)

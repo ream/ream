@@ -24,7 +24,7 @@ export const getServerMain = (api: Ream): { createApp: any; routes: any } => {
 
 export const getErrorComponent = (api: Ream) => {
   const { routes } = getServerMain(api)
-  return routes['pages/_error']
+  return routes['routes/_error']
 }
 
 export async function render(
@@ -57,7 +57,7 @@ export async function render(
     res.statusCode = 404
   }
 
-  if (route.isApiRoute) {
+  if (route.isServerRoute) {
     if (api.exportedApiRoutes) {
       if (Object.keys(req.query).length > 0) {
         throw new Error(
@@ -108,7 +108,7 @@ export async function renderPage(
   const appHTML = await renderToString(app)
   const head: HeadProvider = app.config.globalProperties.$head
   const headHTML = await renderToString(h(Fragment, head.headTags))
-  const { default: getDocument } = await routes['pages/_document']()
+  const { default: getDocument } = await routes['routes/_document']()
   const noop = () => ''
   const addPublicPath = (file: string) => clientManifest.publicPath + file
   const scripts =

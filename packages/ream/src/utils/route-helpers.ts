@@ -19,7 +19,7 @@ export function execPathRegexp(path: string, regexp: RegExp, keys: Key[]) {
 
 export function findMatchedRoute(routes: Route[], path: string) {
   for (const route of routes) {
-    if (route.isClientRoute || route.isApiRoute) {
+    if (route.isClientRoute || route.isServerRoute) {
       const keys: Key[] = []
       const regexp = pathToRegexp(route.routePath, keys)
       if (regexp.test(path)) {

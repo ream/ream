@@ -4,7 +4,7 @@ export type Route = {
   absolutePath: string
   relativePath: string
   isClientRoute: boolean
-  isApiRoute: boolean
+  isServerRoute: boolean
   index: number
   score: number
   is404: boolean

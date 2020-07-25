@@ -4,14 +4,14 @@ import { Ream } from 'ream/src/node'
 export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
   const transpileDirs = [
     api.resolveVueApp(),
-    ...api.plugins.map(plugin => plugin.pluginDir),
+    ...api.plugins.map((plugin) => plugin.pluginDir),
   ]
 
   chain.module
     .rule('js')
     .test([/\.jsx?$/, /\.tsx?$/])
-    .include.add(filepath => {
-      if (transpileDirs.some(dir => filepath.startsWith(dir))) {
+    .include.add((filepath) => {
+      if (transpileDirs.some((dir) => filepath.startsWith(dir))) {
         return true
       }
       if (filepath.includes('node_modules')) {
@@ -29,7 +29,7 @@ export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
         cwd: api.resolveRoot(),
         buildDir: api.resolveDotReam(),
         shouldCache: api.shouldCache,
-        pagesDir: api.resolveRoot('pages'),
+        routesDir: api.resolveRoot('routes'),
       },
     })
 }

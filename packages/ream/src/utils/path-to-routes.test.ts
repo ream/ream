@@ -1,26 +1,26 @@
 import { pathToRoutes } from 'ream/src/utils/path-to-routes'
 
 test(`compile static paths to routes`, () => {
-  const routes = pathToRoutes(['bar/zoo.js', 'foo.vue'], '/pages')
+  const routes = pathToRoutes(['bar/zoo.js', 'foo.vue'], '/routes')
   expect(routes).toMatchInlineSnapshot(`
     Array [
       Object {
-        "absolutePath": "/pages/bar/zoo.js",
-        "entryName": "pages/bar/zoo",
+        "absolutePath": "/routes/bar/zoo.js",
+        "entryName": "routes/bar/zoo",
         "index": 0,
         "is404": false,
-        "isApiRoute": false,
+        "isServerRoute": false,
         "isClientRoute": true,
         "relativePath": "bar/zoo.js",
         "routePath": "/bar/zoo",
         "score": 14,
       },
       Object {
-        "absolutePath": "/pages/foo.vue",
-        "entryName": "pages/foo",
+        "absolutePath": "/routes/foo.vue",
+        "entryName": "routes/foo",
         "index": 1,
         "is404": false,
-        "isApiRoute": false,
+        "isServerRoute": false,
         "isClientRoute": true,
         "relativePath": "foo.vue",
         "routePath": "/foo",
@@ -31,15 +31,15 @@ test(`compile static paths to routes`, () => {
 })
 
 test('compile dynamic params', () => {
-  const routes = pathToRoutes(['[foo].vue'], '/pages')
+  const routes = pathToRoutes(['[foo].vue'], '/routes')
   expect(routes).toMatchInlineSnapshot(`
     Array [
       Object {
-        "absolutePath": "/pages/[foo].vue",
-        "entryName": "pages/[foo]",
+        "absolutePath": "/routes/[foo].vue",
+        "entryName": "routes/[foo]",
         "index": 0,
         "is404": false,
-        "isApiRoute": false,
+        "isServerRoute": false,
         "isClientRoute": true,
         "relativePath": "[foo].vue",
         "routePath": "/:foo",
@@ -50,15 +50,15 @@ test('compile dynamic params', () => {
 })
 
 test('compile catchAll params', () => {
-  const routes = pathToRoutes(['[...foo].vue'], '/pages')
+  const routes = pathToRoutes(['[...foo].vue'], '/routes')
   expect(routes).toMatchInlineSnapshot(`
     Array [
       Object {
-        "absolutePath": "/pages/[...foo].vue",
-        "entryName": "pages/[...foo]",
+        "absolutePath": "/routes/[...foo].vue",
+        "entryName": "routes/[...foo]",
         "index": 0,
         "is404": false,
-        "isApiRoute": false,
+        "isServerRoute": false,
         "isClientRoute": true,
         "relativePath": "[...foo].vue",
         "routePath": "/:foo(.*)",
