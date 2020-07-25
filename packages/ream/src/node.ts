@@ -45,8 +45,8 @@ export class Ream {
   config: Required<ReamConfig>
   configPath?: string
   store: Store
-  // Used by `export` command
-  exportedApiRoutes?: Set<string>
+  // Used by `export` command, addtional routes like server routes and *.serverpreload.json
+  exportedServerRoutes?: Set<string>
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
     this.dir = resolve(options.dir || '.')

@@ -1,3 +1,5 @@
+import { getServerPreloadPath } from 'ream/dist/shared'
+
 /**
  * Execute `preload` in router-level `beforeResolve`
  * @param {import('vue').App} vm vm is the root Vue app instance
@@ -40,9 +42,3 @@ export const getBeforeResolve = (vm) =>
       fetchProps(next)
     }
   }
-
-function getServerPreloadPath(path) {
-  return /\/$/.test(path)
-    ? `${path}index.serverpreload.json`
-    : `${path}.serverpreload.json`
-}

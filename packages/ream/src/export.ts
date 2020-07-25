@@ -34,7 +34,7 @@ export async function exportSite(api: Ream) {
   await copy(api.resolveDotReam('client'), join(exportDir, '_ream'))
 
   // Export static HTML files and API routes
-  api.exportedApiRoutes = new Set()
+  api.exportedServerRoutes = new Set()
 
   const staticRoutes = api.routes.filter(
     (route) => route.isClientRoute && !route.routePath.includes(':')
@@ -79,8 +79,8 @@ export async function exportSite(api: Ream) {
   await queue.run()
 
   // export server routes that are request by pages
-  if (api.exportedApiRoutes.size > 0) {
-    for (const path of api.exportedApiRoutes) {
+  if (api.exportedServerRoutes.size > 0) {
+    for (const path of api.exportedServerRoutes) {
       queue.add(`export ${path}`, path, true)
     }
     await queue.run()

@@ -20,9 +20,9 @@ describe(`use preload`, () => {
     })
 
     it(`should render preload`, async () => {
-      const { statusCode, html } = await app.visit('/')
+      const { statusCode, content } = await app.visit('/')
       expect(statusCode).toBe(200)
-      expect(html).toContain(`hello world`)
+      expect(content).toContain(`hello world`)
     })
   })
 })

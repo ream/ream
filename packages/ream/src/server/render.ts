@@ -7,6 +7,7 @@ import { Ream } from '../node'
 import { ClientManifest } from '../webpack/plugins/client-manifest'
 import { ReamServerRequest, ReamServerResponse } from './server'
 import { NextFunction } from 'connect'
+import { getServerPreloadPath } from '../shared'
 
 export type RenderError = {
   statusCode: number
@@ -58,7 +59,7 @@ export async function render(
   }
 
   if (route.isServerRoute) {
-    if (api.exportedApiRoutes) {
+    if (api.exportedServerRoutes) {
       if (Object.keys(req.query).length > 0) {
         throw new Error(
           `You can't request API routes with query string in exporting mode`
@@ -67,9 +68,9 @@ export async function render(
     }
     const handler = await routes[route.entryName]()
     await handler.default(req, res, next)
-    if (api.exportedApiRoutes) {
+    if (api.exportedServerRoutes) {
       // Keep this path when request succeeds
-      api.exportedApiRoutes.add(req.path)
+      api.exportedServerRoutes.add(req.path)
     }
     return
   }
@@ -104,6 +105,10 @@ export async function renderPage(
       params: req.params,
     }),
   ])
+
+  if (api.exportedServerRoutes && serverPreloadResult) {
+    api.exportedServerRoutes.add(getServerPreloadPath(req.path))
+  }
 
   const context: { url: string; pagePropsStore: any } = {
     url: req.url,
