@@ -3,11 +3,9 @@
 </template>
 
 <script>
-export async function getInitialProps() {
+export async function preload() {
   return {
-    props: {
-      msg: 'hello world',
-    },
+    msg: 'hello world',
   }
 }
 

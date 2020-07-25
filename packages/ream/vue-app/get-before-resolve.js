@@ -1,5 +1,5 @@
 /**
- * Execute `getInitialProps` in router-level `beforeResolve`
+ * Execute `preload` in router-level `beforeResolve`
  * @param {import('vue').App} vm vm is the root Vue app instance
  */
 export const getBeforeResolve = (vm) =>
@@ -8,13 +8,24 @@ export const getBeforeResolve = (vm) =>
       return next()
     }
     const matched = to.matched[0].components.default
-    const { getInitialProps } = matched
-    if (!getInitialProps) {
+    const { preload, hasServerPreload } = matched
+    console.log(matched)
+    if (!preload && !hasServerPreload) {
       return next()
     }
     const fetchProps = (next) => {
-      getInitialProps({ params: to.params }).then((res) => {
-        pagePropsStore[to.path] = res.props
+      Promise.all(
+        [
+          preload && preload({ params: to.params }),
+          hasServerPreload &&
+            fetch(getServerPreloadPath(to.path)).then((res) => res.json()),
+        ].filter(Boolean)
+      ).then(([preloadResult, servePreloadResult]) => {
+        pagePropsStore[to.path] = Object.assign(
+          {},
+          preloadResult,
+          servePreloadResult
+        )
         if (next) {
           next()
         }
@@ -29,3 +40,9 @@ export const getBeforeResolve = (vm) =>
       fetchProps(next)
     }
   }
+
+function getServerPreloadPath(path) {
+  return /\/$/.test(path)
+    ? `${path}index.serverpreload.json`
+    : `${path}.serverpreload.json`
+}

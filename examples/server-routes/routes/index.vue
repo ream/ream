@@ -9,12 +9,10 @@
 <script>
 import { fetch } from 'ream/fetch'
 
-export const getInitialProps = async () => {
+export const preload = async () => {
   const posts = await fetch(`/api/posts`).then((res) => res.json())
   return {
-    props: {
-      posts,
-    },
+    posts,
   }
 }
 

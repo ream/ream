@@ -32,7 +32,18 @@ export async function getRequestHandler(api: Ream) {
   }
 
   server.use(async (req, res, next) => {
-    await render(api, req, res, next, { clientManifest })
+    if (req.path.endsWith('.serverpreload.json')) {
+      req.url = req.url.replace(/(\/index)?\.serverpreload\.json/, '')
+      if (req.url[0] !== '/') {
+        req.url = `/${req.url}`
+      }
+      await render(api, req, res, next, {
+        clientManifest,
+        isServerPreload: true,
+      })
+    } else {
+      await render(api, req, res, next, { clientManifest })
+    }
   })
 
   server.onError(async (err, req, res, next) => {

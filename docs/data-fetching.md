@@ -1,18 +1,16 @@
 # Data Fetching
 
-Page components can have an optional `getInitialProps` function that will load some data that the page depends on:
+Page components can have an optional `preload` function that will load some data that the page depends on:
 
 ```vue
 <script>
 import { fetch } from 'ream/fetch'
 
-export const getInitialProps = async (context) => {
+export const preload = async (context) => {
   const posts = await fetch(`/blog/posts.json?user=${context.params.user}`)
   return {
-    // Props will be passed to the component as props
-    props: {
-      posts,
-    },
+    // Returned value will be passed to the component as props
+    posts,
   }
 }
 

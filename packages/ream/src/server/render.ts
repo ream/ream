@@ -34,8 +34,8 @@ export async function render(
   next: NextFunction,
   {
     clientManifest,
-    error,
-  }: { clientManifest?: ClientManifest; error?: RenderError }
+    isServerPreload,
+  }: { clientManifest?: ClientManifest; isServerPreload?: boolean }
 ) {
   if (!clientManifest) {
     return res.end(`Please wait for build to complete..`)
@@ -78,7 +78,16 @@ export async function render(
     return res.end('unsupported method')
   }
   const routeComponent = await routes[route.entryName]()
-  await renderPage(api, req, res, clientManifest, routeComponent)
+
+  if (isServerPreload) {
+    const serverPreloadResult = await getServerPreloadResult(routeComponent, {
+      params: req.params,
+    })
+    res.setHeader('content-type', 'application/json')
+    res.end(serializeJavaScript(serverPreloadResult, { isJSON: true }))
+  } else {
+    await renderPage(api, req, res, clientManifest, routeComponent)
+  }
 }
 
 export async function renderPage(
@@ -89,17 +98,21 @@ export async function renderPage(
   component: any,
   props?: any
 ) {
-  const getInitialPropsContext = { params: req.params }
-  const getInitialPropsResult =
-    component.getInitialProps &&
-    (await component.getInitialProps(getInitialPropsContext))
+  const [preloadResult, serverPreloadResult] = await Promise.all([
+    component.preload && (await component.preload({ params: req.params })),
+    getServerPreloadResult(component, {
+      params: req.params,
+    }),
+  ])
+
   const context: { url: string; pagePropsStore: any } = {
     url: req.url,
     pagePropsStore: {},
   }
   context.pagePropsStore = {
     [req.path]: {
-      ...getInitialPropsResult?.props,
+      ...preloadResult,
+      ...serverPreloadResult,
       ...props,
     },
   }
@@ -141,4 +154,11 @@ export async function renderPage(
 
   res.setHeader('content-type', 'text/html')
   res.end(`<!DOCTYPE html>${html}`)
+}
+
+async function getServerPreloadResult(component: any, context: any) {
+  if (!component.serverPreload) {
+    return
+  }
+  return component.serverPreload(context)
 }

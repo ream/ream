@@ -19,14 +19,12 @@ import Nav from '../components/Nav.vue'
 import { sleep } from '../utils/sleep'
 import { Head } from 'ream/head'
 
-export const getInitialProps = async () => {
+export const preload = async () => {
   const arr = new Array(100).fill(null)
   return {
-    props: {
-      posts: arr.map((_, index) => ({
-        title: `${index} post`,
-      })),
-    },
+    posts: arr.map((_, index) => ({
+      title: `${index} post`,
+    }))
   }
 }
 

@@ -3,7 +3,7 @@ import { buildAndLaunch, ProductionApp } from '@ream/test-utils'
 
 jest.setTimeout(600000)
 
-describe(`use getInitialProps`, () => {
+describe(`use preload`, () => {
   describe(`Production mode`, () => {
     let app: ProductionApp
 
@@ -19,7 +19,7 @@ describe(`use getInitialProps`, () => {
       done()
     })
 
-    it(`should render getInitialProps`, async () => {
+    it(`should render preload`, async () => {
       const { statusCode, html } = await app.visit('/')
       expect(statusCode).toBe(200)
       expect(html).toContain(`hello world`)

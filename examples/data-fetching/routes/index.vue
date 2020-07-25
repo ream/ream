@@ -15,12 +15,10 @@ import { Head } from 'ream/head'
 import Nav from '../components/Nav.vue'
 import { sleep } from '../utils/sleep'
 
-export const getInitialProps = async () => {
+export const preload = async () => {
   await sleep(1000)
   return {
-    props: {
-      message: 'hello world',
-    },
+    message: 'hello world',
   }
 }
 

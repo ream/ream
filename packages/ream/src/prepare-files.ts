@@ -5,6 +5,7 @@ import { Ream } from './node'
 import { store } from './store'
 import { Route } from './utils/route'
 import { sortRoutesByScore } from './utils/rank-routes'
+import { SERVER_PRELOAD_INDICATOR } from './babel/constants'
 
 function getRoutes(_routes: Route[], ownRoutesDir: string) {
   const routes: Route[] = [..._routes]
@@ -78,7 +79,8 @@ export async function prepareFiles(api: Ream) {
       var _app = res[0], _error = res[1], page = res[2]
       var Component = page.default
       return {
-        getInitialProps: page.getInitialProps,
+        preload: page.preload,
+        hasServerPreload: page["${SERVER_PRELOAD_INDICATOR}"],
         render: function () {
           var pagePropsStore = this.$root.pagePropsStore
           var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
