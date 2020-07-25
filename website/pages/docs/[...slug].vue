@@ -11,8 +11,8 @@
             <DocsMenu />
           </div>
           <div class="md:w-8/12 md:px-5">
-            <h2 class="text-5xl font-semibold mb-5">{{ title }}</h2>
-            <div class="markdown-body" v-html="content"></div>
+            <h2 class="text-5xl font-semibold mb-5">{{ page.title }}</h2>
+            <div class="markdown-body" v-html="page.content"></div>
           </div>
         </div>
       </div>
@@ -32,9 +32,11 @@ import DocsMenu from '@/components/DocsMenu.vue'
 
 export const preload: PreloadFunction = async ({ params }) => {
   const res = await fetch(`/docs/${params.slug}.json`)
-  const props = await res.json()
+  const page = await res.json()
   return {
-    props,
+    props: {
+      page,
+    },
   }
 }
 
@@ -46,11 +48,11 @@ export default defineComponent({
     Head,
   },
 
-  props: ['title', 'content'],
+  props: ['page'],
 
-  setup({ title }) {
+  setup({ page }) {
     return {
-      title: `${title} - Ream Documentation`,
+      title: `${page.title} - Ream Documentation`,
     }
   },
 })

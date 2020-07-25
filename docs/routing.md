@@ -1,10 +1,10 @@
 # Routing
 
-Ream has a file-system based router built on the concept of [pages](#pages).
+Ream has a file-system based router which supports Vue-powered pages and server routes.
 
 ## Pages
 
-In Ream, a **page** is a Vue Component exported from a `.js` `.ts` or `.vue` file in the pages directory. Each page is associated with a route based on its file name.
+In Ream, pages are Vue Components exported from `.js`, `.ts` or `.vue` files in the `pages` directory. Each page is associated with a route based on its file name.
 
 **Example**: If you create `pages/about.vue` that exports a Vue component like below, it will be accessible at `/about`.
 
@@ -26,7 +26,7 @@ Consider the following page `pages/post/[pid].vue`:
 </template>
 ```
 
-Any route like `/post/1`, `/post/abc`, etc. will be matched by `pages/post/[pid].vue`. The matched value will be sent as a path parameter to the page.
+Any route like `/post/1`, `/post/abc`, etc. will be matched by `pages/post/[pid].vue`. The matched value will be sent as a route parameter to the page.
 
 For example, the route `/post/abc` will have the following `params` object:
 
