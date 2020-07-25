@@ -19,7 +19,7 @@ import Nav from '../components/Nav.vue'
 import { sleep } from '../utils/sleep'
 import { Head } from 'ream/head'
 
-export const preload = async () => {
+export const getInitialProps = async () => {
   const arr = new Array(100).fill(null)
   return {
     props: {

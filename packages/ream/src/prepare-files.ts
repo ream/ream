@@ -78,7 +78,7 @@ export async function prepareFiles(api: Ream) {
       var _app = res[0], _error = res[1], page = res[2]
       var Component = page.default
       return {
-        preload: page.preload,
+        getInitialProps: page.getInitialProps,
         render: function () {
           var pagePropsStore = this.$root.pagePropsStore
           var pageProps = pagePropsStore && pagePropsStore[this.$route.path]

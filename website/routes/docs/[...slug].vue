@@ -23,14 +23,14 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { PreloadFunction } from 'ream'
+import { GetInitialProps } from 'ream'
 import { fetch } from 'ream/fetch'
 import { Head } from 'ream/head'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import DocsMenu from '@/components/DocsMenu.vue'
 
-export const preload: PreloadFunction = async ({ params }) => {
+export const getInitialProps: GetInitialProps = async ({ params }) => {
   const res = await fetch(`/docs/${params.slug}.json`)
   const page = await res.json()
   return {

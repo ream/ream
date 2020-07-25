@@ -3,7 +3,7 @@
 </template>
 
 <script>
-export async function preload() {
+export async function getInitialProps() {
   return {
     props: {
       msg: 'hello world',

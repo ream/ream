@@ -89,16 +89,17 @@ export async function renderPage(
   component: any,
   props?: any
 ) {
-  const preloadContext = { params: req.params }
-  const preloadResult =
-    component.preload && (await component.preload(preloadContext))
+  const getInitialPropsContext = { params: req.params }
+  const getInitialPropsResult =
+    component.getInitialProps &&
+    (await component.getInitialProps(getInitialPropsContext))
   const context: { url: string; pagePropsStore: any } = {
     url: req.url,
     pagePropsStore: {},
   }
   context.pagePropsStore = {
     [req.path]: {
-      ...preloadResult?.props,
+      ...getInitialPropsResult?.props,
       ...props,
     },
   }

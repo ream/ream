@@ -15,7 +15,7 @@ import { Head } from 'ream/head'
 import Nav from '../components/Nav.vue'
 import { sleep } from '../utils/sleep'
 
-export const preload = async () => {
+export const getInitialProps = async () => {
   await sleep(1000)
   return {
     props: {

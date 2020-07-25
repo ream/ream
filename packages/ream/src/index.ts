@@ -1,18 +1,18 @@
-export interface PreloadContext {
+export interface GetInitialPropsContext {
   params: {
     [k: string]: string
   }
 }
 
-export type PreloadResult = {
+export type GetInitialPropsResult = {
   props: {
     [k: string]: any
   }
 }
 
-export type PreloadFunction = (
-  ctx: PreloadContext
-) => PreloadResult | Promise<PreloadResult>
+export type GetInitialProps = (
+  ctx: GetInitialPropsContext
+) => GetInitialPropsResult | Promise<GetInitialPropsResult>
 
 export {
   ReamServerHandler,
