@@ -5,9 +5,8 @@
   },
   "version": "5.0.0-alpha.2",
   "files": [
-    "index.js",
-    "browser.js",
-    "index.d.ts"
+    "*.js",
+    "*.d.ts"
   ],
   "main": "index.js",
   "browser": "browser.js",
