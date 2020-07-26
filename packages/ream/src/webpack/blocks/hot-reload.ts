@@ -1,5 +1,5 @@
 import { HotModuleReplacementPlugin } from 'webpack'
-import { Ream } from 'ream/src'
+import { Ream } from 'ream/src/node'
 import WebpackChain from 'webpack-chain'
 
 export function setHotReloading(

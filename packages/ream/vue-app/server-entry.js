@@ -1,26 +1,17 @@
 import 'dot-ream/templates/global-imports'
 import { createApp } from './create-app'
 import { routes } from 'dot-ream/templates/all-routes'
-
-function routerReady(router) {
-  return new Promise((resolve, reject) => {
-    router.onReady(resolve, reject)
-  })
-}
+import { createMemoryHistory } from 'vue-router'
 
 export default async (context) => {
-  const { router, app } = createApp(context)
+  const { router, app } = createApp(context, createMemoryHistory())
 
   router.push(context.url)
 
-  await routerReady(router)
-
-  context.meta = app.$meta()
+  await router.isReady()
 
   return app
 }
 
-// Expose all routes for getStaticProps/getServerSideProps and API routes
-export {
-  routes
-}
+// Expose all routes
+export { routes }

@@ -1,38 +1,72 @@
 import glob from 'fast-glob'
-import { pathToRoutes } from './utils/path-to-routes'
+import { pathToRoutes, pathToRoute } from './utils/path-to-routes'
 import { outputFile } from 'fs-extra'
-import { Ream } from '.'
-import {
-  GET_SERVER_SIDE_PROPS_INDICATOR,
-  GET_STATIC_PROPS_INDICATOR,
-} from './babel/plugins/page-exports-transforms'
+import { Ream } from './node'
 import { store } from './store'
-import { Route } from '@ream/common/dist/route'
+import { Route } from './utils/route'
+import { sortRoutesByScore } from './utils/rank-routes'
+import {
+  SERVER_PRELOAD_INDICATOR,
+  STATIC_PRELOAD_INDICATOR,
+} from './babel/constants'
+
+function getRoutes(_routes: Route[], ownRoutesDir: string) {
+  const routes: Route[] = [..._routes]
+
+  const patterns = [
+    {
+      require: (route: Route) => route.entryName === 'routes/_error',
+      filename: '_error.js',
+    },
+    {
+      require: (route: Route) => route.entryName === 'routes/_app',
+      filename: '_app.js',
+    },
+    {
+      require: (route: Route) => route.entryName === 'routes/_document',
+      filename: '_document.js',
+    },
+    {
+      require: (route: Route) => route.entryName === 'routes/404',
+      filename: '404.js',
+    },
+  ]
+  for (const pattern of patterns) {
+    if (!routes.some(pattern.require)) {
+      routes.push(pathToRoute(pattern.filename, ownRoutesDir, routes.length))
+    }
+  }
+  return sortRoutesByScore(routes)
+}
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
-  const cwd = api.resolveRoot('pages')
+  const routesDir = api.resolveRoot('routes')
   const files = new Set(
     await glob(pattern, {
-      cwd,
+      cwd: routesDir,
     })
   )
 
   const writeRoutes = async () => {
-    api._routes = pathToRoutes([...files], cwd)
+    const routes = getRoutes(
+      pathToRoutes([...files], routesDir),
+      api.resolveVueApp('routes')
+    )
 
-    const routes = api.routes
     let appRoute: Route
     let errorRoute: Route
     for (const route of routes) {
-      if (route.entryName === 'pages/_app') {
+      if (route.entryName === 'routes/_app') {
         appRoute = route
-      } else if (route.entryName === 'pages/_error') {
+      } else if (route.entryName === 'routes/_error') {
         errorRoute = route
       }
     }
 
     const clientRoutesContent = `
+    import { h } from 'vue'
+
     var getAppComponent = function() {
       return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${
       appRoute!.absolutePath
@@ -46,23 +80,20 @@ export async function prepareFiles(api: Ream) {
 
     var wrapPage = function(res) {
       var _app = res[0], _error = res[1], page = res[2]
+      var Component = page.default
       return {
-        functional: true,
-        getServerSideProps: page[${JSON.stringify(
-          GET_SERVER_SIDE_PROPS_INDICATOR
-        )}],
-        getStaticProps: page[${JSON.stringify(GET_STATIC_PROPS_INDICATOR)}],
-        render(h, ctx) {
-          var pageProps = ctx.parent.$root.$options.pageProps
-          var Component = page.default
-          if (pageProps && pageProps.__ream_error__) {
+        preload: page.preload,
+        hasServerPreload: page["${SERVER_PRELOAD_INDICATOR}"] || page["${STATIC_PRELOAD_INDICATOR}"],
+        render: function () {
+          var pagePropsStore = this.$root.pagePropsStore
+          var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
+          if (pageProps && pageProps.error) {
             Component = _error.default
           }
           return h(_app.default, {
-            props: {
-              Component: Component,
-              pageProps: pageProps
-            }
+            Component: Component,
+            pageProps: pageProps,
+            key: this.$route.path
           })
         }
       }
@@ -70,8 +101,8 @@ export async function prepareFiles(api: Ream) {
 
     var routes = [
       ${routes
-        .filter(route => route.isClientRoute)
-        .map(route => {
+        .filter((route) => route.isClientRoute)
+        .map((route) => {
           return `{
           path: ${JSON.stringify(route.routePath)},
           component: function() {
@@ -103,12 +134,13 @@ export async function prepareFiles(api: Ream) {
     var routes = {}
     
     ${routes
-      .map(route => {
-        return `routes[${JSON.stringify(
-          route.entryName
-        )}] = () => import(/* webpackChunkName: "${
-          route.entryName
-        }" */ ${JSON.stringify(route.absolutePath)})`
+      .map((route) => {
+        return `routes[${JSON.stringify(route.entryName)}] = {
+          type: "${route.isServerRoute ? 'server' : 'client'}",
+          load: () => import(/* webpackChunkName: "${
+            route.entryName
+          }" */ ${JSON.stringify(route.absolutePath)})
+        }`
       })
       .join('\n')}
 
@@ -125,14 +157,17 @@ export async function prepareFiles(api: Ream) {
 
     await outputFile(
       api.resolveDotReam('manifest/routes-info.json'),
-      JSON.stringify(api.routes, null, 2),
+      JSON.stringify(routes, null, 2),
       'utf8'
     )
 
     await outputFile(
       api.resolveDotReam('templates/global-imports.js'),
       `
-      ${api.config.css.map(file => `import ${JSON.stringify(file)}`).join('\n')}
+      import '@ream/fetch'
+      ${api.config.css
+        .map((file) => `import ${JSON.stringify(file)}`)
+        .join('\n')}
       `,
       'utf8'
     )
@@ -141,7 +176,7 @@ export async function prepareFiles(api: Ream) {
       api.resolveDotReam('templates/enhance-app.js'),
       `
     var files = [
-      ${[...store.state.pluginsFiles['enhance-app']].map(file => {
+      ${[...store.state.pluginsFiles['enhance-app']].map((file) => {
         return `require(${JSON.stringify(file)})`
       })}
     ]
@@ -168,15 +203,15 @@ export async function prepareFiles(api: Ream) {
   if (api.isDev) {
     const { watch } = await import('chokidar')
     watch(pattern, {
-      cwd,
+      cwd: routesDir,
       ignoreInitial: true,
     })
-      .on('add', async file => {
+      .on('add', async (file) => {
         files.add(file)
         await writeRoutes()
         api.invalidate()
       })
-      .on('unlink', async file => {
+      .on('unlink', async (file) => {
         files.delete(file)
         await writeRoutes()
         api.invalidate()

@@ -1,4 +1,5 @@
-import { Route } from '@ream/common/dist/route'
+import { Route } from './route'
+import { isDynamicSegment } from './route-helpers'
 
 const SEGMENT_POINTS = 4
 const STATIC_POINTS = 3
@@ -6,8 +7,6 @@ const DYNAMIC_POINTS = 2
 const CATCH_ALL_PENALTY = 1
 const ROOT_POINTS = 10000
 const NOT_FOUND_PENALTY = 10000
-
-const paramRe = /^:(.+)/
 
 const segmentize = (uri: string) =>
   uri
@@ -17,7 +16,6 @@ const segmentize = (uri: string) =>
 
 const isRootSegment = (segment: string) => segment === ''
 
-const isDynamic = (segment: string) => paramRe.test(segment)
 const isCatchAll = (segment: string) =>
   segment.includes('(.*)') && !segment.startsWith(':404')
 const isNotFound = (segment: string) => segment === ':404(.*)'
@@ -31,7 +29,7 @@ export function rankRoute(route: string) {
       score -= NOT_FOUND_PENALTY
     } else if (isCatchAll(segment)) {
       score -= SEGMENT_POINTS + CATCH_ALL_PENALTY
-    } else if (isDynamic(segment)) {
+    } else if (isDynamicSegment(segment)) {
       score += DYNAMIC_POINTS
     } else {
       score += STATIC_POINTS

@@ -11,17 +11,21 @@ export default [
         link: '/docs/routing',
       },
       {
+        text: 'Server Routes',
+        link: '/docs/server-routes',
+      },
+      {
         text: 'Data Fetching',
         link: '/docs/data-fetching',
       },
       {
         text: 'Dynamic or Static',
-        link: '/docs/dynamic-or-static'
+        link: '/docs/dynamic-or-static',
       },
       {
         text: 'Configuration',
-        link: '/docs/configuration'
-      }
+        link: '/docs/configuration',
+      },
     ],
   },
 ]

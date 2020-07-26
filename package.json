@@ -2,7 +2,7 @@
   "private": true,
   "name": "ream-workspace",
   "scripts": {
-    "test:unit": "jest --testPathPattern test/unit/",
+    "test:unit": "jest --testPathPattern packages",
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
     "test": "npm run build && npm run test:unit && npm run test:integration",
     "build": "lerna run build --ignore website",
@@ -18,7 +18,9 @@
     "@types/jest": "^25.2.1",
     "jest": "^25.3.0",
     "lerna": "^3.20.2",
+    "prettier": "^2.0.5",
     "ts-jest": "^25.3.1",
+    "tsup": "^3.4.0",
     "typescript": "^3.8.3"
   }
 }

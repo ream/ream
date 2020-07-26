@@ -47,6 +47,8 @@ export default babelLoader.custom((babel: any) => {
       options.presets = options.presets || []
       options.plugins = options.plugins || []
 
+      const isRoute = filename.startsWith(customOptions.routesDir)
+
       if (cfg.hasFilesystemConfig()) {
         for (const file of [cfg.babelrc, cfg.config]) {
           if (file && !configs.has(file)) {
@@ -54,18 +56,6 @@ export default babelLoader.custom((babel: any) => {
             consola.debug(`Applying Babel config file ${file}`)
           }
         }
-      }
-
-      // Replace ssr exports for pages in client build
-      if (
-        customOptions.isClient &&
-        filename.startsWith(customOptions.pagesDir)
-      ) {
-        options.plugins.push([
-          require.resolve('../../babel/plugins/page-exports-transforms'),
-          {
-          },
-        ])
       }
 
       options.presets.unshift(
@@ -84,6 +74,13 @@ export default babelLoader.custom((babel: any) => {
           }
         )
       )
+
+      if (isRoute && customOptions.isClient) {
+        options.plugins.push([
+          require.resolve('../../babel/transform-page-exports'),
+          {},
+        ])
+      }
 
       return options
     },

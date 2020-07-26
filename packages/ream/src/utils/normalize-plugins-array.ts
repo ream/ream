@@ -1,6 +1,6 @@
 import { dirname, join } from 'path'
 import resolveFrom from 'resolve-from'
-import { ReamPluginConfigItem } from '..'
+import { ReamPluginConfigItem } from '../node'
 import { ReamPlugin } from '../types'
 
 function requireMain(pluginDir: string): ReamPlugin | null {
@@ -39,7 +39,7 @@ export function normalizePluginsArray(
   plugins: ReamPluginConfigItem[],
   cwd: string
 ) {
-  return plugins.map(plugin => {
+  return plugins.map((plugin) => {
     if (typeof plugin === 'string') {
       return normalizePlugin(cwd, plugin)
     }

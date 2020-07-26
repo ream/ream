@@ -12,6 +12,6 @@ jobs:
             - run: yarn
             - run: yarn test
 workflows:
-    build-and-test:
-      jobs:
-        - build-and-test
+  build-and-test:
+    jobs:
+      - build-and-test

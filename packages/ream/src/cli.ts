@@ -10,7 +10,7 @@ cli
   .option('--no-cache', 'Disable webpack caching')
   .option('--port <port>', 'Server port')
   .action(async (dir, options) => {
-    const { Ream } = await import('./')
+    const { Ream } = await import('./node')
     const app = new Ream({
       dir,
       dev: true,
@@ -28,7 +28,7 @@ cli
   })
   .option('--no-cache', 'Disable webpack caching')
   .action(async (dir, options) => {
-    const { Ream } = await import('./')
+    const { Ream } = await import('./node')
     const app = new Ream({
       dir,
       dev: false,
@@ -39,8 +39,8 @@ cli
 
 cli
   .command('export [dir]', 'Export a hybrid site to a static site')
-  .action(async dir => {
-    const { Ream } = await import('./')
+  .action(async (dir) => {
+    const { Ream } = await import('./node')
     const app = new Ream({
       dir,
       dev: false,
@@ -52,7 +52,7 @@ cli
   .command('start [dir]', 'Start a production server')
   .option('--port <port>', 'Server port')
   .action(async (dir, options) => {
-    const { Ream } = await import('./')
+    const { Ream } = await import('./node')
     const app = new Ream({
       dir,
       dev: false,

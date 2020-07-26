@@ -1,11 +1,11 @@
 import WebpackChain, { Rule } from 'webpack-chain'
-import { Ream } from 'ream/src'
+import { Ream } from 'ream/src/node'
 import { getAssetFileName } from '../../utils/asset-filename'
 import consola from 'consola'
 
 export function useCSS(api: Ream, chain: WebpackChain, isClient: boolean) {
   // TODO: maybe make these options configurable
-  const extractCSS = false
+  const extractCSS = true
   const loaderOptions: any = {}
   const sourceMap = api.isDev
 

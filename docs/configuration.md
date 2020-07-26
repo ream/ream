@@ -4,7 +4,7 @@
 
 - Type: `object`
 
-Use compile-time environment variables, matched variables in your app code will be replaced with supplied value.
+Use build-time environment variables, matched variables in your app code will be replaced with supplied value.
 
 For example:
 
@@ -50,6 +50,6 @@ module.exports = {
   chainWebpack(config, { isClient, isDev }) {
     // Disable sourcemaps forever
     config.devtool(false)
-  }
+  },
 }
 ```

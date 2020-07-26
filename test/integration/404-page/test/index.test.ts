@@ -12,7 +12,7 @@ describe(`Custom 404 page`, () => {
       app = await buildAndLaunch({ appDir, dev: false })
     })
 
-    afterAll(async done => {
+    afterAll(async (done) => {
       if (app) {
         await app.teardown()
       }
@@ -20,9 +20,9 @@ describe(`Custom 404 page`, () => {
     })
 
     it(`should render custom 404 page`, async () => {
-      const { statusCode, html } = await app.visit('/')
+      const { statusCode, content } = await app.visit('/')
       expect(statusCode).toBe(404)
-      expect(html).toContain(`Custom 404 page`)
+      expect(content).toContain(`Custom 404 page`)
     })
   })
 })

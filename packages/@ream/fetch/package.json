@@ -1,0 +1,15 @@
+{
+  "name": "@ream/fetch",
+  "version": "0.0.0",
+  "files": [
+    "index.js",
+    "browser.js",
+    "index.d.ts"
+  ],
+  "main": "index.js",
+  "browser": "browser.js",
+  "dependencies": {
+    "node-fetch": "^2.6.0",
+    "unfetch": "^4.1.0"
+  }
+}

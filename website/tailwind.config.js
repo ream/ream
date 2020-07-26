@@ -1,11 +1,5 @@
 module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        ...(require('@egoist/md-colors'))
-      }
-    },
-  },
+  purge: [`${__dirname}/**/*.vue`],
   variants: {},
-  plugins: [],
+  plugins: [require('@tailwindcss/ui')()],
 }
