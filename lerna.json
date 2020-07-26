@@ -4,7 +4,7 @@
     "packages/ream-server",
     "packages/@ream/*"
   ],
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.0",
   "npmClient": "yarn",
   "useWorkspaces": true
 }
