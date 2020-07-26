@@ -19,24 +19,18 @@ describe(`export static site`, () => {
       done()
     })
 
-    it(`should export static page`, async () => {
-      const { statusCode, content } = await app.visit('/')
+    it(`should export page`, async () => {
+      const { statusCode, content } = await app.visit('/static-preload')
       expect(statusCode).toBe(200)
-      expect(content).toContain(`home`)
+      expect(content).toContain(`static preload`)
     })
 
-    it(`should export server route`, async () => {
-      const { statusCode, content } = await app.visit('/server-route.json')
-      expect(statusCode).toBe(200)
-      expect(content).toBe(`{"message":"hello world"}`)
-    })
-
-    it(`should export serverpreload.json`, async () => {
+    it(`should export data as json file`, async () => {
       const { statusCode, content } = await app.visit(
-        '/server-preload.serverpreload.json'
+        '/static-preload.serverpreload.json'
       )
       expect(statusCode).toBe(200)
-      expect(content).toBe(`{"message":"server preload"}`)
+      expect(content).toBe(`{"message":"static preload"}`)
     })
   })
 })

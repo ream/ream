@@ -12,7 +12,7 @@ export const createApp = (context, history) => {
       }
     },
     render: () => [
-      h(Head, [
+      h(Head, () => [
         h('meta', { charset: 'utf-8' }),
         h('meta', {
           name: 'viewport',

@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@arr/every@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@arr/every/-/every-1.0.1.tgz#22fe1f8e6355beca6c7c7bde965eb15cf994387b"
+  integrity sha512-UQFQ6SgyJ6LX42W8rHCs8KVc0JS0tzVL9ct4XYedJukskYVWTo49tNiMEK9C2HTyarbNiT/RVIRSY82vH+6sTg==
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.8.3":
   version "7.8.3"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.8.3.tgz#33e25903d7481181534e12ec0a25f16b6fcf419e"
@@ -1103,10 +1108,10 @@
     postcss-load-config "^2.0.0"
     schema-utils "^1.0.0"
 
-"@egoist/vue-head@0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@egoist/vue-head/-/vue-head-0.1.6.tgz#ac9d62c79cd455dcb5895011239b46ee03c43f6c"
-  integrity sha512-IDGPfoMnP7HARs/6Yri78M7jrbx2MKhc4uUTYbR/ngBCWFycR3auCOBD73KcocuvAw0xXzJFTa5ybgSbWHlc7w==
+"@egoist/vue-head@0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@egoist/vue-head/-/vue-head-0.1.8.tgz#4cb3070d067189c2e2927672563687cf6d751359"
+  integrity sha512-JjslNwl2geSgZZ6JTobFR+4dZFqKoRbSkemOV5MfZd1bBWyLJQFx+liwOxT0GbZLoNZrNZPRtQqH1G1JMKyWuw==
 
 "@evocateur/libnpmaccess@^3.1.2":
   version "3.1.2"
@@ -2182,6 +2187,11 @@
   dependencies:
     "@types/node" ">= 8"
 
+"@polka/url@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@polka/url/-/url-0.5.0.tgz#b21510597fd601e5d7c95008b76bf0d254ebfd31"
+  integrity sha512-oZLYFEAzUKyi3SKnXvj32ZCEGH6RDnao7COuCVhDydMS9NrCSVXhM79VaKyP5+Zc33m0QXEd2DN3UkU7OsHcfw==
+
 "@ream/common@5.0.0-alpha.0":
   version "5.0.0-alpha.0"
   resolved "https://registry.yarnpkg.com/@ream/common/-/common-5.0.0-alpha.0.tgz#6f9258bbd067abb86c1e333e731845182725532d"
@@ -2269,6 +2279,14 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/body-parser@*":
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/@types/body-parser/-/body-parser-1.19.0.tgz#0685b3c47eb3006ffed117cdd55164b61f80538f"
+  integrity sha512-W98JrE0j2K78swW4ukqMleo8R7h/pFETjM2DQ90MF6XK2i4LO4W3gQ71Lt4w3bfm2EvVSyWHplECvB5sK22yFQ==
+  dependencies:
+    "@types/connect" "*"
+    "@types/node" "*"
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
@@ -2294,6 +2312,16 @@
     "@types/node" "*"
     "@types/qs" "*"
     "@types/range-parser" "*"
+
+"@types/express@*":
+  version "4.17.7"
+  resolved "https://registry.yarnpkg.com/@types/express/-/express-4.17.7.tgz#42045be6475636d9801369cd4418ef65cdb0dd59"
+  integrity sha512-dCOT5lcmV/uC2J9k0rPafATeeyz+99xTt54ReX11/LObZgfzJqZNcW27zGhYyX+9iSEGXGt5qLPwRSvBZcLvtQ==
+  dependencies:
+    "@types/body-parser" "*"
+    "@types/express-serve-static-core" "*"
+    "@types/qs" "*"
+    "@types/serve-static" "*"
 
 "@types/fs-extra@^8.1.0":
   version "8.1.0"
@@ -2378,6 +2406,16 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-13.11.1.tgz#49a2a83df9d26daacead30d0ccc8762b128d53c7"
   integrity sha512-eWQGP3qtxwL8FGneRrC5DwrJLGN4/dH1clNTuLfN81HCrxVtxRjygDTUoZJ5ASlDEeo0ppYFQjQIlXhtXpOn6g==
 
+"@types/polka@0.5.1":
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/@types/polka/-/polka-0.5.1.tgz#ea83c31bc25977c9718facb98bd9948cc13e2a40"
+  integrity sha512-KX2n8ydTuPhX4iYZbgnkZAE2M2vkDZWQCqc33Z59XNPqhgrbTZO46z5K4MJ2AicBn7UImzOdL+LMA5l9N5alqQ==
+  dependencies:
+    "@types/express" "*"
+    "@types/express-serve-static-core" "*"
+    "@types/node" "*"
+    "@types/trouter" "*"
+
 "@types/prettier@^1.19.0":
   version "1.19.1"
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-1.19.1.tgz#33509849f8e679e4add158959fdb086440e9553f"
@@ -2415,7 +2453,7 @@
   resolved "https://registry.yarnpkg.com/@types/serialize-javascript/-/serialize-javascript-4.0.0.tgz#ab9c47edf71f6a4590221118d1dffc37b50d71a2"
   integrity sha512-y9UO8ozDGF30EVRizmsXuCdZzAxHmYpEEiL+/SQjX+7bnxslkvZQU8rLydixJv7yVae6bWyrNDFHsh6fYHkFMA==
 
-"@types/serve-static@^1.13.4":
+"@types/serve-static@*", "@types/serve-static@^1.13.4":
   version "1.13.4"
   resolved "https://registry.yarnpkg.com/@types/serve-static/-/serve-static-1.13.4.tgz#6662a93583e5a6cabca1b23592eb91e12fa80e7c"
   integrity sha512-jTDt0o/YbpNwZbQmE/+2e+lfjJEJJR0I3OFaKQKPWkASkCoW3i6fsUnqudSMcNAfbtmADGu8f4MV4q+GqULmug==
@@ -2437,6 +2475,11 @@
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@types/tapable/-/tapable-1.0.5.tgz#9adbc12950582aa65ead76bffdf39fe0c27a3c02"
   integrity sha512-/gG2M/Imw7cQFp8PGvz/SwocNrmKFjFsm5Pb8HdbHkZ1K8pmuPzOX4VeVoiEecFCVf4CsN1r3/BRvx+6sNqwtQ==
+
+"@types/trouter@*":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/trouter/-/trouter-3.1.0.tgz#8a3c7b34352b1cb454217a194e8bf03e5cdf7cc4"
+  integrity sha512-4LPNrqSJknLzILMVXn2P/mh0djNgFvom4T9Y1hmhaB8OBm1cY71bMMSrGRu1q5qF4JZzY6iaGT11BHmCMY/NZg==
 
 "@types/uglify-js@*":
   version "3.0.5"
@@ -7132,6 +7175,13 @@ marked@^0.8.2:
   resolved "https://registry.yarnpkg.com/marked/-/marked-0.8.2.tgz#4faad28d26ede351a7a1aaa5fec67915c869e355"
   integrity sha512-EGwzEeCcLniFX51DhTpmTom+dSA/MG/OBUDjnWtHbEnjAH180VzUeAw+oE4+Zv+CoYBWyRlYOTR0N8SO9R1PVw==
 
+matchit@^1.0.0:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/matchit/-/matchit-1.0.8.tgz#9a129e38f79b2053dd75339215b19e1f6bb88efb"
+  integrity sha512-CwPPICzozd/ezCzpVwGYG5bMVieaapnA0vvHDQnmQ2u2vZtVLynoPmvFsZjL67hFOvTBhhpqSR0bq3uloDP/Rw==
+  dependencies:
+    "@arr/every" "^1.0.0"
+
 md5.js@^1.3.4:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/md5.js/-/md5.js-1.3.5.tgz#b5d07b8e3216e3e27cd728d72f70d1e6a342005f"
@@ -8239,6 +8289,14 @@ pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha512-2qHaIQr2VLRFoxe2nASzsV6ef4yOOH+Fi9FBOVH6cqeSgUnoyySPZkxzLuzd+RYOQTRpROA0ztTMqxROKSb/nA==
+
+polka@0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/polka/-/polka-0.5.2.tgz#588bee0c5806dbc6c64958de3a1251860e9f2e26"
+  integrity sha512-FVg3vDmCqP80tOrs+OeNlgXYmFppTXdjD5E7I4ET1NjvtNmQrb1/mJibybKkb/d4NA7YWAr1ojxuhpL3FHqdlw==
+  dependencies:
+    "@polka/url" "^0.5.0"
+    trouter "^2.0.1"
 
 posix-character-classes@^0.1.0:
   version "0.1.1"
@@ -10355,6 +10413,13 @@ trim-off-newlines@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/trim-off-newlines/-/trim-off-newlines-1.0.1.tgz#9f9ba9d9efa8764c387698bcbfeb2c848f11adb3"
   integrity sha1-n5up2e+odkw4dpi8v+sshI8RrbM=
+
+trouter@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/trouter/-/trouter-2.0.1.tgz#2726a5f8558e090d24c3a393f09eaab1df232df6"
+  integrity sha512-kr8SKKw94OI+xTGOkfsvwZQ8mWoikZDd2n8XZHjJVZUARZT+4/VV6cacRS6CLsH9bNm+HFIPU1Zx4CnNnb4qlQ==
+  dependencies:
+    matchit "^1.0.0"
 
 ts-interface-checker@^0.1.9:
   version "0.1.11"

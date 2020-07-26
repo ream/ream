@@ -1,4 +1,5 @@
-import { getServerPreloadPath } from 'ream/dist/shared'
+// @ts-check
+import { getServerPreloadPath } from 'ream/dist/runtime-utils'
 
 /**
  * Execute `preload` in router-level `beforeResolve`
@@ -32,6 +33,7 @@ export const getBeforeResolve = (vm) =>
         }
       })
     }
+    //@ts-ignore
     const pagePropsStore = vm.$root.pagePropsStore
     if (pagePropsStore[to.path]) {
       // Page props already exist, use cache and reinvalidate

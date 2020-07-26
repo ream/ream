@@ -13,10 +13,10 @@ import {
 } from './server'
 import { NextFunction } from 'connect'
 import { Preload, ServerPreload, StaticPreload, StaticPaths } from '..'
-import { pathToFile } from '../export'
-import { join } from 'path'
 import { readFile, pathExists, outputFile } from 'fs-extra'
 import serializeJavascript from 'serialize-javascript'
+import { getOutputHTMLPath, getOutputServerPreloadPath } from '../utils/paths'
+import { join } from 'path'
 
 export type RenderError = {
   statusCode: number
@@ -115,13 +115,11 @@ export async function render(
   }
   const routeLoader = routes[route.entryName] as ClientRouteLoader
   const routeComponent = await routeLoader.load()
-  const staticHTMLPath = join(
-    api.resolveDotReam('export'),
-    pathToFile(req.path)
-  )
-  const staticPreloadOutputPath = staticHTMLPath.replace(
-    /\.html$/,
-    '.serverpreload.json'
+  const exportDir = api.resolveDotReam('export')
+  const staticHTMLPath = join(exportDir, getOutputHTMLPath(req.path))
+  const staticPreloadOutputPath = join(
+    exportDir,
+    getOutputServerPreloadPath(req.path)
   )
   const shouldExport =
     !routeComponent.preload && !routeComponent.serverPreload && !api.isDev

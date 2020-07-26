@@ -1,4 +1,5 @@
-import { createServer, Server } from 'http'
+import polka from 'polka'
+import { Server, createServer } from 'http'
 import { join } from 'path'
 import { remove } from 'fs-extra'
 import { Ream } from 'ream/dist/node'
@@ -34,7 +35,9 @@ export async function buildAndLaunch({
   if (exportSite) {
     await ream.export()
     const serveStaticHandler = serveStatic(ream.resolveDotReam('export')) as any
-    server = createServer(serveStaticHandler)
+    const s = polka()
+    s.use(serveStaticHandler)
+    server = createServer(s.handler as any)
     server.listen(port, () => {
       console.log(`Serve exported site at http://localhost:${port}`)
     })

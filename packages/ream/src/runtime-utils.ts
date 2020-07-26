@@ -1,4 +1,5 @@
-// Share in ream and vue-app runtime
+// Used in vue-app runtime
+// Be careful to import Node.js modules!
 
 export function getServerPreloadPath(path: string) {
   return /\/$/.test(path)

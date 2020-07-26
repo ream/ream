@@ -3,8 +3,8 @@
 </template>
 
 <script>
-export const serverPreload = () => {
-  return { message: 'server preload' }
+export const staticPreload = () => {
+  return { message: 'static preload' }
 }
 
 export default {

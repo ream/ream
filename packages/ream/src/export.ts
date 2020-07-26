@@ -16,17 +16,7 @@ import {
   getParams,
 } from './utils/route-helpers'
 import serializeJavascript from 'serialize-javascript'
-
-export function pathToFile(path: string, isServerRoute?: boolean) {
-  if (isServerRoute) {
-    // Remove trailing slash for api routes
-    return path.replace(/(.+)\/$/, '$1')
-  }
-
-  return path.endsWith('.html')
-    ? path
-    : `${path.endsWith('/') ? path.slice(0, -1) : path}/index.html`
-}
+import { getOutputHTMLPath, getOutputServerPreloadPath } from './utils/paths'
 
 function getHref(attrs: string) {
   const match = /href\s*=\s*(?:"(.*?)"|'(.*?)'|([^\s>]*))/.exec(attrs)
@@ -127,13 +117,13 @@ export async function exportSite(
       }
     }
 
-    const file = pathToFile(path, false)
-    const outPath = join(exportDir, file)
+    const outPath = join(exportDir, getOutputHTMLPath(path))
     await outputFile(outPath, html, 'utf8')
 
     if (exported.staticPreload) {
+      const dataOutPath = join(exportDir, getOutputServerPreloadPath(path))
       await outputFile(
-        outPath.replace(/\.html$/, '.serverpreload.json'),
+        dataOutPath,
         serializeJavascript(props, {
           isJSON: true,
         }),
