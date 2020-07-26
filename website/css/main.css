@@ -14,12 +14,11 @@ body[data-no-scroll] {
 
 .container {
   max-width: 1080px;
-  padding: 0 10px;
+  padding: 0 20px;
 }
 
 .main {
   margin-top: var(--header-height);
-  padding: 30px 0;
 }
 
 .markdown-body pre {

@@ -1,5 +1,5 @@
 import { h, createSSRApp } from 'vue'
-import { createHead } from 'ream/head'
+import { createHead, Head } from 'ream/head'
 import { createRouter as createVueRouter, RouterView } from 'vue-router'
 import { routes } from 'dot-ream/templates/client-routes'
 import { onCreatedApp } from 'dot-ream/templates/enhance-app'
@@ -11,7 +11,16 @@ export const createApp = (context, history) => {
         pagePropsStore: context.pagePropsStore,
       }
     },
-    render: () => h(RouterView),
+    render: () => [
+      h(Head, [
+        h('meta', { charset: 'utf-8' }),
+        h('meta', {
+          name: 'viewport',
+          content: 'width=device-width, initial-scale=1, shrink-to-fit=no',
+        }),
+      ]),
+      h(RouterView),
+    ],
   })
 
   let router = createVueRouter({

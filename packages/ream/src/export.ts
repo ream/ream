@@ -1,12 +1,23 @@
-import { fetch } from 'ream/fetch'
 import { Ream } from './node'
 import { join, relative } from 'path'
 import { parse as parseUrl } from 'url'
-import { outputFile, copy, remove } from 'fs-extra'
-import { createServer } from 'http'
+import { outputFile, copy } from 'fs-extra'
 import { PromiseQueue } from './utils/promise-queue'
+import { Route } from './utils/route'
+import {
+  renderToHTML,
+  getServerMain,
+  ClientRouteLoader,
+  getPreloadData,
+} from './server/render'
+import {
+  findMatchedRoute,
+  compileToPath,
+  getParams,
+} from './utils/route-helpers'
+import serializeJavascript from 'serialize-javascript'
 
-function pathToFile(path: string, isServerRoute?: boolean) {
+export function pathToFile(path: string, isServerRoute?: boolean) {
   if (isServerRoute) {
     // Remove trailing slash for api routes
     return path.replace(/(.+)\/$/, '$1')
@@ -22,13 +33,11 @@ function getHref(attrs: string) {
   return match && (match[1] || match[2] || match[3])
 }
 
-export async function exportSite(api: Ream) {
-  // Start a production server
-  const server = createServer(await api.getRequestHandler())
-  server.listen(api.serverOptions.port)
-
+export async function exportSite(
+  api: Ream,
+  options: { crawl?: boolean; type: 'build' | 'export' }
+) {
   const exportDir = api.resolveDotReam('export')
-  await remove(exportDir)
 
   // Copy assets
   await copy(api.resolveDotReam('client'), join(exportDir, '_ream'))
@@ -36,21 +45,64 @@ export async function exportSite(api: Ream) {
   // Export static HTML files and API routes
   api.exportedServerRoutes = new Set()
 
-  const staticRoutes = api.routes.filter(
-    (route) => route.isClientRoute && !route.routePath.includes(':')
-  )
-
   const exportHander = async (
     _: string,
-    path: string,
-    isServerRoute?: boolean
+    { route, path, params }: { route: Route; path?: string; params?: any }
   ) => {
-    const file = pathToFile(path, isServerRoute)
-    const outPath = join(exportDir, file)
-    console.log(`Exporting ${isServerRoute ? 'server route' : 'page'} ${path}`)
-    const html = await fetch(path).then((res) => res.text())
+    const { routes } = getServerMain(api)
+    const routeLoader = routes[route.entryName] as ClientRouteLoader
+    const exported = await routeLoader.load()
+    const hasDynamicSegment = route.routePath.includes(':')
 
-    if (!isServerRoute) {
+    if (route.is404) {
+      path = '/404.html'
+    }
+
+    if (exported.serverPreload || exported.preload) {
+      if (options.type === 'export') {
+        // Only allow `staticPreload` for full static export
+        throw new Error(
+          `You can't use serverPreload or preload in export command, use staticPreload instead`
+        )
+      }
+      return
+    }
+
+    if (!path) {
+      if (hasDynamicSegment) {
+        if (exported.staticPaths) {
+          const { paths } = await exported.staticPaths()
+          for (const p of paths) {
+            const staticPath = compileToPath(route.routePath, p.params)
+            queue.add(`export ${staticPath}`, {
+              route,
+              path: staticPath,
+              params: p.params,
+            })
+          }
+        }
+        return
+      }
+
+      path = route.routePath
+    }
+
+    console.log(`Exporting page ${path}`)
+
+    params = params || getParams(path, route.routePath)
+
+    const { props } = await getPreloadData(exported, { params })
+    const html = await renderToHTML(api, {
+      params,
+      url: path,
+      path,
+      props,
+      clientManifest: require(api.resolveDotReam(
+        'client/client-manifest.json'
+      )),
+    })
+
+    if (options.crawl) {
       // find all `<a>` tags in exported html files and export links that are not yet exported
       let match: RegExpExecArray | null = null
       const LINK_RE = /<a ([\s\S]+?)>/gm
@@ -59,36 +111,52 @@ export async function exportSite(api: Ream) {
         if (href) {
           const parsed = parseUrl(href)
           if (!parsed.host && parsed.pathname) {
-            queue.add(`export ${parsed.pathname}`, parsed.pathname)
+            const { route, params } = findMatchedRoute(
+              api.routes,
+              parsed.pathname
+            )
+            if (route && params) {
+              queue.add(`export ${parsed.pathname}`, {
+                path: parsed.pathname,
+                route,
+                params,
+              })
+            }
           }
         }
       }
     }
 
+    const file = pathToFile(path, false)
+    const outPath = join(exportDir, file)
     await outputFile(outPath, html, 'utf8')
+
+    if (exported.staticPreload) {
+      await outputFile(
+        outPath.replace(/\.html$/, '.serverpreload.json'),
+        serializeJavascript(props, {
+          isJSON: true,
+        }),
+        'utf8'
+      )
+    }
   }
 
-  const queue = new PromiseQueue(exportHander, {
+  const queue = new PromiseQueue<
+    [{ path?: string; params?: any; route: Route }]
+  >(exportHander, {
     maxConcurrent: 100,
   })
 
-  for (const route of staticRoutes) {
-    queue.add(`export ${route.routePath}`, route.routePath)
+  for (const route of api.routes) {
+    if (route.isClientRoute) {
+      queue.add(`export ${route.routePath}`, {
+        route,
+      })
+    }
   }
 
   await queue.run()
-
-  // export server routes that are request by pages
-  if (api.exportedServerRoutes.size > 0) {
-    for (const path of api.exportedServerRoutes) {
-      queue.add(`export ${path}`, path, true)
-    }
-    await queue.run()
-  }
-
-  // Close server
-  // Enjoy your static site
-  server.close()
 
   console.log(`Done, exported to ${relative(process.cwd(), exportDir)}`)
 }

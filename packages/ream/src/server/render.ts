@@ -1,3 +1,4 @@
+import { Component } from 'vue'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
 import { HeadProvider } from 'ream/head'
@@ -5,15 +6,46 @@ import { findMatchedRoute } from '../utils/route-helpers'
 import { h, Fragment } from 'vue'
 import { Ream } from '../node'
 import { ClientManifest } from '../webpack/plugins/client-manifest'
-import { ReamServerRequest, ReamServerResponse } from './server'
+import {
+  ReamServerRequest,
+  ReamServerResponse,
+  ReamServerHandler,
+} from './server'
 import { NextFunction } from 'connect'
-import { getServerPreloadPath } from '../shared'
+import { Preload, ServerPreload, StaticPreload, StaticPaths } from '..'
+import { pathToFile } from '../export'
+import { join } from 'path'
+import { readFile, pathExists, outputFile } from 'fs-extra'
+import serializeJavascript from 'serialize-javascript'
 
 export type RenderError = {
   statusCode: number
 }
 
-export const getServerMain = (api: Ream): { createApp: any; routes: any } => {
+export type ClientRouteLoader = {
+  type: 'client'
+  load: () => Promise<{
+    default: Component
+    preload?: Preload
+    serverPreload?: ServerPreload
+    staticPreload?: StaticPreload
+    staticPaths?: StaticPaths
+  }>
+}
+
+export type ServerRouteLoader = {
+  type: 'server'
+  load: () => Promise<{ default: ReamServerHandler }>
+}
+
+export const getServerMain = (
+  api: Ream
+): {
+  createApp: any
+  routes: {
+    [entryName: string]: ClientRouteLoader | ServerRouteLoader
+  }
+} => {
   const { default: createApp, routes } = require(api.resolveDotReam(
     'server/main.js'
   ))
@@ -25,7 +57,7 @@ export const getServerMain = (api: Ream): { createApp: any; routes: any } => {
 
 export const getErrorComponent = (api: Ream) => {
   const { routes } = getServerMain(api)
-  return routes['routes/_error']
+  return routes['routes/_error'] as ClientRouteLoader
 }
 
 export async function render(
@@ -66,60 +98,99 @@ export async function render(
         )
       }
     }
-    const handler = await routes[route.entryName]()
-    await handler.default(req, res, next)
-    if (api.exportedServerRoutes) {
-      // Keep this path when request succeeds
-      api.exportedServerRoutes.add(req.path)
+    const routeLoader = routes[route.entryName]
+    if (routeLoader.type === 'server') {
+      const handler = await routeLoader.load()
+      await handler.default(req, res, next)
+      if (api.exportedServerRoutes) {
+        // Keep this path when request succeeds
+        api.exportedServerRoutes.add(req.path)
+      }
+      return
     }
-    return
   }
 
   if (req.method !== 'GET') {
     return res.end('unsupported method')
   }
-  const routeComponent = await routes[route.entryName]()
-
+  const routeLoader = routes[route.entryName] as ClientRouteLoader
+  const routeComponent = await routeLoader.load()
+  const staticHTMLPath = join(
+    api.resolveDotReam('export'),
+    pathToFile(req.path)
+  )
+  const staticPreloadOutputPath = staticHTMLPath.replace(
+    /\.html$/,
+    '.serverpreload.json'
+  )
+  const shouldExport =
+    !routeComponent.preload && !routeComponent.serverPreload && !api.isDev
+  const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
   if (isServerPreload) {
-    const serverPreloadResult = await getServerPreloadResult(routeComponent, {
-      params: req.params,
-    })
     res.setHeader('content-type', 'application/json')
-    res.end(serializeJavaScript(serverPreloadResult, { isJSON: true }))
+    if (hasStaticHTML) {
+      res.end(await readFile(staticPreloadOutputPath, 'utf8'))
+    } else {
+      const { props } = await getPreloadData(routeComponent, {
+        req,
+        res,
+        params: req.params,
+      })
+      const result = serializeJavascript(props, { isJSON: true })
+      res.end(result)
+      if (shouldExport) {
+        outputFile(staticPreloadOutputPath, result, 'utf8').catch(console.error)
+      }
+    }
   } else {
-    await renderPage(api, req, res, clientManifest, routeComponent)
+    res.setHeader('content-type', 'text/html')
+    if (hasStaticHTML) {
+      const html = await readFile(staticHTMLPath, 'utf8')
+      res.end(html)
+    } else {
+      const { props } = await getPreloadData(routeComponent, {
+        req,
+        res,
+        params: req.params,
+      })
+      const html = await renderToHTML(api, {
+        params: req.params,
+        url: req.url,
+        path: req.path,
+        req,
+        res,
+        props,
+        clientManifest,
+      })
+      const result = `<!DOCTYPE>${html}`
+      res.end(result)
+      if (shouldExport) {
+        outputFile(staticHTMLPath, result, 'utf8').catch(console.error)
+      }
+    }
   }
 }
 
-export async function renderPage(
+export async function renderToHTML(
   api: Ream,
-  req: ReamServerRequest,
-  res: ReamServerResponse,
-  clientManifest: ClientManifest,
-  component: any,
-  props?: any
-) {
-  const [preloadResult, serverPreloadResult] = await Promise.all([
-    component.preload && (await component.preload({ params: req.params })),
-    getServerPreloadResult(component, {
-      params: req.params,
-    }),
-  ])
-
-  if (api.exportedServerRoutes && serverPreloadResult) {
-    api.exportedServerRoutes.add(getServerPreloadPath(req.path))
+  options: {
+    params: any
+    url: string
+    path: string
+    req?: any
+    res?: any
+    props: {
+      [k: string]: any
+    }
+    clientManifest: ClientManifest
   }
-
+) {
   const context: { url: string; pagePropsStore: any } = {
-    url: req.url,
+    url: options.url,
     pagePropsStore: {},
   }
   context.pagePropsStore = {
-    [req.path]: {
-      ...preloadResult,
-      ...serverPreloadResult,
-      ...props,
-    },
+    [options.path]: options.props,
   }
 
   const { createApp, routes } = getServerMain(api)
@@ -127,15 +198,17 @@ export async function renderPage(
   const appHTML = await renderToString(app)
   const head: HeadProvider = app.config.globalProperties.$head
   const headHTML = await renderToString(h(Fragment, head.headTags))
-  const { default: getDocument } = await routes['routes/_document']()
+  const routeLoader = routes['routes/_document'] as any
+  const { default: getDocument } = await routeLoader.load()
   const noop = () => ''
-  const addPublicPath = (file: string) => clientManifest.publicPath + file
+  const addPublicPath = (file: string) =>
+    options.clientManifest.publicPath + file
   const scripts =
-    clientManifest?.initial
+    options.clientManifest.initial
       .filter((file) => file.endsWith('.js'))
       .map(addPublicPath) || []
   const styles =
-    clientManifest?.initial
+    options.clientManifest.initial
       .filter((file) => file.endsWith('.css'))
       .map(addPublicPath) || []
   const html = await getDocument({
@@ -157,13 +230,40 @@ export async function renderPage(
     bodyAttrs: noop,
   })
 
-  res.setHeader('content-type', 'text/html')
-  res.end(`<!DOCTYPE html>${html}`)
+  return `<!DOCTYPE html>${html}`
 }
 
-async function getServerPreloadResult(component: any, context: any) {
-  if (!component.serverPreload) {
-    return
+export async function getPreloadData(
+  component: any,
+  options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
+) {
+  const [
+    preloadResult,
+    serverPreloadResult,
+    staticPreloadResult,
+  ] = await Promise.all([
+    component.preload &&
+      (await component.preload({
+        req: options.req,
+        res: options.res,
+        params: options.params,
+      })),
+    component.serverPreload &&
+      component.serverPreload({
+        req: options.req,
+        res: options.res,
+        params: options.params,
+      }),
+    component.staticPreload &&
+      component.staticPreload({
+        params: options.params,
+      }),
+  ])
+  return {
+    props: {
+      ...preloadResult,
+      ...serverPreloadResult,
+      ...staticPreloadResult,
+    },
   }
-  return component.serverPreload(context)
 }

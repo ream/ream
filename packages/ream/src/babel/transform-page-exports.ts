@@ -9,27 +9,33 @@
 import { PluginObj, NodePath, types as BabelTypes } from '@babel/core'
 import {
   SERVER_PRELOAD_INDICATOR,
-  GET_STATIC_PROPS_INDICATOR,
+  STATIC_PRELOAD_INDICATOR,
   GET_STATIC_PATHS_INDICATOR,
 } from './constants'
 
 const EXPORT_SERVER_PRELOAD = `serverPreload`
+const EXPORT_STATIC_PRELOAD = `staticPreload`
 const EXPORT_GET_STATIC_PATHS = `getStaticPaths`
 
 type DATA_EXPORT_ID =
   | typeof EXPORT_SERVER_PRELOAD
+  | typeof EXPORT_STATIC_PRELOAD
   | typeof EXPORT_GET_STATIC_PATHS
 
 const exportPatterns: Array<{
   input: DATA_EXPORT_ID
   output:
     | typeof SERVER_PRELOAD_INDICATOR
-    | typeof GET_STATIC_PROPS_INDICATOR
+    | typeof STATIC_PRELOAD_INDICATOR
     | typeof GET_STATIC_PATHS_INDICATOR
 }> = [
   {
     input: EXPORT_SERVER_PRELOAD,
     output: SERVER_PRELOAD_INDICATOR,
+  },
+  {
+    input: EXPORT_STATIC_PRELOAD,
+    output: STATIC_PRELOAD_INDICATOR,
   },
   {
     input: EXPORT_GET_STATIC_PATHS,
@@ -287,6 +293,15 @@ export default function pageExportsTransforms({
           if (state.dataExports.size === 0) {
             // No need to clean unused references then
             return
+          }
+
+          if (
+            state.dataExports.has(EXPORT_SERVER_PRELOAD) &&
+            state.dataExports.has(EXPORT_STATIC_PRELOAD)
+          ) {
+            throw new Error(
+              `You can't use ${EXPORT_SERVER_PRELOAD} and ${EXPORT_STATIC_PRELOAD} on the same page, use ${EXPORT_STATIC_PRELOAD} if you want to pre-render the page at build time, otherwise use ${EXPORT_SERVER_PRELOAD}`
+            )
           }
 
           const refs = state.refs

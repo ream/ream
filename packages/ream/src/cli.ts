@@ -39,7 +39,7 @@ cli
 
 cli
   .command('export [dir]', 'Export a hybrid site to a static site')
-  .action(async dir => {
+  .action(async (dir) => {
     const { Ream } = await import('./node')
     const app = new Ream({
       dir,

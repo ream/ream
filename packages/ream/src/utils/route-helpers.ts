@@ -20,10 +20,8 @@ export function execPathRegexp(path: string, regexp: RegExp, keys: Key[]) {
 export function findMatchedRoute(routes: Route[], path: string) {
   for (const route of routes) {
     if (route.isClientRoute || route.isServerRoute) {
-      const keys: Key[] = []
-      const regexp = pathToRegexp(route.routePath, keys)
-      if (regexp.test(path)) {
-        const params = execPathRegexp(path, regexp, keys)
+      const params = getParams(path, route.routePath)
+      if (params) {
         return {
           params,
           route,
@@ -34,8 +32,18 @@ export function findMatchedRoute(routes: Route[], path: string) {
   return { params: {} }
 }
 
-export function compileToPath(template: string, params: any) {
-  return compile(template, {
+export function getParams(path: string, pattern: string) {
+  const keys: Key[] = []
+  const regexp = pathToRegexp(pattern, keys)
+  if (regexp.test(path)) {
+    const params = execPathRegexp(path, regexp, keys)
+    return params
+  }
+  return
+}
+
+export function compileToPath(pattern: string, params: any) {
+  return compile(pattern, {
     encode: encodeURIComponent,
   })(params)
 }

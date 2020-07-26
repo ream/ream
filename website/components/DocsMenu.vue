@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="sticky docs-menu">
     <div v-for="item in menu" :key="item.text">
       <div class="text-sm text-gray-500 uppercase mb-3 tracking-wide">
         {{ item.text }}
@@ -30,6 +30,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.docs-menu {
+  top: 0;
+}
+
 .menu-item-link {
   @apply flex;
   @apply px-2;

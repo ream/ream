@@ -10,7 +10,7 @@ const compile = (input: string) => {
 }
 
 it('removes export function declaration', () => {
-  const code = compile(
+  const code1 = compile(
     `
   export function serverPreload() {
     return {}
@@ -18,7 +18,17 @@ it('removes export function declaration', () => {
   `
   )
 
-  expect(code).toMatchInlineSnapshot(`"export var __re0 = true;"`)
+  expect(code1).toMatchInlineSnapshot(`"export var __re0 = true;"`)
+
+  const code2 = compile(
+    `
+  export function staticPreload() {
+    return {}
+  }
+  `
+  )
+
+  expect(code2).toMatchInlineSnapshot(`"export var __re1 = true;"`)
 })
 
 it('removes references that are only used in ssr exports', () => {

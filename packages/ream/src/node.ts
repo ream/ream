@@ -9,6 +9,7 @@ import { ChainWebpack } from './types'
 import { createServer } from 'http'
 import { Entry } from 'webpack'
 import { remove } from 'fs-extra'
+import { exportSite } from './export'
 
 export interface Options {
   dir?: string
@@ -180,16 +181,24 @@ export class Ream {
     return server
   }
 
-  async build() {
+  async build(shouldExport = true) {
     await this.prepare({ shouldCleanDir: true, shouldPrepreFiles: true })
     const { build } = await import('./build')
-    return build(this)
+    await build(this)
+    if (shouldExport) {
+      await exportSite(this, {
+        type: 'build',
+      })
+    }
   }
 
   async export() {
-    await this.prepare({ shouldCleanDir: false, shouldPrepreFiles: false })
+    await this.build(false)
     const { exportSite } = await import('./export')
-    await exportSite(this)
+    await exportSite(this, {
+      crawl: true,
+      type: 'export',
+    })
   }
 }
 

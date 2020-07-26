@@ -11,7 +11,6 @@ export const getBeforeResolve = (vm) =>
     }
     const matched = to.matched[0].components.default
     const { preload, hasServerPreload } = matched
-    console.log(matched)
     if (!preload && !hasServerPreload) {
       return next()
     }

@@ -3,7 +3,12 @@ import { FetchError } from 'ream/fetch'
 import { Ream } from '../node'
 import { Server } from './server'
 import { ClientManifest } from '../webpack/plugins/client-manifest'
-import { render, renderPage, getErrorComponent } from './render'
+import {
+  render,
+  renderToHTML,
+  getErrorComponent,
+  getPreloadData,
+} from './render'
 
 export async function getRequestHandler(api: Ream) {
   const server = new Server()
@@ -55,13 +60,29 @@ export async function getRequestHandler(api: Ream) {
       res.statusCode =
         !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
     }
-    const Component = getErrorComponent(api)
-    await renderPage(api, req, res, clientManifest!, Component, {
-      error: {
-        statusCode: res.statusCode,
-        stack: api.isDev ? err.stack : undefined,
-      },
+    const component = getErrorComponent(api)
+    const { props } = await getPreloadData(component, {
+      req,
+      res,
+      params: req.params,
     })
+    const html = await renderToHTML(api, {
+      params: req.params,
+      path: req.path,
+      url: req.url,
+      req,
+      res,
+      props: {
+        ...props,
+        error: {
+          statusCode: res.statusCode,
+          stack: api.isDev ? err.stack : undefined,
+        },
+      },
+      clientManifest: clientManifest!,
+    })
+    res.setHeader('content-type', 'text-html')
+    res.end(html)
   })
 
   return server.handler

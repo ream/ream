@@ -3,13 +3,16 @@ type Options = {
   retry?: boolean
 }
 
-type ProcessCallback = (job: string, ...args: any[]) => void | Promise<void>
+type ProcessCallback<TProcessArgs extends any[]> = (
+  job: string,
+  ...args: TProcessArgs
+) => void | Promise<void>
 
-export class PromiseQueue {
-  process: ProcessCallback
+export class PromiseQueue<TProcessArgs extends any[]> {
+  process: ProcessCallback<TProcessArgs>
   maxConcurrent: number
   retry: boolean
-  queue: Array<[string, any[]]>
+  queue: Array<[string, TProcessArgs]>
   processing: Set<string>
   processed: Set<string>
   numRunning: number
@@ -17,7 +20,7 @@ export class PromiseQueue {
   resolve: ((processed: Set<string>) => void) | null
   reject: ((error: Error) => void) | null
 
-  constructor(callback: ProcessCallback, options: Options = {}) {
+  constructor(callback: ProcessCallback<TProcessArgs>, options: Options = {}) {
     this.process = callback
     this.maxConcurrent = options.maxConcurrent || Infinity
     this.retry = options.retry !== false
@@ -30,7 +33,7 @@ export class PromiseQueue {
     this.reject = null
   }
 
-  add(job: string, ...args: any[]) {
+  add(job: string, ...args: TProcessArgs) {
     if (this.processing.has(job) || this.processed.has(job)) {
       return
     }
@@ -60,7 +63,7 @@ export class PromiseQueue {
     return runPromise
   }
 
-  async _runJob(job: string, args: any[]) {
+  async _runJob(job: string, args: TProcessArgs) {
     try {
       this.numRunning++
       await this.process(job, ...args)
@@ -91,7 +94,8 @@ export class PromiseQueue {
 
     if (this.queue.length > 0) {
       while (this.queue.length > 0 && this.numRunning < this.maxConcurrent) {
-        this._runJob(...this.queue.shift()!)
+        const item = this.queue.shift()!
+        this._runJob(item[0], item[1])
       }
     } else if (this.processing.size === 0) {
       this.resolve!(this.processed)

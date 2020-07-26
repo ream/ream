@@ -5,7 +5,10 @@ import { Ream } from './node'
 import { store } from './store'
 import { Route } from './utils/route'
 import { sortRoutesByScore } from './utils/rank-routes'
-import { SERVER_PRELOAD_INDICATOR } from './babel/constants'
+import {
+  SERVER_PRELOAD_INDICATOR,
+  STATIC_PRELOAD_INDICATOR,
+} from './babel/constants'
 
 function getRoutes(_routes: Route[], ownRoutesDir: string) {
   const routes: Route[] = [..._routes]
@@ -80,7 +83,7 @@ export async function prepareFiles(api: Ream) {
       var Component = page.default
       return {
         preload: page.preload,
-        hasServerPreload: page["${SERVER_PRELOAD_INDICATOR}"],
+        hasServerPreload: page["${SERVER_PRELOAD_INDICATOR}"] || page["${STATIC_PRELOAD_INDICATOR}"],
         render: function () {
           var pagePropsStore = this.$root.pagePropsStore
           var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
@@ -132,11 +135,12 @@ export async function prepareFiles(api: Ream) {
     
     ${routes
       .map((route) => {
-        return `routes[${JSON.stringify(
-          route.entryName
-        )}] = () => import(/* webpackChunkName: "${
-          route.entryName
-        }" */ ${JSON.stringify(route.absolutePath)})`
+        return `routes[${JSON.stringify(route.entryName)}] = {
+          type: "${route.isServerRoute ? 'server' : 'client'}",
+          load: () => import(/* webpackChunkName: "${
+            route.entryName
+          }" */ ${JSON.stringify(route.absolutePath)})
+        }`
       })
       .join('\n')}
 

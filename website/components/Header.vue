@@ -1,18 +1,21 @@
 <template>
-  <Head>
-    <!-- <body :data-no-scroll="showDropdown" /> -->
-  </Head>
-  <header class="header bg-blue-600 text-white fixed w-full top-0">
-    <div class="container mx-auto flex h-full items-center justify-between">
+  <header class="header bg-blue-500 text-white fixed w-full top-0 z-10">
+    <Head>
+      <!-- <body :data-no-scroll="showDropdown" /> -->
+    </Head>
+    <div class="px-5 flex h-full items-center justify-between mx-auto">
       <h1 class="text-2xl font-bold">
         <router-link to="/">Ream</router-link>
       </h1>
-      <div class="hidden md:flex">
+      <div class="hidden md:flex space-x-8">
         <a
+          v-for="item in navLinks"
           target="_blank"
+          class="flex"
           rel="nofollow noreferer"
-          href="https://github.com/ream/ream"
-          >GitHub</a
+          :href="item.link"
+          :key="item.link"
+          >{{ item.title }}</a
         >
       </div>
       <div class="flex md:hidden">
@@ -56,8 +59,16 @@
         class="dropdown fixed bottom-0 left-0 right-0 text-black bg-white overflow-auto"
         v-if="showDropdown"
       >
-        <div class="px-2 py-5">
-          <a href="https://github.com/ream/ream">GitHub</a>
+        <div class="px-2 py-4 flex flex-col space-y-2">
+          <a
+            v-for="item in navLinks"
+            target="_blank"
+            class="flex"
+            rel="nofollow noreferer"
+            :href="item.link"
+            :key="item.link"
+            >{{ item.title }}</a
+          >
         </div>
         <div class="border-b border-gray-300 my-2 md:hidden"></div>
         <div class="px-2 py-5">
@@ -83,6 +94,16 @@ export default defineComponent({
   setup() {
     const route = useRoute()
     const showDropdown = ref(false)
+    const navLinks = [
+      {
+        title: 'GitHub',
+        link: 'https://github.com/ream/ream',
+      },
+      {
+        title: 'Twiter',
+        link: 'https://twitter.com/_egoistlily',
+      },
+    ]
 
     watch(
       () => route.path,
@@ -93,6 +114,7 @@ export default defineComponent({
 
     return {
       showDropdown,
+      navLinks,
     }
   },
 })
