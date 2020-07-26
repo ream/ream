@@ -129,3 +129,5 @@ return {
 ```
 
 Then Ream will statically generate `posts/1` and `posts/2` at build time.
+
+Note that if you want to [export static website](/dynamic-or-static#static-sites), you don't have to use `staticPaths`.
