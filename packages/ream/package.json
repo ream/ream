@@ -13,7 +13,8 @@
   "scripts": {
     "test": "echo skip",
     "watch": "tsc --watch",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "license": "MIT",
   "author": {

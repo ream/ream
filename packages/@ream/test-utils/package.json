@@ -11,7 +11,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "test": "echo skip"
+    "test": "echo skip",
+    "prepublishOnly": "npm run build"
   },
   "license": "MIT",
   "dependencies": {
