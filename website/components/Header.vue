@@ -100,7 +100,7 @@ export default defineComponent({
         link: 'https://github.com/ream/ream',
       },
       {
-        title: 'Twiter',
+        title: 'Twitter',
         link: 'https://twitter.com/_egoistlily',
       },
     ]
