@@ -5,7 +5,7 @@
     </Head>
     <Header />
     <div
-      class="sidebar fixed hidden xl:block w-64 xl:w-2/12 p-5 bottom-0 left-0 overflow-y-auto"
+      class="sidebar fixed hidden xl:block p-5 bottom-0 left-0 overflow-y-auto"
     >
       <DocsMenu />
     </div>
@@ -55,5 +55,12 @@ export default defineComponent({
 <style scoped>
 .sidebar {
   top: var(--header-height);
+  width: var(--sidebar-width);
+}
+
+@screen xl {
+  .main {
+    margin-left: var(--sidebar-width);
+  }
 }
 </style>

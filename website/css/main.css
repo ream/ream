@@ -2,6 +2,7 @@
 
 :root {
   --header-height: 60px;
+  --sidebar-width: 260px;
 }
 
 body {
@@ -27,6 +28,7 @@ body[data-no-scroll] {
   @apply p-5;
   @apply rounded-lg;
   @apply my-5;
+  @apply overflow-auto;
 }
 
 .markdown-body p {

@@ -2,7 +2,7 @@
   <div>
     <Header />
     <div class="main">
-      <div class="max-w-2xl text-center mx-auto my-32">
+      <div class="max-w-2xl text-center mx-auto my-32 px-5">
         <h2 class="text-4xl">
           A Vue framework for building
           <span class="text-blue-700">server-rendered</span> or

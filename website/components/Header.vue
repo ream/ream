@@ -56,10 +56,10 @@
         </button>
       </div>
       <div
-        class="dropdown fixed bottom-0 left-0 right-0 text-black bg-white overflow-auto"
+        class="dropdown fixed bottom-0 left-0 right-0 text-black bg-white overflow-auto md:hidden"
         v-if="showDropdown"
       >
-        <div class="px-2 py-4 flex flex-col space-y-2">
+        <div class="p-5 flex flex-col space-y-2">
           <a
             v-for="item in navLinks"
             target="_blank"
@@ -70,8 +70,8 @@
             >{{ item.title }}</a
           >
         </div>
-        <div class="border-b border-gray-300 my-2 md:hidden"></div>
-        <div class="px-2 py-5">
+        <div class="border-b border-gray-300"></div>
+        <div class="p-5">
           <DocsMenu />
         </div>
       </div>
