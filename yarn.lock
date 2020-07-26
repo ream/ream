@@ -1094,9 +1094,9 @@
     minimist "^1.2.0"
 
 "@egoist/md-colors@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@egoist/md-colors/-/md-colors-1.1.0.tgz#0c3681bff03c3199ca643d95c63dfe4e16819907"
-  integrity sha512-dVn2T60dLNVLYZKwX1YMmKXWTG6/ZGCjaeANVjUB4XRSCKNfL/ilk3Blh6m/0wRoh6yX4uzToxLBPJAKoRsVVg==
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@egoist/md-colors/-/md-colors-1.2.2.tgz#92227d56b6f72cbf4e359e532c096b89a1418c96"
+  integrity sha512-Qs0W63ZELvEenmAUUO8H5oufl2zxxylS+vNo1fhYcsZMT2gc1gdiFMmu7IPKbK/nXEe2/zv9zRiwX3m6GvrejQ==
 
 "@egoist/postcss-loader@3.0.2":
   version "3.0.2"
