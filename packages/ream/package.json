@@ -1,5 +1,5 @@
 {
-  "version": "5.0.0-alpha.0",
+  "version": "5.0.0-alpha.1",
   "name": "ream",
   "description": "The Vue Framework",
   "files": [
@@ -35,7 +35,7 @@
     "@egoist/postcss-loader": "3.0.2",
     "@egoist/vue-head": "0.1.8",
     "@ream/common": "5.0.0-alpha.0",
-    "@ream/fetch": "0.0.0",
+    "@ream/fetch": "^5.0.0-alpha.1",
     "@vue/compiler-sfc": "3.0.0-rc.4",
     "@vue/server-renderer": "3.0.0-rc.4",
     "babel-loader": "8.1.0",

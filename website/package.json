@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "5.0.0-alpha.0",
+  "version": "5.0.0-alpha.1",
   "name": "website",
   "scripts": {
     "dev": "ream",
@@ -10,11 +10,11 @@
   },
   "devDependencies": {
     "@egoist/md-colors": "^1.1.0",
+    "@tailwindcss/ui": "0.4.0",
     "@types/marked": "^0.7.4",
     "@types/prismjs": "^1.16.0",
     "marked": "^0.8.2",
     "prismjs": "^1.20.0",
-    "tailwindcss": "^1.5.2",
-    "@tailwindcss/ui": "0.4.0"
+    "tailwindcss": "^1.5.2"
   }
 }
