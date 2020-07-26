@@ -1,9 +1,9 @@
 # Server Routes
 
-Ream allows you to build your API alongside regular Vue pages by having files like `**/*.json.{js,ts}`, `api/**/*.{js,ts}` in `pages` folder and export a request handler as follows:
+Ream allows you to build your API alongside regular Vue pages by having files like `**/*.json.{js,ts}`, `api/**/*.{js,ts}` in `routes` folder and export a request handler as follows:
 
 ```js
-// pages/api/hello.js
+// routes/api/hello.js
 export default (req, res) => {
   res.end(`hello`)
 }
