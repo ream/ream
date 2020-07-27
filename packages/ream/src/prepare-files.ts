@@ -1,6 +1,6 @@
 import glob from 'fast-glob'
 import { pathToRoutes, pathToRoute } from './utils/path-to-routes'
-import { outputFile, ensureDir } from 'fs-extra'
+import { outputFile, pathExists } from 'fs-extra'
 import { Ream } from './node'
 import { store } from './store'
 import { Route } from './utils/route'
@@ -42,6 +42,11 @@ function getRoutes(_routes: Route[], ownRoutesDir: string) {
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
   const routesDir = api.resolveSrcDir('routes')
+
+  if (!(await pathExists(routesDir))) {
+    throw new Error(`${routesDir} doesn't exist`)
+  }
+
   const files = new Set(
     await glob(pattern, {
       cwd: routesDir,
@@ -202,7 +207,6 @@ export async function prepareFiles(api: Ream) {
 
   if (api.isDev) {
     const { watch } = await import('chokidar')
-    await ensureDir(routesDir)
     watch(pattern, {
       cwd: routesDir,
       ignoreInitial: true,

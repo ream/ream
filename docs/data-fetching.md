@@ -72,7 +72,7 @@ In many cases you will still need to use external data on pre-rendered pages, Re
 For example, let's say you are building a static blog, and you want to fetch blog posts from an external API:
 
 ```vue
-<!-- src/routes/posts/[id].vue -->
+<!-- routes/posts/[id].vue -->
 <script>
 export const staticPreload = async (context) => {
   const post = await fetchPostFromApi({ id: context.params.id })

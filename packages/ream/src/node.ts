@@ -8,7 +8,7 @@ import { Store, store } from './store'
 import { ChainWebpack } from './types'
 import { createServer } from 'http'
 import { Entry } from 'webpack'
-import { remove } from 'fs-extra'
+import { remove, existsSync } from 'fs-extra'
 import { exportSite } from './export'
 
 export interface Options {
@@ -53,7 +53,12 @@ export class Ream {
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
     this.dir = resolve(options.dir || '.')
-    this.srcDir = join(this.dir, options.srcDir || 'src')
+    if (options.srcDir) {
+      this.srcDir = join(this.dir, options.srcDir)
+    } else {
+      const hasRoutesInSrc = existsSync(join(this.dir, 'src/routes'))
+      this.srcDir = hasRoutesInSrc ? join(this.dir, 'src') : this.dir
+    }
     this.isDev = Boolean(options.dev)
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
