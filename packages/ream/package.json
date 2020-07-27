@@ -41,7 +41,7 @@
     "@vue/compiler-sfc": "3.0.0-rc.4",
     "@vue/server-renderer": "3.0.0-rc.4",
     "babel-loader": "8.1.0",
-    "cac": "6.5.8",
+    "cac": "6.6.1",
     "chokidar": "3.4.1",
     "connect": "3.7.0",
     "consola": "2.14.0",
