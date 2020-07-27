@@ -1,6 +1,6 @@
 import glob from 'fast-glob'
 import { pathToRoutes, pathToRoute } from './utils/path-to-routes'
-import { outputFile } from 'fs-extra'
+import { outputFile, ensureDir } from 'fs-extra'
 import { Ream } from './node'
 import { store } from './store'
 import { Route } from './utils/route'
@@ -41,7 +41,7 @@ function getRoutes(_routes: Route[], ownRoutesDir: string) {
 
 export async function prepareFiles(api: Ream) {
   const pattern = '**/*.{vue,js,ts,jsx,tsx}'
-  const routesDir = api.resolveRoot('routes')
+  const routesDir = api.resolveSrcDir('routes')
   const files = new Set(
     await glob(pattern, {
       cwd: routesDir,
@@ -202,6 +202,7 @@ export async function prepareFiles(api: Ream) {
 
   if (api.isDev) {
     const { watch } = await import('chokidar')
+    await ensureDir(routesDir)
     watch(pattern, {
       cwd: routesDir,
       ignoreInitial: true,
@@ -209,12 +210,10 @@ export async function prepareFiles(api: Ream) {
       .on('add', async (file) => {
         files.add(file)
         await writeRoutes()
-        api.invalidate()
       })
       .on('unlink', async (file) => {
         files.delete(file)
         await writeRoutes()
-        api.invalidate()
       })
   }
 }

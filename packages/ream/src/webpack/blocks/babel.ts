@@ -26,10 +26,10 @@ export function useBabel(api: Ream, chain: WebpackChain, isClient: boolean) {
       customLoaderOptions: {
         isClient,
         isDev: api.isDev,
-        cwd: api.resolveRoot(),
+        cwd: api.resolveDir(),
         buildDir: api.resolveDotReam(),
         shouldCache: api.shouldCache,
-        routesDir: api.resolveRoot('routes'),
+        routesDir: api.resolveSrcDir('routes'),
       },
     })
 }

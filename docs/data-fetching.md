@@ -72,7 +72,7 @@ In many cases you will still need to use external data on pre-rendered pages, Re
 For example, let's say you are building a static blog, and you want to fetch blog posts from an external API:
 
 ```vue
-<!-- pages/posts/[id].vue -->
+<!-- src/routes/posts/[id].vue -->
 <script>
 export const staticPreload = async (context) => {
   const post = await fetchPostFromApi({ id: context.params.id })
@@ -91,12 +91,12 @@ export default {
 
 `staticPreload` is actually very similar to `serverPreload`, both of them are executed on server-side, but `staticPreload` will pre-render the pages:
 
-- For pages without dynamic segments (i.e. `:id`), it's rendered at build time.
-- For pages with dynamic segments, Ream renders them at request time but will cache the result and susequent requests will use the cache instead.
+- For dynamic routes (i.e. `:id`), it's rendered at build time.
+- For non-dynamic routes, Ream renders them at request time but will cache the result and susequent requests will use the cache instead.
 
 ### Static Paths
 
-For pages with dynamic segments, you can also render them at build time by using the `staticPaths` option, suppose that you have a page that uses dynamic routes named `pages/posts/[id].vue`
+For dynamic routes, you can also render them at build time by using the `staticPaths` option, suppose that you have a page that uses dynamic routes named `src/pages/posts/[id].vue`
 
 ```vue
 <script>

@@ -1,4 +1,4 @@
-import { resolve } from 'path'
+import { resolve, join } from 'path'
 import resolveFrom from 'resolve-from'
 import { Route } from './utils/route'
 import { loadConfig } from './utils/load-config'
@@ -13,6 +13,7 @@ import { exportSite } from './export'
 
 export interface Options {
   dir?: string
+  srcDir?: string
   dev?: boolean
   cache?: boolean
   server?: {
@@ -40,6 +41,7 @@ export type ReamConfig = {
 
 export class Ream {
   dir: string
+  srcDir: string
   isDev: boolean
   shouldCache: boolean
   serverOptions: ServerOptions
@@ -51,6 +53,7 @@ export class Ream {
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
     this.dir = resolve(options.dir || '.')
+    this.srcDir = join(this.dir, options.srcDir || 'src')
     this.isDev = Boolean(options.dev)
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
@@ -86,12 +89,12 @@ export class Ream {
     }
   }
 
-  invalidate() {
-    // noop
+  resolveDir(...args: string[]) {
+    return resolve(this.dir, ...args)
   }
 
-  resolveRoot(...args: string[]) {
-    return resolve(this.dir, ...args)
+  resolveSrcDir(...args: string[]) {
+    return resolve(this.srcDir, ...args)
   }
 
   resolveDotReam(...args: string[]) {

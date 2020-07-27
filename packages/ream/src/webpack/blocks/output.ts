@@ -9,7 +9,7 @@ export function setOutput(api: Ream, chain: WebpackChain, isClient: boolean) {
     api.isDev
       ? (info: any) => resolve(info.absoluteResourcePath).replace(/\\/g, '/')
       : (info: any) =>
-          relative(api.resolveRoot(), info.absoluteResourcePath).replace(
+          relative(api.resolveDir(), info.absoluteResourcePath).replace(
             /\\/g,
             '/'
           )

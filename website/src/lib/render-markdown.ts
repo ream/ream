@@ -3,12 +3,10 @@ import fs from 'fs'
 import marked from 'marked'
 import Prism from 'prismjs'
 
-if (!process.browser) {
-  require('prismjs/components/prism-json')
-  require('prismjs/components/prism-bash')
-}
+require('prismjs/components/prism-json')
+require('prismjs/components/prism-bash')
 
-const docsDir = join(__dirname, '../../docs')
+const docsDir = join(__dirname, '../../../docs')
 
 export async function renderMarkdown(slug: string) {
   const renderer = new marked.Renderer()

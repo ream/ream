@@ -14,7 +14,7 @@ export function createDevMiddlewares(
 
   const serverConfig = getWebpackConfig('server', api)
   const serverCompiler = webpack(serverConfig)
-  const watching = serverCompiler.watch({}, () => {})
+  serverCompiler.watch({}, () => {})
 
   clientCompiler.hooks.done.tap('update-client-manifest', (stats) => {
     if (!stats.hasErrors()) {
@@ -31,10 +31,6 @@ export function createDevMiddlewares(
   const hotMiddleware = createHotMiddleware(clientCompiler, {
     log: false,
   })
-
-  api.invalidate = () => {
-    watching.invalidate()
-  }
 
   return [
     devMiddleware,
