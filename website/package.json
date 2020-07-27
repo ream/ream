@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "5.0.0-alpha.2",
+  "version": "5.0.0-alpha.3",
   "name": "website",
   "scripts": {
     "dev": "ream",

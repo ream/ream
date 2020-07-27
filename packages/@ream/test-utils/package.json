@@ -1,6 +1,6 @@
 {
   "name": "@ream/test-utils",
-  "version": "5.0.0-alpha.2",
+  "version": "5.0.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },
@@ -25,6 +25,6 @@
   "devDependencies": {
     "@types/polka": "0.5.1",
     "@types/puppeteer": "3.0.1",
-    "ream": "^5.0.0-alpha.2"
+    "ream": "^5.0.0-alpha.3"
   }
 }
