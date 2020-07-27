@@ -23,5 +23,4 @@ The response (`res`) includes a set of Express.js-like methods to improve the de
 The included helpers are:
 
 - `res.status(code)` - A function to set the status code. code must be a valid HTTP status code
-- `res.json(json)` - Sends a JSON response. json must be a valid JSON object
-- `res.send(body)` - Sends the HTTP response. `body` can be a `string`, an `object` or a `Buffer`.
+- `res.send(body)` - Sends the HTTP response. `body` can be a `string`, an `object`, a `NodeJS.ReadableStream` or a `Buffer`.

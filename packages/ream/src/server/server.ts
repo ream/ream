@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
 import connect, { NextFunction } from 'connect'
 import { pathToRegexp, execPathRegexp } from '../utils/route-helpers'
+import { send, SendData, status } from './response-helpers'
 
 export type ReamServerHandler = (
   req: ReamServerRequest,
@@ -18,7 +19,9 @@ export interface ReamServerRequest extends IncomingMessage {
   }
 }
 
-export interface ReamServerResponse extends ServerResponse {}
+export interface ReamServerResponse extends ServerResponse {
+  send: (data: SendData) => void
+}
 
 type ReamServerErrorHandler = (
   err: Error,
@@ -47,6 +50,22 @@ export class Server {
             enumerable: true,
             get() {
               return req.url && parseQuery(req.url.split('?')[1])
+            },
+          },
+        })
+        Object.defineProperties(res, {
+          send: {
+            enumerable: true,
+            value: function (data: SendData) {
+              send(res, data)
+              return res
+            },
+          },
+          status: {
+            enumerable: true,
+            value: function (statusCode: number) {
+              status(res, statusCode)
+              return res
             },
           },
         })
