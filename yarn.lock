@@ -10427,9 +10427,9 @@ tslib@^1.9.0:
   integrity sha512-aZW88SY8kQbU7gpV19lN24LtXh/yD4ZZg6qieAJDDg+YBsJcSmLGK9QpnUjAKVG/xefmvJGd1WUmfpT/g6AJGA==
 
 tsup@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/tsup/-/tsup-3.4.0.tgz#0ca009915061d2638e519c409fa569ead75bf022"
-  integrity sha512-L/cAKQkFoJVx0piQVGhAF2r+OTPsHeoxiifqONumfF//xk/rGKNf7/08aziFuTnC3tEA4YFNP5hxGZ2GS3vdfQ==
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/tsup/-/tsup-3.4.2.tgz#82a317c65e7b46f729a2c5d953dc2460e77d71bc"
+  integrity sha512-EQ7/tIMu66I5caj5yMdO6o3bh/NTROBrHF7PXqLZqzl2IocTP3EdohkSAk9pNdxB9XOq5GgsK8BkqvlFGD6kLQ==
   dependencies:
     cac "^6.6.1"
     chalk "^4.1.0"
