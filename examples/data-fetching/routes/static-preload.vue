@@ -22,9 +22,11 @@ import { Head } from 'ream/head'
 export const staticPreload = async () => {
   const arr = new Array(100).fill(null)
   return {
-    posts: arr.map((_, index) => ({
-      title: `${index} post`,
-    })),
+    props: {
+      posts: arr.map((_, index) => ({
+        title: `${index} post`,
+      })),
+    },
   }
 }
 

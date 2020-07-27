@@ -259,9 +259,9 @@ export async function getPreloadData(
   ])
   return {
     props: {
-      ...preloadResult,
-      ...serverPreloadResult,
-      ...staticPreloadResult,
+      ...preloadResult?.props,
+      ...serverPreloadResult?.props,
+      ...staticPreloadResult?.props,
     },
   }
 }

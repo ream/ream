@@ -11,8 +11,10 @@ import { fetch } from 'ream/fetch'
 export const preload = async (context) => {
   const posts = await fetch(`/blog/posts.json?user=${context.params.user}`)
   return {
-    // Returned value will be passed to the component as props
-    posts,
+    // `props` will be passed to the component as props
+    props: {
+      posts,
+    },
   }
 }
 
@@ -43,8 +45,9 @@ import { db } from './path/to/db'
 export const serverPreload = async (context) => {
   const posts = await db.findPosts({ user: context.params.user })
   return {
-    // Returned value will be passed to the component as props
-    posts,
+    props: {
+      posts,
+    },
   }
 }
 
@@ -74,7 +77,9 @@ For example, let's say you are building a static blog, and you want to fetch blo
 export const staticPreload = async (context) => {
   const post = await fetchPostFromApi({ id: context.params.id })
   return {
-    post,
+    props: {
+      post,
+    },
   }
 }
 
@@ -98,7 +103,9 @@ For pages with dynamic segments, you can also render them at build time by using
 export const staticPreload = async (context) => {
   const post = await fetchPostFromApi({ id: context.params.id })
   return {
-    post,
+    props: {
+      post,
+    },
   }
 }
 

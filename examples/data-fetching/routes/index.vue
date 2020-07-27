@@ -18,7 +18,9 @@ import { sleep } from '../utils/sleep'
 export const preload = async () => {
   await sleep(1000)
   return {
-    message: 'hello world',
+    props: {
+      message: 'hello world',
+    },
   }
 }
 

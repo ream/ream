@@ -1,13 +1,26 @@
+import {
+  ReamServerHandler,
+  ReamServerRequest,
+  ReamServerResponse,
+} from './server/server'
+
 interface IParams {
   [k: string]: string
 }
 
 export interface PreloadContext {
   params: IParams
+  req: ReamServerRequest
+  res: ReamServerResponse
 }
 
 export interface PreloadResult {
-  [k: string]: any
+  /**
+   * Pass to page component as props
+   */
+  props: {
+    [k: string]: any
+  }
 }
 
 type PreloadFactory<ContextType = any, ResultType = any> = (
@@ -21,10 +34,12 @@ export type Preload = PreloadFactory<PreloadContext, PreloadResult>
  */
 export type ServerPreload = PreloadFactory<PreloadContext, PreloadResult>
 
+export type StaticPreloadContext = Omit<PreloadContext, 'req' | 'res'>
+
 /**
  * For static export
  */
-export type StaticPreload = PreloadFactory<PreloadContext, PreloadResult>
+export type StaticPreload = PreloadFactory<StaticPreloadContext, PreloadResult>
 
 export type StaticPathsResult = {
   paths: Array<{
@@ -36,8 +51,4 @@ export type StaticPathsResult = {
 
 export type StaticPaths = () => StaticPathsResult | Promise<StaticPathsResult>
 
-export {
-  ReamServerHandler,
-  ReamServerRequest,
-  ReamServerResponse,
-} from './server/server'
+export { ReamServerHandler, ReamServerRequest, ReamServerResponse }

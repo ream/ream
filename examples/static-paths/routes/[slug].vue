@@ -7,7 +7,9 @@ import { StaticPreload, StaticPaths } from 'ream'
 
 export const staticPreload: StaticPreload = ({ params }) => {
   return {
-    name: params.slug,
+    props: {
+      name: params.slug,
+    },
   }
 }
 

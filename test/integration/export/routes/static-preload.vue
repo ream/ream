@@ -4,7 +4,11 @@
 
 <script>
 export const staticPreload = () => {
-  return { message: 'static preload' }
+  return {
+    props: {
+      message: 'static preload',
+    },
+  }
 }
 
 export default {

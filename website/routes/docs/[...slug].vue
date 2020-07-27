@@ -30,7 +30,9 @@ import { renderMarkdown } from '@/lib/render-markdown'
 export const staticPreload: StaticPreload = async ({ params }) => {
   const page = await renderMarkdown(params.slug)
   return {
-    page,
+    props: {
+      page,
+    },
   }
 }
 

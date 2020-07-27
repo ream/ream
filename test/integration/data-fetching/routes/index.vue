@@ -5,7 +5,9 @@
 <script>
 export async function preload() {
   return {
-    msg: 'hello world',
+    props: {
+      msg: 'hello world',
+    },
   }
 }
 

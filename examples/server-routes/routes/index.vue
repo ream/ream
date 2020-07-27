@@ -12,7 +12,9 @@ import { fetch } from 'ream/fetch'
 export const preload = async () => {
   const posts = await fetch(`/api/posts`).then((res) => res.json())
   return {
-    posts,
+    props: {
+      posts,
+    },
   }
 }
 
