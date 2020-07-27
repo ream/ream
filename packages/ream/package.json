@@ -46,7 +46,7 @@
     "connect": "3.7.0",
     "consola": "2.14.0",
     "css-loader": "3.5.2",
-    "fast-glob": "3.2.2",
+    "fast-glob": "3.2.4",
     "fs-extra": "9.0.0",
     "hash-sum": "2.0.0",
     "joycon": "2.2.5",
