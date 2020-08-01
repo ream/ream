@@ -63,7 +63,12 @@ export default defineComponent({
 }
 
 .page {
-  padding-left: var(--sidebar-width);
   padding-top: var(--header-height);
+}
+
+@screen lg {
+  .page {
+    padding-left: var(--sidebar-width);
+  }
 }
 </style>

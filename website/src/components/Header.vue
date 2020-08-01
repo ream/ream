@@ -7,7 +7,7 @@
       <h1 class="text-2xl font-bold">
         <router-link to="/">Ream</router-link>
       </h1>
-      <div class="hidden md:flex space-x-8">
+      <div class="hidden lg:flex space-x-8">
         <a
           v-for="item in navLinks"
           target="_blank"
@@ -18,7 +18,7 @@
           >{{ item.title }}</a
         >
       </div>
-      <div class="flex md:hidden">
+      <div class="flex lg:hidden">
         <button @click="showDropdown = !showDropdown">
           <svg
             v-if="showDropdown"
@@ -56,7 +56,7 @@
         </button>
       </div>
       <div
-        class="dropdown fixed bottom-0 left-0 right-0 text-black bg-white overflow-auto md:hidden"
+        class="dropdown fixed bottom-0 left-0 right-0 text-black bg-white overflow-auto lg:hidden"
         v-if="showDropdown"
       >
         <div class="p-5 flex flex-col space-y-2">
