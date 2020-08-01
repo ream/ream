@@ -4,17 +4,17 @@
       <title>{{ title }}</title>
     </Head>
     <Header />
-    <div
-      class="sidebar fixed hidden xl:block p-5 bottom-0 left-0 overflow-y-auto"
+    <aside
+      class="sidebar fixed hidden lg:block p-5 bottom-0 left-0 overflow-y-auto"
     >
       <DocsMenu />
-    </div>
-    <div class="main">
+    </aside>
+    <main class="page">
       <div class="max-w-3xl mx-auto p-5">
         <h2 class="text-5xl font-semibold mb-5">{{ page.title }}</h2>
         <div class="markdown-body" v-html="page.content"></div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
@@ -58,11 +58,12 @@ export default defineComponent({
 .sidebar {
   top: var(--header-height);
   width: var(--sidebar-width);
+  @apply border-r;
+  @apply border-gray-100;
 }
 
-@screen xl {
-  .main {
-    margin-left: var(--sidebar-width);
-  }
+.page {
+  padding-left: var(--sidebar-width);
+  padding-top: var(--header-height);
 }
 </style>
