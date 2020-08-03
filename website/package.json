@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@egoist/md-colors": "^1.1.0",
-    "@tailwindcss/ui": "0.4.0",
+    "@tailwindcss/ui": "0.5.0",
     "@types/marked": "^1.1.0",
     "@types/prismjs": "^1.16.0",
     "marked": "^1.1.1",
