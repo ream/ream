@@ -26,7 +26,7 @@ Data fetching on the client-side can be quite complex, good old web frameworks l
 
 ### Convention over Configuration
 
-Ream made many decisions for you so you can enjoy a good experience with less effort, for example Ream offers a file-system based router, and adding `auth` is as simple as running a command. Remeber how you integrate [Social Login](https://laravel.com/docs/7.x/socialite) in your Laravel app? It will be as simple if not simpler.
+Ream made many decisions for you so you can enjoy a good experience with less effort, for example Ream offers a file-system based router, and adding `auth` is as simple as running a command. Remember how you integrate [Social Login](https://laravel.com/docs/7.x/socialite) in your Laravel app? It will be as simple if not simpler.
 
 ## Sponsors
 
@@ -35,7 +35,7 @@ Ream made many decisions for you so you can enjoy a good experience with less ef
 ## Inspirations
 
 - [Next.js](https://nextjs.org)
-- [ReadwoodJS](https://redwoodjs.com/)
+- [RedwoodJS](https://redwoodjs.com/)
 - [BlitzJS](https://blitzjs.com/)
 - [Laravel](https://laravel.com)
 - [LiveWire](https://laravel-livewire.com/)
