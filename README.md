@@ -22,7 +22,7 @@ Inspired by Laravel and Ruby on Rails, Ream will offer many features like `data 
 
 ### API Not Required
 
-Data fetching on the client-side can be quite complex, good old web frameworks like Laravel allows you to directly render a view with data fetced on the backend, this is also available in Ream, see more about [serverPreload](https://ream.dev/docs/data-fetching#server-preload).
+Data fetching on the client-side can be quite complex, good old web frameworks like Laravel allows you to directly render a view with data fetched on the backend, this is also available in Ream, see more about [serverPreload](https://ream.dev/docs/data-fetching#server-preload).
 
 ### Convention over Configuration
 
