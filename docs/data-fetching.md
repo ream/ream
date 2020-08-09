@@ -91,8 +91,8 @@ export default {
 
 `staticPreload` is actually very similar to `serverPreload`, both of them are executed on server-side, but `staticPreload` will pre-render the pages:
 
-- For dynamic routes (i.e. `:id`), it's rendered at build time.
-- For non-dynamic routes, Ream renders them at request time but will cache the result and susequent requests will use the cache instead.
+- For dynamic routes (i.e. `:id`), Ream renders them at request time but will cache the result and susequent requests will use the cache instead.
+- For static routes, it's rendered at build time.
 
 ### Static Paths
 
