@@ -3710,7 +3710,7 @@ chardet@^0.7.0:
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
 
-chokidar@3.4.1, chokidar@^3.4.1:
+chokidar@3.4.1:
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.1.tgz#e905bdecf10eaa0a0b1db0c664481cc4cbc22ba1"
   integrity sha512-TQTJyr2stihpC4Sya9hs2Xh+O2wf+igjL36Y75xx2WdHuiICcn/XJza46Jwt0eT5hVpQOzo3FpY3cj3RVYLX0g==
@@ -3743,6 +3743,21 @@ chokidar@^2.1.8:
     upath "^1.1.1"
   optionalDependencies:
     fsevents "^1.2.7"
+
+chokidar@^3.4.1, chokidar@^3.4.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.2.tgz#38dc8e658dec3809741eb3ef7bb0a47fe424232d"
+  integrity sha512-IZHaDeBeI+sZJRX7lGcXsdzgvZqKv6sECqsbErJA4mHWfpRrD8B97kSFN4cQz6nGBGiuFia1MKR4d6c1o8Cv7A==
+  dependencies:
+    anymatch "~3.1.1"
+    braces "~3.0.2"
+    glob-parent "~5.1.0"
+    is-binary-path "~2.1.0"
+    is-glob "~4.0.1"
+    normalize-path "~3.0.0"
+    readdirp "~3.4.0"
+  optionalDependencies:
+    fsevents "~2.1.2"
 
 chownr@^1.1.1, chownr@^1.1.2:
   version "1.1.4"
@@ -4863,10 +4878,10 @@ es6-promisify@^5.0.0:
   dependencies:
     es6-promise "^4.0.3"
 
-esbuild@^0.6.6:
-  version "0.6.6"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.6.6.tgz#354227da80d9eb5ca855adb1217e1b4ef388dd67"
-  integrity sha512-eDnYl7ZT1kqkbvwY+sCuGC82cqRPuBRaU0Tqdx72wESLIjZNAF3plAtZBk1Ybku0U152Q1xWVvFpVdwVhhqDaw==
+esbuild@^0.6.19:
+  version "0.6.25"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.6.25.tgz#060f95ed171dba4e6e86e6920f2aff328f96e99e"
+  integrity sha512-yOSDMlo0tmhF023LL37UVK/WHIM8UttxiUM0iOHb/DgB9Mk02wQAAHEso2ZkTY3ImpGDRQM0JnIif7aZAmGm2w==
 
 escalade@^3.0.1:
   version "3.0.2"
@@ -9349,17 +9364,17 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^3.0.0"
     inherits "^2.0.1"
 
-rollup-plugin-dts@^1.4.8:
-  version "1.4.9"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-dts/-/rollup-plugin-dts-1.4.9.tgz#936e4cc1139d81c5c0ce64dc1e9fe025bb3eccaf"
-  integrity sha512-ikEIpVKDhgNFouGQemmVeXojpxEhgSUCPrfEbiDMWg3YmDWYoNifmbmt5AiBqf3KHnv/6Se5+KSgDE11oVlZYg==
+rollup-plugin-dts@^1.4.10:
+  version "1.4.10"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-dts/-/rollup-plugin-dts-1.4.10.tgz#0373c4284a2ba4d2d72df69c289271a816bc2736"
+  integrity sha512-bL6MBXc8lK7D5b/tYbHaglxs4ZxMQTQilGA6Xm9KQBEj4h9ZwIDlAsvDooGjJ/cOw23r3POTRtSCEyTHxtzHJg==
   optionalDependencies:
     "@babel/code-frame" "^7.10.4"
 
-rollup@^2.22.1:
-  version "2.22.2"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.22.2.tgz#94d51fc8c30a2e545d1ff6358cc4fa14131332ee"
-  integrity sha512-2a4Mch4f0W2lEvkPuxtz0GfrtfgLj9bdd/oC9L3LozGOCnmLqO7ivMfKbCJoRgqWIU2UqAcbxRFSwmIKx+uStA==
+rollup@^2.23.1:
+  version "2.26.3"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.26.3.tgz#502c755872a4590937cfa4e8f7eb99d3bc3c4025"
+  integrity sha512-Mlt39/kL2rA9egcbQbaZV1SNVplGqYYhDDMcGgHPPE0tvM3R4GrB+IEdYy2QtTrdzMQx57ZcqDFf/KWWm8F+uw==
   optionalDependencies:
     fsevents "~2.1.2"
 
@@ -10458,17 +10473,18 @@ tslib@^1.9.0:
   integrity sha512-aZW88SY8kQbU7gpV19lN24LtXh/yD4ZZg6qieAJDDg+YBsJcSmLGK9QpnUjAKVG/xefmvJGd1WUmfpT/g6AJGA==
 
 tsup@^3.4.0:
-  version "3.4.2"
-  resolved "https://registry.yarnpkg.com/tsup/-/tsup-3.4.2.tgz#82a317c65e7b46f729a2c5d953dc2460e77d71bc"
-  integrity sha512-EQ7/tIMu66I5caj5yMdO6o3bh/NTROBrHF7PXqLZqzl2IocTP3EdohkSAk9pNdxB9XOq5GgsK8BkqvlFGD6kLQ==
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/tsup/-/tsup-3.6.1.tgz#ba2361809d20c881b4361fb60185dab5de6efb93"
+  integrity sha512-RBd/0ZHn/o8S1zKRWJzqr6R4AiulMxYD9IZvCkNIHGQ+olATceJ+UK0ubZD4q37UWxbQPL/96/aHy2ZF7IpzNQ==
   dependencies:
     cac "^6.6.1"
     chalk "^4.1.0"
-    chokidar "^3.4.1"
-    esbuild "^0.6.6"
+    chokidar "^3.4.2"
+    esbuild "^0.6.19"
     joycon "^2.2.5"
-    rollup "^2.22.1"
-    rollup-plugin-dts "^1.4.8"
+    resolve-from "^5.0.0"
+    rollup "^2.23.1"
+    rollup-plugin-dts "^1.4.10"
     sucrase "^3.15.0"
 
 tty-browserify@0.0.0:
