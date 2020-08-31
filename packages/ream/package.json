@@ -38,7 +38,7 @@
     "@egoist/vue-head": "0.1.8",
     "@ream/common": "5.0.0-alpha.0",
     "@ream/fetch": "^5.0.0-alpha.3",
-    "@vue/compiler-sfc": "3.0.0-rc.4",
+    "@vue/compiler-sfc": "3.0.0-rc.9",
     "@vue/server-renderer": "3.0.0-rc.5",
     "babel-loader": "8.1.0",
     "cac": "6.6.1",
