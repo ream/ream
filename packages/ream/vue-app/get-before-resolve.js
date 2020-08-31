@@ -6,7 +6,7 @@ import { getServerPreloadPath } from 'ream/dist/runtime-utils'
  * @param {import('vue').App} vm vm is the root Vue app instance
  */
 export const getBeforeResolve = (vm) =>
-  function beforeResolve(to, from, next) {
+  async function beforeResolve(to, from, next) {
     if (!to.matched || to.matched.length === 0) {
       return next()
     }
@@ -16,7 +16,7 @@ export const getBeforeResolve = (vm) =>
       return next()
     }
     const fetchProps = (next) => {
-      Promise.all(
+      return Promise.all(
         [
           preload && preload({ params: to.params }),
           hasServerPreload &&
@@ -40,6 +40,6 @@ export const getBeforeResolve = (vm) =>
       next()
       fetchProps()
     } else {
-      fetchProps(next)
+      await fetchProps(next)
     }
   }
