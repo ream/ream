@@ -36,6 +36,9 @@ export async function getRequestHandler(api: Ream) {
     })
   }
 
+  const { createPublicFilesMiddleware } = await require('./public-files-middleware')
+  server.use(createPublicFilesMiddleware(api))
+
   server.use(async (req, res, next) => {
     if (req.path.endsWith('.serverpreload.json')) {
       req.url = req.url.replace(/(\/index)?\.serverpreload\.json/, '')
