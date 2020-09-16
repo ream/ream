@@ -18,7 +18,7 @@ Ream is a full-stack framework that works similar to Next.js and Nuxt.js.
 
 ### Fullstack & Monolithic
 
-Inspired by Laravel and Ruby on Rails, Ream will offer many features like `data fetching`, `auth`, `autorization`, `mail`, `validation` and/or `database` out-of-the-box or via official packages. 
+Inspired by Laravel and Ruby on Rails, Ream will offer many features like `data fetching`, `auth`, `authorization`, `mail`, `validation` and/or `database` out-of-the-box or via official packages. 
 
 ### API Not Required
 
