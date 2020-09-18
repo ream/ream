@@ -2,7 +2,7 @@
 
 # Ream
 
-A Vue framework for building servers and static sites.
+A server-side rendering framework for Vue.js with first-class TypeScript support.
 
 [![sponsor egoist](https://flat.badgen.net/badge/SPONSOR/EGOIST/purple?icon=kofi&scale=1.5&labelColor=black)](https://github.com/sponsors/egoist) [![npm version](https://flat.badgen.net/npm/v/ream?scale=1.5)](https://npm.im/ream) [![build status](https://flat.badgen.net/github/status/ream/ream/master?scale=1.5)](https://github.com/ream/ream/actions) [![npm downloads](https://flat.badgen.net/npm/dm/ream?scale=1.5)](https://npm.im/ream)
 
@@ -11,22 +11,6 @@ A Vue framework for building servers and static sites.
 [Website](https://ream.dev)
 
 [Documentation](https://ream.dev/docs/getting-started) (WIP)
-
-## Goals / What is Ream
-
-Ream is a full-stack framework that works similar to Next.js and Nuxt.js.
-
-### Fullstack & Monolithic
-
-Inspired by Laravel and Ruby on Rails, Ream will offer many features like `data fetching`, `auth`, `authorization`, `mail`, `validation` and/or `database` out-of-the-box or via official packages. 
-
-### API Not Required
-
-Data fetching on the client-side can be quite complex, good old web frameworks like Laravel allows you to directly render a view with data fetched on the backend, this is also available in Ream, see more about [serverPreload](https://ream.dev/docs/data-fetching#server-preload).
-
-### Convention over Configuration
-
-Ream made many decisions for you so you can enjoy a good experience with less effort, for example Ream offers a file-system based router, and adding `auth` is as simple as running a command. Remember how you integrate [Social Login](https://laravel.com/docs/7.x/socialite) in your Laravel app? It will be as simple if not simpler.
 
 ## Sponsors
 
