@@ -45,7 +45,7 @@
     "chokidar": "3.4.2",
     "connect": "3.7.0",
     "consola": "2.15.0",
-    "css-loader": "3.5.2",
+    "css-loader": "5.0.1",
     "fast-glob": "3.2.4",
     "fs-extra": "9.0.1",
     "hash-sum": "2.0.0",
