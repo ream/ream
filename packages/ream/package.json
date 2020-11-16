@@ -70,7 +70,7 @@
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.9",
-    "@types/fs-extra": "^8.1.0",
+    "@types/fs-extra": "^9.0.4",
     "@types/hash-sum": "^1.0.0",
     "@types/node": "^14.0.26",
     "@types/serialize-javascript": "^4.0.0",
