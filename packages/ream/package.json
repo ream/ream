@@ -57,7 +57,7 @@
     "serialize-javascript": "^4.0.0",
     "serve-static": "1.14.1",
     "time-fix-plugin": "^2.0.6",
-    "vue": "3.0.0-rc.5",
+    "vue": "3.0.2",
     "vue-loader": "16.0.0-beta.4",
     "vue-router": "4.0.0-rc.5",
     "vue-style-loader": "4.1.2",
