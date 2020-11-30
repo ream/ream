@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/polka": "0.5.1",
-    "@types/puppeteer": "3.0.1",
+    "@types/puppeteer": "5.4.0",
     "ream": "^5.0.0-alpha.3"
   }
 }
