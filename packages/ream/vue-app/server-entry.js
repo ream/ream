@@ -1,17 +1,18 @@
-import 'dot-ream/templates/global-imports'
+import '/.ream/templates/global-imports'
 import { createApp } from './create-app'
-import { routes } from 'dot-ream/templates/all-routes'
 import { createMemoryHistory } from 'vue-router'
+import allRoutes from '/.ream/templates/all-routes'
 
-export default async (context) => {
-  const { router, app } = createApp(context, createMemoryHistory())
+export default {
+  async render(context) {
+    const { router, app } = createApp(context, createMemoryHistory())
 
-  router.push(context.url)
+    router.push(context.url)
 
-  await router.isReady()
+    await router.isReady()
 
-  return app
+    return app
+  },
+
+  routes: allRoutes,
 }
-
-// Expose all routes
-export { routes }

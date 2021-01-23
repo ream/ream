@@ -1,28 +1,22 @@
 import { resolve, join } from 'path'
+import type { ViteDevServer } from 'vite'
 import resolveFrom from 'resolve-from'
 import { Route } from './utils/route'
 import { loadConfig } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
 import { normalizePluginsArray } from './utils/normalize-plugins-array'
 import { Store, store } from './store'
-import { ChainWebpack } from './types'
 import { createServer } from 'http'
-import { Entry } from 'webpack'
 import { remove, existsSync } from 'fs-extra'
 import { exportSite } from './export'
 
 export interface Options {
-  dir?: string
+  rootDir?: string
   srcDir?: string
   dev?: boolean
-  cache?: boolean
   server?: {
     port?: number | string
   }
-}
-
-type ServerOptions = {
-  port: string
 }
 
 export type ReamPluginConfigItem =
@@ -35,43 +29,40 @@ export type ReamConfig = {
     [k: string]: string | boolean | number
   }
   plugins?: Array<ReamPluginConfigItem>
-  chainWebpack?: ChainWebpack
   css?: string[]
+  server?: {
+    port?: number
+  }
 }
 
 export class Ream {
-  dir: string
+  rootDir: string
   srcDir: string
   isDev: boolean
-  shouldCache: boolean
-  serverOptions: ServerOptions
   config: Required<ReamConfig>
   configPath?: string
   store: Store
+  viteDevServer?: ViteDevServer
   // Used by `export` command, addtional routes like server routes and *.serverpreload.json
   exportedServerRoutes?: Set<string>
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
-    this.dir = resolve(options.dir || '.')
+    this.rootDir = resolve(options.rootDir || '.')
     if (options.srcDir) {
-      this.srcDir = join(this.dir, options.srcDir)
+      this.srcDir = join(this.rootDir, options.srcDir)
     } else {
-      const hasRoutesInSrc = existsSync(join(this.dir, 'src/routes'))
-      this.srcDir = hasRoutesInSrc ? join(this.dir, 'src') : this.dir
+      const hasRoutesInSrc = existsSync(join(this.rootDir, 'src/routes'))
+      this.srcDir = hasRoutesInSrc ? join(this.rootDir, 'src') : this.rootDir
     }
     this.isDev = Boolean(options.dev)
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
     }
-    this.shouldCache = options.cache !== false
-    this.serverOptions = {
-      port: String(options.server?.port || '3000'),
-    }
     this.store = store
 
-    process.env.PORT = this.serverOptions.port
-
-    const { data: projectConfig = {}, path: configPath } = loadConfig(this.dir)
+    const { data: projectConfig = {}, path: configPath } = loadConfig(
+      this.rootDir
+    )
     this.configPath = configPath
     this.config = {
       env: {
@@ -82,20 +73,17 @@ export class Ream {
         ...(configOverride.plugins || []),
         ...(projectConfig.plugins || []),
       ],
-      chainWebpack(chain, options) {
-        if (projectConfig.chainWebpack) {
-          projectConfig.chainWebpack(chain, options)
-        }
-        if (configOverride.chainWebpack) {
-          configOverride.chainWebpack(chain, options)
-        }
-      },
       css: projectConfig.css || [],
+      server: {
+        ...projectConfig.server,
+        port: projectConfig.server?.port || 3000,
+      },
     }
+    process.env.PORT = String(this.config.server.port)
   }
 
-  resolveDir(...args: string[]) {
-    return resolve(this.dir, ...args)
+  resolveRootDir(...args: string[]) {
+    return resolve(this.rootDir, ...args)
   }
 
   resolveSrcDir(...args: string[]) {
@@ -103,35 +91,28 @@ export class Ream {
   }
 
   resolveDotReam(...args: string[]) {
-    return resolve(this.dir, '.ream', ...args)
+    return this.resolveRootDir('.ream', ...args)
   }
 
   resolveVueApp(...args: string[]) {
-    return resolve(__dirname, '../vue-app', ...args)
+    return this.resolveOwnDir('vue-app', ...args)
   }
 
-  get routes(): Route[] {
+  resolveOwnDir(...args: string[]) {
+    return resolve(__dirname, '../', ...args)
+  }
+
+  get routesInfo(): {
+    routes: Route[]
+    errorFile: string
+    documentFile: string
+    appFile: string
+  } {
     return require(this.resolveDotReam('manifest/routes-info.json'))
   }
 
   get plugins() {
-    return normalizePluginsArray(this.config.plugins, this.dir)
-  }
-
-  async getEntry(isClient: boolean): Promise<Entry> {
-    if (isClient) {
-      return {
-        main: [
-          ...(this.isDev
-            ? [require.resolve('webpack-hot-middleware/client')]
-            : []),
-          this.resolveVueApp('client-entry.js'),
-        ],
-      }
-    }
-    return {
-      main: this.resolveVueApp('server-entry.js'),
-    }
+    return normalizePluginsArray(this.config.plugins, this.rootDir)
   }
 
   async prepare({
@@ -163,7 +144,7 @@ export class Ream {
   }
 
   localResolve(name: string) {
-    return resolveFrom.silent(this.dir, name)
+    return resolveFrom.silent(this.rootDir, name)
   }
 
   localRequire(name: string) {
@@ -184,8 +165,8 @@ export class Ream {
   async serve() {
     const handler = await this.getRequestHandler()
     const server = createServer(handler)
-    server.listen(this.serverOptions.port)
-    console.log(`> http://localhost:${this.serverOptions.port}`)
+    server.listen(this.config.server.port)
+    console.log(`> http://localhost:${this.config.server.port}`)
     return server
   }
 

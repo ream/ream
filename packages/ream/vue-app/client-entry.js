@@ -1,4 +1,4 @@
-import 'dot-ream/templates/global-imports'
+import '@templates/global-imports'
 import { createWebHistory } from 'vue-router'
 import { createApp } from './create-app'
 import { getBeforeResolve } from './get-before-resolve'
@@ -15,7 +15,7 @@ const { router, app } = createApp(
 router.isReady().then(() => {
   const vm = app.mount('#_ream')
 
-  if (__DEV__) {
+  if (import.meta.env.DEV) {
     window.__vm__ = vm
   }
 

@@ -1,4 +1,4 @@
-class FetchError extends Error {
+export class FetchError extends Error {
   constructor(message, response) {
     super(message)
     this.name = this.constructor.name
@@ -11,9 +11,7 @@ class FetchError extends Error {
   }
 }
 
-exports.FetchError = FetchError
-
-exports.handleError = function (res) {
+export const handleError = function (res) {
   if (!res.ok) {
     throw new FetchError(res.statusText, res)
   }

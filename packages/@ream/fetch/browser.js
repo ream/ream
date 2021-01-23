@@ -1,8 +1,8 @@
-var fetch = require('unfetch')
-var { handleError, FetchError } = require('./shared')
+import _fetch from 'unfetch'
+import { handleError, FetchError } from './shared'
 
-exports.fetch = function (url, opts) {
-  return fetch.default(url, opts).then(handleError)
+export const fetch = function (url, opts) {
+  return _fetch(url, opts).then(handleError)
 }
 
-exports.FetchError = FetchError
+export { FetchError }

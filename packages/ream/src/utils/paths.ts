@@ -1,7 +1,7 @@
-import { getServerPreloadPath } from '../runtime-utils'
-
 export function getOutputServerPreloadPath(path: string) {
-  return getServerPreloadPath(path)
+  return /\/$/.test(path)
+    ? `${path}index.serverpreload.json`
+    : `${path}.serverpreload.json`
 }
 
 export function getOutputHTMLPath(path: string) {

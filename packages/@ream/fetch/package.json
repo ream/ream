@@ -4,6 +4,7 @@
     "access": "public"
   },
   "version": "5.0.0-alpha.3",
+  "type": "module",
   "files": [
     "*.js",
     "*.d.ts"

@@ -1,5 +1,5 @@
 import glob from 'fast-glob'
-import { pathToRoutes, pathToRoute } from './utils/path-to-routes'
+import { pathToRoute, pathToRoutes } from './utils/path-to-routes'
 import { outputFile, pathExists } from 'fs-extra'
 import { Ream } from './node'
 import { store } from './store'
@@ -9,34 +9,42 @@ import {
   SERVER_PRELOAD_INDICATOR,
   STATIC_PRELOAD_INDICATOR,
 } from './babel/constants'
+import path from 'path'
 
 function getRoutes(_routes: Route[], ownRoutesDir: string) {
-  const routes: Route[] = [..._routes]
+  const routes: Route[] = []
 
-  const patterns = [
-    {
-      require: (route: Route) => route.entryName === 'routes/_error',
-      filename: '_error.js',
-    },
-    {
-      require: (route: Route) => route.entryName === 'routes/_app',
-      filename: '_app.js',
-    },
-    {
-      require: (route: Route) => route.entryName === 'routes/_document',
-      filename: '_document.js',
-    },
-    {
-      require: (route: Route) => route.entryName === 'routes/404',
-      filename: '404.js',
-    },
-  ]
-  for (const pattern of patterns) {
-    if (!routes.some(pattern.require)) {
-      routes.push(pathToRoute(pattern.filename, ownRoutesDir, routes.length))
+  let errorFile = path.join(ownRoutesDir, '_error.js')
+  let documentFile = path.join(ownRoutesDir, '_document.js')
+  let appFile = path.join(ownRoutesDir, '_app.js')
+  let catchAllRoute: Route = pathToRoute('404.js', ownRoutesDir, 0)
+
+  for (const route of _routes) {
+    if (route.routePath === '/_error') {
+      errorFile = route.absolutePath
+    } else if (route.routePath === '/_document') {
+      documentFile = route.absolutePath
+    } else if (route.routePath === '/_app') {
+      appFile = route.routePath
+    } else if (route.routePath === '/404') {
+      catchAllRoute = pathToRoute(
+        route.relativePath,
+        path.dirname(route.absolutePath),
+        0
+      )
+    } else {
+      routes.push(route)
     }
   }
-  return sortRoutesByScore(routes)
+
+  routes.push(catchAllRoute)
+
+  return {
+    routes: sortRoutesByScore(routes),
+    errorFile,
+    documentFile,
+    appFile,
+  }
 }
 
 export async function prepareFiles(api: Ream) {
@@ -54,33 +62,29 @@ export async function prepareFiles(api: Ream) {
   )
 
   const writeRoutes = async () => {
-    const routes = getRoutes(
+    const {
+      routes,
+      appFile,
+      errorFile,
+      documentFile,
+      notFoundFile,
+    } = getRoutes(
       pathToRoutes([...files], routesDir),
       api.resolveVueApp('routes')
     )
 
-    let appRoute: Route
-    let errorRoute: Route
-    for (const route of routes) {
-      if (route.entryName === 'routes/_app') {
-        appRoute = route
-      } else if (route.entryName === 'routes/_error') {
-        errorRoute = route
-      }
+    const getRelativePathToTemplatesDir = (p: string) => {
+      return path.relative(api.resolveDotReam('templates'), p)
     }
 
     const clientRoutesContent = `
     import { h } from 'vue'
 
     var getAppComponent = function() {
-      return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${
-      appRoute!.absolutePath
-    }")
+      return import("${getRelativePathToTemplatesDir(appFile)}")
     }
     var getErrorComponent = function() {
-      return import(/* webpackChunkName: "${errorRoute!.entryName}" */ "${
-      errorRoute!.absolutePath
-    }")
+      return import("${getRelativePathToTemplatesDir(errorFile)}")
     }
 
     var wrapPage = function(res) {
@@ -114,9 +118,7 @@ export async function prepareFiles(api: Ream) {
             return Promise.all([
               getAppComponent(),
               getErrorComponent(),
-              import(/* webpackChunkName: ${JSON.stringify(
-                route.entryName
-              )} */ ${JSON.stringify(route.absolutePath)})
+              import("${getRelativePathToTemplatesDir(route.absolutePath)}")
             ]).then(wrapPage)
           }
         }`
@@ -136,22 +138,19 @@ export async function prepareFiles(api: Ream) {
     )
 
     const allRoutesContent = `
-    var routes = {}
-    
+   export default [
     ${routes
       .map((route) => {
-        return `routes[${JSON.stringify(route.entryName)}] = {
-          type: "${route.isServerRoute ? 'server' : 'client'}",
-          load: () => import(/* webpackChunkName: "${
-            route.entryName
-          }" */ ${JSON.stringify(route.absolutePath)})
-        }`
+        return `{
+        entryName: "${route.entryName}",
+        type: "${route.isServerRoute ? 'server' : 'client'}",
+        load: () => import("${getRelativePathToTemplatesDir(
+          route.absolutePath
+        )}")
+      }`
       })
-      .join('\n')}
-
-    export {
-      routes
-    }
+      .join(',')}
+   ]
     `
 
     await outputFile(
@@ -162,7 +161,17 @@ export async function prepareFiles(api: Ream) {
 
     await outputFile(
       api.resolveDotReam('manifest/routes-info.json'),
-      JSON.stringify(routes, null, 2),
+      JSON.stringify(
+        {
+          routes,
+          errorFile,
+          documentFile,
+          appFile,
+          notFoundFile,
+        },
+        null,
+        2
+      ),
       'utf8'
     )
 

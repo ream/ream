@@ -1,5 +1,5 @@
 // @ts-check
-import { getServerPreloadPath } from 'ream/dist/runtime-utils'
+import { getServerPreloadPath } from '@client-app/runtime-utils'
 
 /**
  * Execute `preload` in router-level `beforeResolve`

@@ -1,1 +1,1 @@
-export * from '@egoist/vue-head'
+export * from '@vueuse/head'

@@ -1,9 +1,8 @@
 import { Component } from 'vue'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
-import { HeadProvider } from 'ream/head'
 import { findMatchedRoute } from '../utils/route-helpers'
-import { h, Fragment } from 'vue'
+import { Head, renderHeadToString } from '@vueuse/head'
 import { Ream } from '../node'
 import { ClientManifest } from '../webpack/plugins/client-manifest'
 import {
@@ -12,7 +11,6 @@ import {
   ReamServerHandler,
 } from './server'
 import { NextFunction } from 'connect'
-import { Preload, ServerPreload, StaticPreload, StaticPaths } from '..'
 import { readFile, pathExists, outputFile } from 'fs-extra'
 import serializeJavascript from 'serialize-javascript'
 import { getOutputHTMLPath, getOutputServerPreloadPath } from '../utils/paths'
@@ -22,42 +20,24 @@ export type RenderError = {
   statusCode: number
 }
 
-export type ClientRouteLoader = {
-  type: 'client'
-  load: () => Promise<{
-    default: Component
-    preload?: Preload
-    serverPreload?: ServerPreload
-    staticPreload?: StaticPreload
-    staticPaths?: StaticPaths
-  }>
-}
-
 export type ServerRouteLoader = {
   type: 'server'
   load: () => Promise<{ default: ReamServerHandler }>
 }
 
-export const getServerMain = (
+export const getServerMain = async (
   api: Ream
-): {
-  createApp: any
-  routes: {
-    [entryName: string]: ClientRouteLoader | ServerRouteLoader
-  }
-} => {
-  const { default: createApp, routes } = require(api.resolveDotReam(
-    'server/main.js'
-  ))
-  return {
-    createApp,
-    routes,
-  }
+): Promise<{
+  render: any
+}> => {
+  const mod = await api.viteDevServer?.ssrLoadModule(
+    `/@fs/${api.resolveVueApp('server-entry.js')}`
+  )
+  return mod.default
 }
 
-export const getErrorComponent = (api: Ream) => {
-  const { routes } = getServerMain(api)
-  return routes['routes/_error'] as ClientRouteLoader
+export const getErrorComponent = async (api: Ream) => {
+  return api.viteDevServer?.ssrLoadModule(`/@fs/${api.routesInfo.errorFile}`)
 }
 
 export async function render(
@@ -70,14 +50,8 @@ export async function render(
     isServerPreload,
   }: { clientManifest?: ClientManifest; isServerPreload?: boolean }
 ) {
-  if (!clientManifest) {
-    return res.end(`Please wait for build to complete..`)
-  }
-
-  const { routes } = getServerMain(api)
-
-  const { params, route } = findMatchedRoute(api.routes, req.path)
-
+  const { routes } = api.routesInfo
+  const { params, route } = findMatchedRoute(routes, req.path)
   req.params = params
 
   if (!route) {
@@ -98,9 +72,10 @@ export async function render(
         )
       }
     }
-    const routeLoader = routes[route.entryName]
-    if (routeLoader.type === 'server') {
-      const handler = await routeLoader.load()
+    if (route.isServerRoute) {
+      const handler = await api.viteDevServer.ssrLoadModule(
+        `/@fs/${route.absolutePath}`
+      )
       await handler.default(req, res, next)
       if (api.exportedServerRoutes) {
         // Keep this path when request succeeds
@@ -113,8 +88,10 @@ export async function render(
   if (req.method !== 'GET') {
     return res.end('unsupported method')
   }
-  const routeLoader = routes[route.entryName] as ClientRouteLoader
-  const routeComponent = await routeLoader.load()
+  const routeComponent = await api.viteDevServer.ssrLoadModule(
+    `/@fs/${route.absolutePath}`
+  )
+  console.log('route component', routeComponent)
   const exportDir = api.resolveDotReam('export')
   const staticHTMLPath = join(exportDir, getOutputHTMLPath(req.path))
   const staticPreloadOutputPath = join(
@@ -151,6 +128,7 @@ export async function render(
         res,
         params: req.params,
       })
+      console.log(req.path, req.url)
       const html = await renderToHTML(api, {
         params: req.params,
         url: req.url,
@@ -191,29 +169,17 @@ export async function renderToHTML(
     [options.path]: options.props,
   }
 
-  const { createApp, routes } = getServerMain(api)
-  const app = await createApp(context)
+  const { render } = await getServerMain(api)
+  const app = await render(context)
   const appHTML = await renderToString(app)
-  const head: HeadProvider = app.config.globalProperties.$head
-  const headHTML = await renderToString(h(Fragment, head.headTags))
-  const routeLoader = routes['routes/_document'] as any
-  const { default: getDocument } = await routeLoader.load()
+  const head: Head = app.config.globalProperties.$head
+  const headHTML = renderHeadToString(head)
+  const { default: getDocument } = await api.viteDevServer.ssrLoadModule(
+    `/@fs/${api.routesInfo.documentFile}`
+  )
   const noop = () => ''
-  const addPublicPath = (file: string) =>
-    options.clientManifest.publicPath + file
-  const scripts =
-    options.clientManifest.initial
-      .filter((file) => file.endsWith('.js'))
-      .map(addPublicPath) || []
-  const styles =
-    options.clientManifest.initial
-      .filter((file) => file.endsWith('.css'))
-      .map(addPublicPath) || []
   const html = await getDocument({
-    head: () =>
-      `${headHTML}${styles.map(
-        (file) => `<link rel="stylesheet" href="${file}">`
-      )}`,
+    head: () => `${headHTML.headTags}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
     script: () => `
       <script>INITIAL_STATE=${serializeJavaScript(
@@ -221,10 +187,13 @@ export async function renderToHTML(
           pagePropsStore: context.pagePropsStore,
         },
         { isJSON: true }
-      )}</script>
-      ${scripts.map((file) => `<script src="${file}"></script>`).join('')}`,
+      )}
+      </script>
+      <script type="module" src="/@vite/client"></script>
+      <script type="module" src="/@fs/${api.resolveVueApp(
+        'client-entry.js'
+      )}"></script>`,
     htmlAttrs: noop,
-    headAttrs: noop,
     bodyAttrs: noop,
   })
 

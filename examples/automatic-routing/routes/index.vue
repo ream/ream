@@ -8,3 +8,11 @@
     </ul>
   </div>
 </template>
+
+<script lang="ts" setup>
+import { useHead } from 'ream/head'
+
+useHead({
+  title: 'Home',
+})
+</script>

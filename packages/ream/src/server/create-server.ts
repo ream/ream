@@ -16,13 +16,13 @@ export async function getRequestHandler(api: Ream) {
   let clientManifest: ClientManifest | undefined
 
   if (api.isDev) {
-    const { createDevMiddlewares } = await import('./dev-middlewares')
-    const devMiddlewares = createDevMiddlewares(api, (_clientManifest) => {
-      clientManifest = _clientManifest
+    const { createDevMiddleware } = await import('./dev-middlewares')
+    const middleware = await createDevMiddleware(api)
+    server.use(middleware)
+    server.use((req, res, next) => {
+      req.url = req.originalUrl
+      next()
     })
-    for (const m of devMiddlewares) {
-      server.use(m)
-    }
   } else {
     clientManifest = require(api.resolveDotReam('client/client-manifest.json'))
 
@@ -52,7 +52,10 @@ export async function getRequestHandler(api: Ream) {
   })
 
   server.onError(async (err, req, res, next) => {
-    console.error('server error', err)
+    if (api.isDev) {
+      api.viteDevServer?.ssrFixStacktrace(err)
+    }
+    console.error('server error', err.stack)
     const response = (err as FetchError).response as Response | undefined
     if (response) {
       res.statusCode = response.status
