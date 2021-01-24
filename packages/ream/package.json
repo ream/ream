@@ -27,6 +27,7 @@
     "url": "https://github.com/egoist/ream"
   },
   "dependencies": {
+    "@babel/core": "^7.12.10",
     "@ream/common": "5.0.0-alpha.0",
     "@ream/fetch": "5.0.0-alpha.3",
     "@vitejs/plugin-vue": "1.1.0",

@@ -3,10 +3,6 @@ import { outputFile, pathExists } from 'fs-extra'
 import { Ream } from './node'
 import { store } from './store'
 import { Route } from './utils/route'
-import {
-  SERVER_PRELOAD_INDICATOR,
-  STATIC_PRELOAD_INDICATOR,
-} from './babel/constants'
 import path from 'path'
 import { filesToRoutes } from './utils/load-routes'
 
@@ -93,7 +89,7 @@ export async function prepareFiles(api: Ream) {
       var Component = page.default
       return {
         preload: page.preload,
-        hasServerPreload: page["${SERVER_PRELOAD_INDICATOR}"] || page["${STATIC_PRELOAD_INDICATOR}"],
+        hasServerPreload: page.serverPreload || page.staticPreload,
         render: function () {
           var pagePropsStore = this.$root.pagePropsStore
           var pageProps = pagePropsStore && pagePropsStore[this.$route.path]

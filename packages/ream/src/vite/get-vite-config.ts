@@ -3,6 +3,7 @@ import { UserConfig as ViteConfig, Plugin } from 'vite'
 import { NodeTypes, ElementTypes } from '@vue/compiler-core'
 import vuePlugin from '@vitejs/plugin-vue'
 import path from 'path'
+import { babelPlugin } from './plugins/babel'
 
 const CLIENT_APP_DIR = path.join(__dirname, '../../vue-app')
 
@@ -35,6 +36,7 @@ export const getViteConfig = (api: Ream): ViteConfig => {
     root: api.rootDir,
     plugins: [
       reamAliasPlugin(api),
+      babelPlugin(),
       vuePlugin({
         include: [/\.vue$/],
         template: {

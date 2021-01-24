@@ -19,10 +19,6 @@ export async function getRequestHandler(api: Ream) {
     const { createDevMiddleware } = await import('./dev-middlewares')
     const middleware = await createDevMiddleware(api)
     server.use(middleware)
-    server.use((req, res, next) => {
-      req.url = req.originalUrl
-      next()
-    })
   } else {
     clientManifest = require(api.resolveDotReam('client/client-manifest.json'))
 

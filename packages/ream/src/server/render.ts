@@ -1,4 +1,4 @@
-import { Component } from 'vue'
+import { createRouter, createMemoryHistory } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
 import { findMatchedRoute } from '../utils/route-helpers'
@@ -50,48 +50,31 @@ export async function render(
     isServerPreload,
   }: { clientManifest?: ClientManifest; isServerPreload?: boolean }
 ) {
-  const { routes } = api.routesInfo
-  const { params, route } = findMatchedRoute(routes, req.path)
+  const { clientRoutes } = await api.viteDevServer.ssrLoadModule(
+    `/.ream/templates/client-routes.js`
+  )
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: clientRoutes,
+  })
+  router.push(req.url)
+  await router.isReady()
+  const route =
+    router.currentRoute.value.matched[
+      router.currentRoute.value.matched.length - 1
+    ]
+
+  // TODO: set status code for 404 pages
+
+  const { params, query } = router.currentRoute.value
   req.params = params
-
-  if (!route) {
-    // This actuall will never be reached
-    // Since we have a catchAll page as 404 page
-    throw new Error(`Page not found`)
-  }
-
-  if (route.is404) {
-    res.statusCode = 404
-  }
-
-  if (route.isServerRoute) {
-    if (api.exportedServerRoutes) {
-      if (Object.keys(req.query).length > 0) {
-        throw new Error(
-          `You can't request API routes with query string in exporting mode`
-        )
-      }
-    }
-    if (route.isServerRoute) {
-      const handler = await api.viteDevServer.ssrLoadModule(
-        `/@fs/${route.absolutePath}`
-      )
-      await handler.default(req, res, next)
-      if (api.exportedServerRoutes) {
-        // Keep this path when request succeeds
-        api.exportedServerRoutes.add(req.path)
-      }
-      return
-    }
-  }
+  req.query = query as any
 
   if (req.method !== 'GET') {
     return res.end('unsupported method')
   }
-  const routeComponent = await api.viteDevServer.ssrLoadModule(
-    `/@fs/${route.absolutePath}`
-  )
-  console.log('route component', routeComponent)
+
+  const component = route.components.default as any
   const exportDir = api.resolveDotReam('export')
   const staticHTMLPath = join(exportDir, getOutputHTMLPath(req.path))
   const staticPreloadOutputPath = join(
@@ -99,14 +82,14 @@ export async function render(
     getOutputServerPreloadPath(req.path)
   )
   const shouldExport =
-    !routeComponent.preload && !routeComponent.serverPreload && !api.isDev
+    !component.preload && !component.serverPreload && !api.isDev
   const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
   if (isServerPreload) {
     res.setHeader('content-type', 'application/json')
     if (hasStaticHTML) {
       res.end(await readFile(staticPreloadOutputPath, 'utf8'))
     } else {
-      const { props } = await getPreloadData(routeComponent, {
+      const { props } = await getPreloadData(component, {
         req,
         res,
         params: req.params,
@@ -123,7 +106,7 @@ export async function render(
       const html = await readFile(staticHTMLPath, 'utf8')
       res.end(html)
     } else {
-      const { props } = await getPreloadData(routeComponent, {
+      const { props } = await getPreloadData(component, {
         req,
         res,
         params: req.params,

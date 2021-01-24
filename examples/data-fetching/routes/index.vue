@@ -1,7 +1,4 @@
 <template>
-  <Head>
-    <title>{{ title }}</title>
-  </Head>
   <div class="page">
     <h1>{{ message }}</h1>
     <Nav />
@@ -10,9 +7,6 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue'
-import { Head } from 'ream/head'
-import Nav from '../components/Nav.vue'
 import { sleep } from '../utils/sleep'
 
 export const preload = async () => {
@@ -23,22 +17,20 @@ export const preload = async () => {
     },
   }
 }
+</script>
 
-export default {
-  props: ['message'],
+<script setup>
+import { ref, computed, defineProps } from 'vue'
+import { useHead } from 'ream/head'
+import Nav from '../components/Nav.vue'
 
-  components: {
-    Nav,
-    Head,
-  },
+const props = defineProps({
+  message: String,
+})
 
-  setup(props) {
-    const count = ref(0)
+const count = ref(0)
 
-    return {
-      count,
-      title: `${count.value} - ${props.message}`,
-    }
-  },
-}
+useHead({
+  title: computed(() => `${count.value} - ${props.message}`),
+})
 </script>

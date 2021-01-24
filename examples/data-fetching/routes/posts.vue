@@ -1,10 +1,6 @@
 <template>
-  <Head>
-    <title>Posts</title>
-  </Head>
   <div class="posts">
     <h1>Posts</h1>
-    <h2>{{ date }}</h2>
     <ul>
       <li v-for="post in posts" :key="post.title">
         {{ post.title }}
@@ -15,10 +11,6 @@
 </template>
 
 <script>
-import Nav from '../components/Nav.vue'
-import { sleep } from '../utils/sleep'
-import { Head } from 'ream/head'
-
 export const preload = async () => {
   const arr = new Array(100).fill(null)
   return {
@@ -29,13 +21,16 @@ export const preload = async () => {
     },
   }
 }
+</script>
 
-export default {
-  props: ['posts', 'date'],
+<script setup>
+import { defineProps } from 'vue'
+import { useHead } from 'ream/head'
+import Nav from '../components/Nav.vue'
 
-  components: {
-    Nav,
-    Head,
-  },
-}
+const props = defineProps({
+  posts: null,
+})
+
+useHead({ title: 'Posts' })
 </script>

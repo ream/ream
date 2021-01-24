@@ -18,7 +18,7 @@ it('removes export function declaration', () => {
   `
   )
 
-  expect(code1).toMatchInlineSnapshot(`"export var __re0 = true;"`)
+  expect(code1).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
 
   const code2 = compile(
     `
@@ -28,7 +28,7 @@ it('removes export function declaration', () => {
   `
   )
 
-  expect(code2).toMatchInlineSnapshot(`"export var __re1 = true;"`)
+  expect(code2).toMatchInlineSnapshot(`"export var staticPreload = 1;"`)
 })
 
 it('removes references that are only used in ssr exports', () => {
@@ -57,7 +57,7 @@ it('removes references that are only used in ssr exports', () => {
     var shouldHeep = 2;
     var alsoShouldKeep = 3;
     console.log(alsoShouldKepp);
-    export var __re0 = true;"
+    export var serverPreload = 1;"
   `)
 })
 
@@ -70,7 +70,7 @@ it('removes export variable declaration', () => {
   `
   )
 
-  expect(code).toMatchInlineSnapshot(`"export var __re0 = true;"`)
+  expect(code).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
 })
 
 it('removes re-exports', () => {
@@ -80,7 +80,7 @@ it('removes re-exports', () => {
   `
   )
 
-  expect(code).toMatchInlineSnapshot(`"export var __re0 = true;"`)
+  expect(code).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
 })
 
 it('keeps other exports', () => {
@@ -89,7 +89,7 @@ it('keeps other exports', () => {
   export {serverPreload} from './'`)
   expect(code).toMatchInlineSnapshot(`
     "export const a = 1;
-    export var __re0 = true;"
+    export var serverPreload = 1;"
   `)
 })
 
@@ -100,5 +100,5 @@ it('removes destructuring assignment (array)', () => {
   export const serverPreload = () => {
     console.log(a,b,c,e)
   }`)
-  expect(code).toMatchInlineSnapshot(`"export var __re0 = true;"`)
+  expect(code).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
 })
