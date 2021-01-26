@@ -4,6 +4,7 @@ import { NodeTypes, ElementTypes } from '@vue/compiler-core'
 import vuePlugin from '@vitejs/plugin-vue'
 import path from 'path'
 import { babelPlugin } from './plugins/babel'
+import { OWN_APP_DIR } from '../utils/constants'
 
 const CLIENT_APP_DIR = path.join(__dirname, '../../vue-app')
 
@@ -34,6 +35,9 @@ const reamAliasPlugin = (api: Ream): Plugin => {
 export const getViteConfig = (api: Ream): ViteConfig => {
   return {
     root: api.rootDir,
+    alias: {
+      '@own-app-dir': OWN_APP_DIR,
+    },
     plugins: [
       reamAliasPlugin(api),
       babelPlugin(),

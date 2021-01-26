@@ -1,6 +1,6 @@
 import { Plugin } from 'vite'
 import { transformSync } from '@babel/core'
-import transformPageExports from 'ream/src/babel/transform-page-exports'
+import transformPageExports from '../../babel/transform-page-exports'
 
 export const babelPlugin = (): Plugin => {
   let needSourceMap = false

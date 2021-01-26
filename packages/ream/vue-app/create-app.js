@@ -1,22 +1,16 @@
 import { h, createSSRApp } from 'vue'
 import { createHead } from '@vueuse/head'
-import { createRouter as createVueRouter, RouterView } from 'vue-router'
-import { routes } from '/.ream/templates/client-routes'
+import { RouterView } from 'vue-router'
 import { onCreatedApp } from '/.ream/templates/enhance-app'
 
-export const createApp = (context, history) => {
+export const createApp = ({ pagePropsStore, router }) => {
   const app = createSSRApp({
     data() {
       return {
-        pagePropsStore: context.pagePropsStore,
+        pagePropsStore,
       }
     },
     render: () => [h(RouterView)],
-  })
-
-  let router = createVueRouter({
-    history,
-    routes,
   })
 
   const head = createHead()

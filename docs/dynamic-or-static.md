@@ -2,7 +2,7 @@
 
 ## Server-rendered sites
 
-By default the site produced by Ream needs to be served as a Node.js server, or run in a serverless environment like AWS lambda. But pages that don't use `preload` or `serverPreload` will be statically generated at build time or at the first time being requested.
+By default the site produced by Ream needs to be served as a Node.js server, or run in a serverless environment like AWS lambda. But pages that don't use `preload` will be statically generated at build time or at the first time being requested.
 
 This is the best way to make some pages "static" while keeping other pages server-rendered if you need.
 

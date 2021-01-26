@@ -1,7 +1,5 @@
-export function getOutputServerPreloadPath(path: string) {
-  return /\/$/.test(path)
-    ? `${path}index.serverpreload.json`
-    : `${path}.serverpreload.json`
+export function getStaticPreloadOutputPath(path: string) {
+  return /\/$/.test(path) ? `${path}index.preload.json` : `${path}.preload.json`
 }
 
 export function getOutputHTMLPath(path: string) {

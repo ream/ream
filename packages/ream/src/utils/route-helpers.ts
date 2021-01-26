@@ -1,5 +1,4 @@
 import { Key, pathToRegexp, compile } from 'path-to-regexp'
-import { Route } from './route'
 
 export function execPathRegexp(path: string, regexp: RegExp, keys: Key[]) {
   let i = 0
@@ -15,21 +14,6 @@ export function execPathRegexp(path: string, regexp: RegExp, keys: Key[]) {
     }
   }
   return out
-}
-
-export function findMatchedRoute(routes: Route[], path: string) {
-  for (const route of routes) {
-    if (route.isClientRoute || route.isServerRoute) {
-      const params = getParams(path, route.routePath)
-      if (params) {
-        return {
-          params,
-          route,
-        }
-      }
-    }
-  }
-  return { params: {} }
 }
 
 export function getParams(path: string, pattern: string) {

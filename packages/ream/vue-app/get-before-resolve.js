@@ -1,5 +1,5 @@
 // @ts-check
-import { getServerPreloadPath } from '@client-app/runtime-utils'
+import { getPreloadPath } from '@client-app/runtime-utils'
 
 /**
  * Execute `preload` in router-level `beforeResolve`
@@ -11,23 +11,17 @@ export const getBeforeResolve = (vm) =>
       return next()
     }
     const matched = to.matched[0].components.default
-    const { preload, hasServerPreload } = matched
-    if (!preload && !hasServerPreload) {
+    const { preload, staticPreload } = matched
+    if (!preload && !staticPreload) {
       return next()
     }
     const fetchProps = (next) => {
       return Promise.all(
-        [
-          preload && preload({ params: to.params }),
-          hasServerPreload &&
-            fetch(getServerPreloadPath(to.path)).then((res) => res.json()),
-        ].filter(Boolean)
-      ).then(([preloadResult, servePreloadResult]) => {
-        pagePropsStore[to.path] = Object.assign(
-          {},
-          preloadResult,
-          servePreloadResult
+        [fetch(getPreloadPath(to.path)).then((res) => res.json())].filter(
+          Boolean
         )
+      ).then(([preloadResult]) => {
+        pagePropsStore[to.path] = Object.assign({}, preloadResult)
         if (next) {
           next()
         }

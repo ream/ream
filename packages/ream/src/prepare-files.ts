@@ -20,11 +20,6 @@ export async function prepareFiles(api: Ream) {
     ignore: ['node_modules', 'dist'],
   })
 
-  const ownRoutesDir = api.resolveVueApp('routes')
-  let errorFile = path.join(ownRoutesDir, '_error.js')
-  let documentFile = path.join(ownRoutesDir, '_document.js')
-  let appFile = path.join(ownRoutesDir, '_app.js')
-
   const writeRoutes = async () => {
     const routesInfo = filesToRoutes(files, routesDir)
 
@@ -74,22 +69,20 @@ export async function prepareFiles(api: Ream) {
     import { h } from 'vue'
 
     var getAppComponent = function() {
-      return import("${getRelativePathToTemplatesDir(
-        routesInfo.appFile || appFile
-      )}")
+      return import("${getRelativePathToTemplatesDir(routesInfo.appFile)}")
     }
     var getErrorComponent = function() {
-      return import("${getRelativePathToTemplatesDir(
-        routesInfo.errorFile || errorFile
-      )}")
+      return import("${getRelativePathToTemplatesDir(routesInfo.errorFile)}")
     }
 
     var wrapPage = function(res) {
       var _app = res[0], _error = res[1], page = res[2]
       var Component = page.default
       return {
-        preload: page.preload,
-        hasServerPreload: page.serverPreload || page.staticPreload,
+        $$preload: page.preload,
+        $$clientPreload: page.clientPreload,
+        $$staticPreload: page.staticPreload,
+        $$getStaticPaths: page.getStaticPaths,
         render: function () {
           var pagePropsStore = this.$root.pagePropsStore
           var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
@@ -117,9 +110,7 @@ export async function prepareFiles(api: Ream) {
     const serverExportsContent = `
    export const serverRoutes = ${stringifyServerRoutes(routesInfo.routes)}
 
-   export const _document = () => import("${
-     routesInfo.documentFile || documentFile
-   }")
+   export const _document = () => import("${routesInfo.documentFile}")
     `
 
     await outputFile(

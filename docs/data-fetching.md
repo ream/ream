@@ -2,47 +2,13 @@
 
 ## Preload
 
-Page components can have an optional `preload` function that will load some data that the page depends on:
-
-```vue
-<script>
-import { fetch } from 'ream/fetch'
-
-export const preload = async (context) => {
-  const posts = await fetch(`/blog/posts.json?user=${context.params.user}`)
-  return {
-    // `props` will be passed to the component as props
-    props: {
-      posts,
-    },
-  }
-}
-
-export default {
-  props: ['posts'],
-}
-</script>
-```
-
-The `context` parameter is an object containing the following keys:
-
-- `params` contains the route parameters for pages using dynamic routes. For example, if the page name is `[id].vue`, then params will look like `{ id: '...' }`. To learn more, take a look at the [Dynamic Routing documentation](/docs/routing#dynamic-routing).
-
-### How does `preload` work
-
-The `preload` function is similar to `getInitialProps` in Next.js and `asyncData` in Nuxt.js, it's executed on both server-side and client-side before rendering a page.
-
-## Server Preload
-
-`preload` function is also executed in browser which means you can't just query a database there, you'll have to write browser-compatible code and use browser-compatble libraries.
-
-Luckily you can use `serverPreload` to get rid of that, you can query a database like this:
+If you export an async function called `preload` from a page, Ream will pre-render this page on each request using the data returned by `preload`.
 
 ```vue
 <script>
 import { db } from './path/to/db'
 
-export const serverPreload = async (context) => {
+export const preload = async (context) => {
   const posts = await db.findPosts({ user: context.params.user })
   return {
     props: {
@@ -57,22 +23,20 @@ export default {
 </script>
 ```
 
-You can write anything as if you're writing a Node.js server in the `serverPreload` function, these code will never be exposed on the client-side.
+As you can see, you can use server-side utilities as if you're writing a Node.js server in the `preload` function, these code will never be exposed on the client-side.
 
-### How does `serverPreload` work
+### How does `preload` work
 
-On the server-side, it behaves the same as `preload`, on the client-side, instead of executing this function, we send a request to the server to get the result of `serverPreload`, the function is entirely processed on the server-side. We also automatically eliminate this function and whatever this function depends on from the client bundle.
+On the server-side, Ream executes `preload` before rendering the page, on the client-side, Ream will send a request to the server to get the result of `preload`, the function is entirely processed on the server-side. We also automatically eliminate this function and whatever this function depends on from the client bundle.
 
 ## Static Preload
 
-Ream applies incremental static page generation to pages that don't use `preload` or `serverPreload`, meaning that you can dynamically render some pages while pre-rendering the other pages.
-
-In many cases you will still need to use external data on pre-rendered pages, Ream provides `staticPreload` for such use case:
+In many cases you will still need to use external data on pre-rendered pages, `preload` kills the possiblity of pre-rendering web pages at build time, so Ream provides `staticPreload` for such use case:
 
 For example, let's say you are building a static blog, and you want to fetch blog posts from an external API:
 
 ```vue
-<!-- routes/posts/[id].vue -->
+<!-- pages/posts/[id].vue -->
 <script>
 export const staticPreload = async (context) => {
   const post = await fetchPostFromApi({ id: context.params.id })
@@ -89,14 +53,14 @@ export default {
 </script>
 ```
 
-`staticPreload` is actually very similar to `serverPreload`, both of them are executed on server-side, but `staticPreload` will pre-render the pages:
+The signature `staticPreload` is almost the same as `preload`, both of them are executed on server-side, but `staticPreload` will tell Ream to pre-render the page at build time:
 
-- For dynamic routes (i.e. `:id`), Ream renders them at request time but will cache the result and subsequent requests will use the cache instead.
+- For dynamic routes (i.e. containing `[id]` in file name), Ream renders them at request time but will cache the result, and subsequent requests will use the cache instead.
 - For static routes, it's rendered at build time.
 
 ### Static Paths
 
-For dynamic routes, you can also render them at build time by using the `staticPaths` option, suppose that you have a page that uses dynamic routes named `src/pages/posts/[id].vue`
+For dynamic routes which use the `staticPreload` function, you can also render them at build time by using the `staticPaths` option, suppose that you have a page that uses dynamic routes named `src/routes/posts/[id].vue`
 
 ```vue
 <script>

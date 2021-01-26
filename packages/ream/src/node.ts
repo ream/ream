@@ -9,6 +9,7 @@ import { Store, store } from './store'
 import { createServer } from 'http'
 import { remove, existsSync } from 'fs-extra'
 import { exportSite } from './export'
+import { OWN_APP_DIR, OWN_DIR } from './utils/constants'
 
 export interface Options {
   rootDir?: string
@@ -43,7 +44,7 @@ export class Ream {
   configPath?: string
   store: Store
   viteDevServer?: ViteDevServer
-  // Used by `export` command, addtional routes like server routes and *.serverpreload.json
+  // Used by `export` command, addtional routes like server routes and *.preload.json
   exportedServerRoutes?: Set<string>
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
@@ -95,11 +96,11 @@ export class Ream {
   }
 
   resolveVueApp(...args: string[]) {
-    return this.resolveOwnDir('vue-app', ...args)
+    return resolve(OWN_APP_DIR, ...args)
   }
 
   resolveOwnDir(...args: string[]) {
-    return resolve(__dirname, '../', ...args)
+    return resolve(OWN_DIR, ...args)
   }
 
   get routesInfo(): {

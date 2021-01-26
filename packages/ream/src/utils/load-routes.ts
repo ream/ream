@@ -1,11 +1,16 @@
 import path from 'path'
+import { OWN_APP_DIR } from './constants'
 import { Route } from './route'
 
 export const filesToRoutes = (files: string[], dir: string) => {
   const routes: Route[] = []
-  let errorFile: string | undefined
-  let appFile: string | undefined
-  let documentFile: string | undefined
+  let errorFile: string = path.join(OWN_APP_DIR, 'routes/_error.js')
+  let appFile: string | undefined = path.join(OWN_APP_DIR, 'routes/_app.js')
+  let documentFile: string | undefined = path.join(
+    OWN_APP_DIR,
+    'routes/_document.js'
+  )
+  let notFoundFile = path.join(OWN_APP_DIR, 'routes/404.js')
 
   for (const file of files) {
     const slug = file
@@ -26,6 +31,8 @@ export const filesToRoutes = (files: string[], dir: string) => {
       documentFile = absolutePath
     } else if (slug === '_app') {
       appFile = absolutePath
+    } else if (slug === '404') {
+      notFoundFile = absolutePath
     }
 
     const isServerRoute = /^api[$|\/]/.test(file)
@@ -82,6 +89,12 @@ export const filesToRoutes = (files: string[], dir: string) => {
 
     parent.push(route)
   }
+
+  routes.push({
+    path: `/:404(.*)`,
+    isServerRoute: false,
+    file: notFoundFile,
+  })
 
   return { routes, appFile, documentFile, errorFile }
 }

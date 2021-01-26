@@ -12,13 +12,13 @@ const compile = (input: string) => {
 it('removes export function declaration', () => {
   const code1 = compile(
     `
-  export function serverPreload() {
+  export function preload() {
     return {}
   }
   `
   )
 
-  expect(code1).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
+  expect(code1).toMatchInlineSnapshot(`"export var preload = 1;"`)
 
   const code2 = compile(
     `
@@ -31,7 +31,7 @@ it('removes export function declaration', () => {
   expect(code2).toMatchInlineSnapshot(`"export var staticPreload = 1;"`)
 })
 
-it('removes references that are only used in ssr exports', () => {
+it('removes references that are only used in server exports', () => {
   const code = compile(
     `
     var readFile = require('fs').readFile
@@ -45,7 +45,7 @@ it('removes references that are only used in ssr exports', () => {
   var shouldHeep = 2
   var alsoShouldKeep =3
   console.log(alsoShouldKepp)
-  export function serverPreload() {
+  export function preload() {
     return {a, bar, foo, readFile: readFile.toString()}
   }
   `
@@ -57,39 +57,39 @@ it('removes references that are only used in ssr exports', () => {
     var shouldHeep = 2;
     var alsoShouldKeep = 3;
     console.log(alsoShouldKepp);
-    export var serverPreload = 1;"
+    export var preload = 1;"
   `)
 })
 
 it('removes export variable declaration', () => {
   const code = compile(
     `
-  export var serverPreload= function() {
+  export var preload= function() {
     return {}
   }
   `
   )
 
-  expect(code).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
+  expect(code).toMatchInlineSnapshot(`"export var preload = 1;"`)
 })
 
 it('removes re-exports', () => {
   const code = compile(
     `
-  export {serverPreload} from './'
+  export {preload} from './'
   `
   )
 
-  expect(code).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
+  expect(code).toMatchInlineSnapshot(`"export var preload = 1;"`)
 })
 
 it('keeps other exports', () => {
   const code = compile(`
   export const a = 1
-  export {serverPreload} from './'`)
+  export {preload} from './'`)
   expect(code).toMatchInlineSnapshot(`
     "export const a = 1;
-    export var serverPreload = 1;"
+    export var preload = 1;"
   `)
 })
 
@@ -97,8 +97,8 @@ it('removes destructuring assignment (array)', () => {
   const code = compile(`
   const [a,b,c] = d
   const e = d[0]
-  export const serverPreload = () => {
+  export const preload = () => {
     console.log(a,b,c,e)
   }`)
-  expect(code).toMatchInlineSnapshot(`"export var serverPreload = 1;"`)
+  expect(code).toMatchInlineSnapshot(`"export var preload = 1;"`)
 })

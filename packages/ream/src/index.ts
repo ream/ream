@@ -27,12 +27,10 @@ type PreloadFactory<ContextType = any, ResultType = any> = (
   ctx: ContextType
 ) => ResultType | Promise<ResultType>
 
-export type Preload = PreloadFactory<PreloadContext, PreloadResult>
-
 /**
  * Always preload data on the server-side
  */
-export type ServerPreload = PreloadFactory<PreloadContext, PreloadResult>
+export type Preload = PreloadFactory<PreloadContext, PreloadResult>
 
 export type StaticPreloadContext = Omit<PreloadContext, 'req' | 'res'>
 

@@ -1,8 +1,8 @@
-import { createRouter, createMemoryHistory } from 'vue-router'
+import { Router } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
-import { findMatchedRoute } from '../utils/route-helpers'
 import { Head, renderHeadToString } from '@vueuse/head'
+import createDebug from 'debug'
 import { Ream } from '../node'
 import { ClientManifest } from '../webpack/plugins/client-manifest'
 import {
@@ -13,8 +13,10 @@ import {
 import { NextFunction } from 'connect'
 import { readFile, pathExists, outputFile } from 'fs-extra'
 import serializeJavascript from 'serialize-javascript'
-import { getOutputHTMLPath, getOutputServerPreloadPath } from '../utils/paths'
+import { getOutputHTMLPath, getStaticPreloadOutputPath } from '../utils/paths'
 import { join } from 'path'
+
+const debug = createDebug('ream:render')
 
 export type RenderError = {
   statusCode: number
@@ -25,19 +27,13 @@ export type ServerRouteLoader = {
   load: () => Promise<{ default: ReamServerHandler }>
 }
 
-export const getServerMain = async (
-  api: Ream
-): Promise<{
-  render: any
-}> => {
-  const mod = await api.viteDevServer?.ssrLoadModule(
-    `/@fs/${api.resolveVueApp('server-entry.js')}`
-  )
-  return mod.default
-}
-
 export const getErrorComponent = async (api: Ream) => {
   return api.viteDevServer?.ssrLoadModule(`/@fs/${api.routesInfo.errorFile}`)
+}
+
+type ServerEntry = {
+  render: any
+  createClientRouter: (url: string) => Promise<Router>
 }
 
 export async function render(
@@ -47,49 +43,46 @@ export async function render(
   next: NextFunction,
   {
     clientManifest,
-    isServerPreload,
-  }: { clientManifest?: ClientManifest; isServerPreload?: boolean }
+    isPreloadRequest,
+  }: { clientManifest?: ClientManifest; isPreloadRequest?: boolean }
 ) {
-  const { clientRoutes } = await api.viteDevServer.ssrLoadModule(
-    `/.ream/templates/client-routes.js`
-  )
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: clientRoutes,
-  })
-  router.push(req.url)
-  await router.isReady()
-  const route =
-    router.currentRoute.value.matched[
-      router.currentRoute.value.matched.length - 1
-    ]
+  const serverEntry: ServerEntry = await api.viteDevServer
+    .ssrLoadModule(`@own-app-dir/server-entry.js`)
+    .then((res) => res.default)
 
-  // TODO: set status code for 404 pages
+  const router = await serverEntry.createClientRouter(req.url)
+  const matchedRoutes = router.currentRoute.value.matched
 
-  const { params, query } = router.currentRoute.value
+  if (matchedRoutes[0].path === '/:404(.*)') {
+    res.statusCode = 404
+  }
+
+  const { params } = router.currentRoute.value
   req.params = params
-  req.query = query as any
 
   if (req.method !== 'GET') {
     return res.end('unsupported method')
   }
 
-  const component = route.components.default as any
+  const components = matchedRoutes.map((route) => route.components.default)
   const exportDir = api.resolveDotReam('export')
   const staticHTMLPath = join(exportDir, getOutputHTMLPath(req.path))
   const staticPreloadOutputPath = join(
     exportDir,
-    getOutputServerPreloadPath(req.path)
+    getStaticPreloadOutputPath(req.path)
   )
+  // Export the page as static HTML after request
   const shouldExport =
-    !component.preload && !component.serverPreload && !api.isDev
+    components.every((component) => !component.$$preload) && !api.isDev
+  // If there's already a exported static HTML file
   const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
-  if (isServerPreload) {
+  if (isPreloadRequest) {
+    debug(`Rendering preload JSON`)
     res.setHeader('content-type', 'application/json')
     if (hasStaticHTML) {
       res.end(await readFile(staticPreloadOutputPath, 'utf8'))
     } else {
-      const { props } = await getPreloadData(component, {
+      const { props } = await getPreloadData(components, {
         req,
         res,
         params: req.params,
@@ -103,15 +96,16 @@ export async function render(
   } else {
     res.setHeader('content-type', 'text/html')
     if (hasStaticHTML) {
+      debug(`Rendering pre-geneated static HTML file`)
       const html = await readFile(staticHTMLPath, 'utf8')
       res.end(html)
     } else {
-      const { props } = await getPreloadData(component, {
+      debug(`Rendering HTML for ${req.url} on the fly`)
+      const { props } = await getPreloadData(components, {
         req,
         res,
         params: req.params,
       })
-      console.log(req.path, req.url)
       const html = await renderToHTML(api, {
         params: req.params,
         url: req.url,
@@ -119,6 +113,8 @@ export async function render(
         req,
         res,
         props,
+        serverEntry,
+        router,
         clientManifest,
       })
       const result = `<!DOCTYPE>${html}`
@@ -141,19 +137,21 @@ export async function renderToHTML(
     props: {
       [k: string]: any
     }
+    router: Router
+    serverEntry: ServerEntry
     clientManifest: ClientManifest
   }
 ) {
-  const context: { url: string; pagePropsStore: any } = {
+  const context: { url: string; pagePropsStore: any; router: Router } = {
     url: options.url,
     pagePropsStore: {},
+    router: options.router,
   }
   context.pagePropsStore = {
     [options.path]: options.props,
   }
 
-  const { render } = await getServerMain(api)
-  const app = await render(context)
+  const app = await options.serverEntry.render(context)
   const appHTML = await renderToString(app)
   const head: Head = app.config.globalProperties.$head
   const headHTML = renderHeadToString(head)
@@ -184,36 +182,24 @@ export async function renderToHTML(
 }
 
 export async function getPreloadData(
-  component: any,
+  components: any[],
   options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
 ) {
-  const [
-    preloadResult,
-    serverPreloadResult,
-    staticPreloadResult,
-  ] = await Promise.all([
-    component.preload &&
-      (await component.preload({
+  const props = {}
+  for (const component of components) {
+    const preload = component.$$staticPreload || component.$$preload
+    const result =
+      preload &&
+      (await preload({
         req: options.req,
         res: options.res,
         params: options.params,
-      })),
-    component.serverPreload &&
-      component.serverPreload({
-        req: options.req,
-        res: options.res,
-        params: options.params,
-      }),
-    component.staticPreload &&
-      component.staticPreload({
-        params: options.params,
-      }),
-  ])
+      }))
+    if (result) {
+      Object.assign(props, result.props)
+    }
+  }
   return {
-    props: {
-      ...preloadResult?.props,
-      ...serverPreloadResult?.props,
-      ...staticPreloadResult?.props,
-    },
+    props,
   }
 }
