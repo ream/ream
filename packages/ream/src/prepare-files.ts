@@ -33,6 +33,7 @@ export async function prepareFiles(api: Ream) {
         .map((route) => {
           return `{
           path: "${route.path}",
+          ${route.routeName ? `name: "${route.routeName}",` : ``}
           component: function() {
             return Promise.all([
               getAppComponent(),

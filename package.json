@@ -14,7 +14,8 @@
     "packages/ream",
     "packages/ream-server",
     "packages/@ream/*",
-    "website"
+    "website",
+    "examples/data-fetching"
   ],
   "devDependencies": {
     "@types/jest": "^26.0.7",

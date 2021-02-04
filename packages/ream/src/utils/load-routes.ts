@@ -92,6 +92,7 @@ export const filesToRoutes = (files: string[], dir: string) => {
 
   routes.push({
     path: `/:404(.*)`,
+    routeName: '404',
     isServerRoute: false,
     file: notFoundFile,
   })

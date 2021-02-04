@@ -47,11 +47,12 @@
     "resolve-from": "5.0.0",
     "serialize-javascript": "4.0.0",
     "serve-static": "1.14.1",
-    "vite": "2.0.0-beta.49",
+    "vite": "2.0.0-beta.64",
     "vue": "3.0.5",
     "vue-router": "4.0.3"
   },
   "devDependencies": {
+    "@types/connect": "^3.4.34",
     "@types/debug": "^4.1.5",
     "@types/fs-extra": "9.0.4",
     "@types/hash-sum": "1.0.0",

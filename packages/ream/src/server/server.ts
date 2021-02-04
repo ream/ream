@@ -17,6 +17,9 @@ export interface ReamServerRequest extends IncomingMessage {
   params: {
     [k: string]: any
   }
+  _ssrInfo: {
+    ssrManifest: any
+  }
 }
 
 export interface ReamServerResponse extends ServerResponse {
@@ -111,6 +114,7 @@ export class Server {
   }
 
   onError(errorHandler: ReamServerErrorHandler) {
+    // @ts-ignore
     this.app.use((err, req, res, next) => {
       // @ts-ignore
       errorHandler(err, req, res, next)

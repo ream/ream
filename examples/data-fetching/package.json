@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "version": "0.0.0",
+  "name": "data-fetching",
+  "scripts": {
+    "dev": "ream"
+  }
+}

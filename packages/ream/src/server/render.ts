@@ -4,7 +4,6 @@ import serializeJavaScript from 'serialize-javascript'
 import { Head, renderHeadToString } from '@vueuse/head'
 import createDebug from 'debug'
 import { Ream } from '../node'
-import { ClientManifest } from '../webpack/plugins/client-manifest'
 import {
   ReamServerRequest,
   ReamServerResponse,
@@ -28,12 +27,24 @@ export type ServerRouteLoader = {
 }
 
 export const getErrorComponent = async (api: Ream) => {
+  // @ts-ignore
   return api.viteDevServer?.ssrLoadModule(`/@fs/${api.routesInfo.errorFile}`)
+}
+
+type GetDocumentArgs = {
+  head(): string
+  main(): string
+  scripts(): string
+  htmlAttrs(): string
+  bodyAttrs(): string
 }
 
 type ServerEntry = {
   render: any
   createClientRouter: (url: string) => Promise<Router>
+  _document: () => Promise<{
+    default: (args: GetDocumentArgs) => string | Promise<string>
+  }>
 }
 
 export async function render(
@@ -42,18 +53,19 @@ export async function render(
   res: ReamServerResponse,
   next: NextFunction,
   {
-    clientManifest,
+    ssrManifest,
+    serverEntry,
     isPreloadRequest,
-  }: { clientManifest?: ClientManifest; isPreloadRequest?: boolean }
+  }: {
+    ssrManifest?: any
+    serverEntry: ServerEntry
+    isPreloadRequest?: boolean
+  }
 ) {
-  const serverEntry: ServerEntry = await api.viteDevServer
-    .ssrLoadModule(`@own-app-dir/server-entry.js`)
-    .then((res) => res.default)
-
   const router = await serverEntry.createClientRouter(req.url)
   const matchedRoutes = router.currentRoute.value.matched
 
-  if (matchedRoutes[0].path === '/:404(.*)') {
+  if (matchedRoutes[0].name === '404') {
     res.statusCode = 404
   }
 
@@ -115,7 +127,7 @@ export async function render(
         props,
         serverEntry,
         router,
-        clientManifest,
+        ssrManifest,
       })
       const result = `<!DOCTYPE>${html}`
       res.end(result)
@@ -139,7 +151,7 @@ export async function renderToHTML(
     }
     router: Router
     serverEntry: ServerEntry
-    clientManifest: ClientManifest
+    ssrManifest: any
   }
 ) {
   const context: { url: string; pagePropsStore: any; router: Router } = {
@@ -155,14 +167,11 @@ export async function renderToHTML(
   const appHTML = await renderToString(app)
   const head: Head = app.config.globalProperties.$head
   const headHTML = renderHeadToString(head)
-  const { default: getDocument } = await api.viteDevServer.ssrLoadModule(
-    `/@fs/${api.routesInfo.documentFile}`
-  )
-  const noop = () => ''
+  const { default: getDocument } = await options.serverEntry._document()
   const html = await getDocument({
     head: () => `${headHTML.headTags}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
-    script: () => `
+    scripts: () => `
       <script>INITIAL_STATE=${serializeJavaScript(
         {
           pagePropsStore: context.pagePropsStore,
@@ -174,8 +183,8 @@ export async function renderToHTML(
       <script type="module" src="/@fs/${api.resolveVueApp(
         'client-entry.js'
       )}"></script>`,
-    htmlAttrs: noop,
-    bodyAttrs: noop,
+    htmlAttrs: () => headHTML.htmlAttrs,
+    bodyAttrs: () => headHTML.bodyAttrs,
   })
 
   return `<!DOCTYPE html>${html}`

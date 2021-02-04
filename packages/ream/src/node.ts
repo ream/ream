@@ -8,7 +8,6 @@ import { normalizePluginsArray } from './utils/normalize-plugins-array'
 import { Store, store } from './store'
 import { createServer } from 'http'
 import { remove, existsSync } from 'fs-extra'
-import { exportSite } from './export'
 import { OWN_APP_DIR, OWN_DIR } from './utils/constants'
 
 export interface Options {
@@ -176,19 +175,8 @@ export class Ream {
     const { build } = await import('./build')
     await build(this)
     if (shouldExport) {
-      await exportSite(this, {
-        type: 'build',
-      })
+      // TODO: export static site
     }
-  }
-
-  async export() {
-    await this.build(false)
-    const { exportSite } = await import('./export')
-    await exportSite(this, {
-      crawl: true,
-      type: 'export',
-    })
   }
 }
 

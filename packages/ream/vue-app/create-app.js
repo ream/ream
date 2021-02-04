@@ -10,7 +10,9 @@ export const createApp = ({ pagePropsStore, router }) => {
         pagePropsStore,
       }
     },
-    render: () => [h(RouterView)],
+    setup() {
+      return () => h(RouterView)
+    },
   })
 
   const head = createHead()

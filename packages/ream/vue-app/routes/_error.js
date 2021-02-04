@@ -1,6 +1,6 @@
-import { h } from 'vue'
+import { h, defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'DefaultError',
   props: ['error'],
   setup({ error }) {
@@ -37,4 +37,4 @@ export default {
         ]
       )
   },
-}
+})

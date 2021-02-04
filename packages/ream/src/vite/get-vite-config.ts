@@ -1,6 +1,5 @@
 import { Ream } from '../node'
 import { UserConfig as ViteConfig, Plugin } from 'vite'
-import { NodeTypes, ElementTypes } from '@vue/compiler-core'
 import vuePlugin from '@vitejs/plugin-vue'
 import path from 'path'
 import { babelPlugin } from './plugins/babel'
@@ -43,32 +42,6 @@ export const getViteConfig = (api: Ream): ViteConfig => {
       babelPlugin(),
       vuePlugin({
         include: [/\.vue$/],
-        template: {
-          compilerOptions: {
-            nodeTransforms: [
-              (node) => {
-                if (node.type === NodeTypes.ELEMENT) {
-                  if (node.props.length === 0 || node.tag !== 'a') {
-                    return
-                  }
-                  for (const attr of node.props) {
-                    if (attr.type === NodeTypes.ATTRIBUTE) {
-                      if (attr.name === 'href' && attr.value) {
-                        if (/^https?:\/\//.test(attr.value.content)) {
-                        } else {
-                          node.tagType = ElementTypes.COMPONENT
-                          node.tag = 'router-link'
-                          attr.name = 'to'
-                        }
-                        break
-                      }
-                    }
-                  }
-                }
-              },
-            ],
-          },
-        },
       }),
     ],
     server: {

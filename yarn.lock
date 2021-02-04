@@ -1680,6 +1680,13 @@
   dependencies:
     "@types/node" "*"
 
+"@types/connect@^3.4.34":
+  version "3.4.34"
+  resolved "https://registry.yarnpkg.com/@types/connect/-/connect-3.4.34.tgz#170a40223a6d666006d93ca128af2beb1d9b1901"
+  integrity sha512-ePPA/JuI+X0vb+gSWlPKOY0NdNAie/rPUqX2GUPpbZwiKTkSPhjXWuee47E4MtE54QVzGCQMQkAL6JhV2E1+cQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/debug@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
@@ -8224,10 +8231,10 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vite@2.0.0-beta.49:
-  version "2.0.0-beta.49"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-2.0.0-beta.49.tgz#a4d96107bbd72aedbe91baf0c53345d9ef559b2b"
-  integrity sha512-8bbweM0qOZLQgrPwvJpO0D82TDCfJB8QSQtRxgPOOmw3w4Ss67MIBxtJtzf0SmTnLYqS8reNrE7OknkQD3AWWw==
+vite@2.0.0-beta.64:
+  version "2.0.0-beta.64"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-2.0.0-beta.64.tgz#245cabc72335911d4cb704545f713d47e880d84f"
+  integrity sha512-/dR5rOXohhdXfkAIBAjmwX7JmoMWhQc7+VI6/EjyqXQCQzREmfBztLgTk/rPkmsNY87Cd71u9b+nlbcYK4TDCA==
   dependencies:
     esbuild "^0.8.34"
     postcss "^8.2.1"

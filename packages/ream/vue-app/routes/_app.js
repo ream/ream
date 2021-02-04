@@ -1,9 +1,9 @@
-import { h } from 'vue'
+import { h, defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'DefaultApp',
   props: ['Component', 'pageProps'],
   setup({ Component, pageProps }) {
     return () => h(Component, pageProps)
   },
-}
+})

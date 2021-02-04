@@ -6,11 +6,8 @@
   </div>
 </template>
 
-<script>
-import { sleep } from '../utils/sleep'
-
+<script lang="ts">
 export const preload = async () => {
-  await sleep(1000)
   return {
     props: {
       message: 'hello world',
@@ -19,7 +16,7 @@ export const preload = async () => {
 }
 </script>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, defineProps } from 'vue'
 import { useHead } from 'ream/head'
 import Nav from '../components/Nav.vue'

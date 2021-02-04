@@ -1,4 +1,4 @@
-export default ({ head, main, script, htmlAttrs, headAttrs, bodyAttrs }) => {
+export default ({ head, main, scripts, htmlAttrs, bodyAttrs }) => {
   return `
   <html${htmlAttrs()}>
     <head>
@@ -6,7 +6,7 @@ export default ({ head, main, script, htmlAttrs, headAttrs, bodyAttrs }) => {
     </head>
     <body${bodyAttrs()}>
       ${main()}
-      ${script()}
+      ${scripts()}
     </body>
   </html>
   `
