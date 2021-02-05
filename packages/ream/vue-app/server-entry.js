@@ -1,8 +1,8 @@
-import '/.ream/templates/global-imports'
+import '/.ream/templates/global-imports.js'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createApp } from './create-app'
-import { clientRoutes } from '/.ream/templates/client-routes'
-import { _document } from '/.ream/templates/server-exports'
+import { clientRoutes } from '/.ream/templates/client-routes.js'
+import { _document } from '/.ream/templates/server-exports.js'
 
 export default {
   async render(context) {

@@ -31,7 +31,11 @@ const reamAliasPlugin = (api: Ream): Plugin => {
   }
 }
 
-export const getViteConfig = (api: Ream): ViteConfig => {
+export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
+  const ssrManifest = !server && !api.isDev
+  const entry = api.isDev
+    ? undefined
+    : api.resolveVueApp(server ? 'server-entry.js' : 'client-entry.js')
   return {
     root: api.rootDir,
     alias: {
@@ -56,8 +60,17 @@ export const getViteConfig = (api: Ream): ViteConfig => {
     },
     build: {
       minify: !api.isDev,
-      outDir: api.resolveDotReam('client'),
+      outDir: server
+        ? api.resolveDotReam('server')
+        : api.resolveDotReam('client'),
       cssCodeSplit: false,
+      ssrManifest,
+      ssr: server,
+      rollupOptions: entry
+        ? {
+            input: entry,
+          }
+        : {},
     },
   }
 }
