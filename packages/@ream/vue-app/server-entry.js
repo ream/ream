@@ -1,7 +1,10 @@
 import '/.ream/templates/global-imports.js'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createApp } from './create-app'
-import { clientRoutes } from '/.ream/templates/client-routes.js'
+import {
+  clientRoutes,
+  ErrorComponent,
+} from '/.ream/templates/shared-exports.js'
 import { _document } from '/.ream/templates/server-exports.js'
 
 export default {
@@ -23,4 +26,6 @@ export default {
   },
 
   _document,
+
+  ErrorComponent,
 }

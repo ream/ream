@@ -63,12 +63,16 @@ export async function prepareFiles(api: Ream) {
         .join(',')}
     ]`
 
-    const clientRoutesContent = `
+    const sharedExportsContent = `
     import { h, defineAsyncComponent } from 'vue'
     import { usePageData } from 'ream/data'
 
     var ErrorComponent = defineAsyncComponent(function() {
       return import("${getRelativePathToTemplatesDir(routesInfo.errorFile)}")
+    })
+
+    var AppComponent = defineAsyncComponent(function() {
+      return import("${getRelativePathToTemplatesDir(routesInfo.appFile)}")
     })
 
     var wrapPage = function(page) {
@@ -90,16 +94,18 @@ export async function prepareFiles(api: Ream) {
       }
     }
 
-    export var AppComponent = defineAsyncComponent(function() {
-      return import("${getRelativePathToTemplatesDir(routesInfo.appFile)}")
-    })
+    var clientRoutes = ${stringifyClientRoutes(routesInfo.routes)}
 
-    export var clientRoutes = ${stringifyClientRoutes(routesInfo.routes)}
+    export {
+      clientRoutes,
+      ErrorComponent,
+      AppComponent
+    }
     `
 
     await outputFile(
-      api.resolveDotReam('templates/client-routes.js'),
-      clientRoutesContent,
+      api.resolveDotReam('templates/shared-exports.js'),
+      sharedExportsContent,
       'utf8'
     )
 

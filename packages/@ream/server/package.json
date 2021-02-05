@@ -1,0 +1,26 @@
+{
+  "name": "@ream/server",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --dts"
+  },
+  "dependencies": {
+    "@ream/vue-app": "0.0.0",
+    "@ream/fetch": "5.0.0-alpha.3",
+    "@vue/server-renderer": "3.0.5",
+    "@vueuse/head": "^0.2.3",
+    "vue": "3.0.5",
+    "vue-router": "4.0.3",
+    "connect": "3.7.0",
+    "path-to-regexp": "6.1.0"
+  }
+}

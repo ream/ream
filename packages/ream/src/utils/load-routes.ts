@@ -1,16 +1,16 @@
 import path from 'path'
-import { OWN_APP_DIR } from './constants'
 import { Route } from './route'
 
 export const filesToRoutes = (files: string[], dir: string) => {
   const routes: Route[] = []
-  let errorFile: string = path.join(OWN_APP_DIR, 'routes/_error.js')
-  let appFile: string | undefined = path.join(OWN_APP_DIR, 'routes/_app.js')
-  let documentFile: string | undefined = path.join(
-    OWN_APP_DIR,
-    'routes/_document.js'
+  let errorFile: string = require.resolve(`@ream/vue-app/routes/_error.js`)
+  let appFile: string | undefined = require.resolve(
+    `@ream/vue-app/routes/_app.js`
   )
-  let notFoundFile = path.join(OWN_APP_DIR, 'routes/404.js')
+  let documentFile: string | undefined = require.resolve(
+    `@ream/vue-app/routes/_document.js`
+  )
+  let notFoundFile = require.resolve(`@ream/vue-app/routes/404.js`)
 
   for (const file of files) {
     const slug = file

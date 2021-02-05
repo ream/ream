@@ -1,9 +1,9 @@
-import { Router } from 'vue-router'
+import path from 'path'
+import type { Router } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
 import { Head, renderHeadToString } from '@vueuse/head'
 import createDebug from 'debug'
-import { Ream } from '../node'
 import {
   ReamServerRequest,
   ReamServerResponse,
@@ -12,8 +12,10 @@ import {
 import { NextFunction } from 'connect'
 import { readFile, pathExists, outputFile } from 'fs-extra'
 import serializeJavascript from 'serialize-javascript'
-import { getOutputHTMLPath, getStaticPreloadOutputPath } from '../utils/paths'
+import { getOutputHTMLPath, getStaticPreloadOutputPath } from './paths-helpers'
 import { join } from 'path'
+import type { ServerEntry } from '.'
+import { IS_PROD } from './constants'
 
 const debug = createDebug('ream:render')
 
@@ -26,37 +28,17 @@ export type ServerRouteLoader = {
   load: () => Promise<{ default: ReamServerHandler }>
 }
 
-export const getErrorComponent = async (api: Ream) => {
-  // @ts-ignore
-  return api.viteDevServer?.ssrLoadModule(`/@fs/${api.routesInfo.errorFile}`)
-}
-
-type GetDocumentArgs = {
-  head(): string
-  main(): string
-  scripts(): string
-  htmlAttrs(): string
-  bodyAttrs(): string
-}
-
-type ServerEntry = {
-  render: any
-  createClientRouter: (url: string) => Promise<Router>
-  _document: () => Promise<{
-    default: (args: GetDocumentArgs) => string | Promise<string>
-  }>
-}
-
 export async function render(
-  api: Ream,
   req: ReamServerRequest,
   res: ReamServerResponse,
   next: NextFunction,
   {
+    dotReamDir,
     ssrManifest,
     serverEntry,
     isPreloadRequest,
   }: {
+    dotReamDir: string
     ssrManifest?: any
     serverEntry: ServerEntry
     isPreloadRequest?: boolean
@@ -77,7 +59,7 @@ export async function render(
   }
 
   const components = matchedRoutes.map((route) => route.components.default)
-  const exportDir = api.resolveDotReam('export')
+  const exportDir = path.join(dotReamDir, 'export')
   const staticHTMLPath = join(exportDir, getOutputHTMLPath(req.path))
   const staticPreloadOutputPath = join(
     exportDir,
@@ -85,7 +67,7 @@ export async function render(
   )
   // Export the page as static HTML after request
   const shouldExport =
-    components.every((component) => !component.$$preload) && !api.isDev
+    components.every((component) => !component.$$preload) && IS_PROD
   // If there's already a exported static HTML file
   const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
   if (isPreloadRequest) {
@@ -118,7 +100,7 @@ export async function render(
         res,
         params: req.params,
       })
-      const html = await renderToHTML(api, {
+      const html = await renderToHTML({
         params: req.params,
         url: req.url,
         path: req.path,
@@ -138,22 +120,19 @@ export async function render(
   }
 }
 
-export async function renderToHTML(
-  api: Ream,
-  options: {
-    params: any
-    url: string
-    path: string
-    req?: any
-    res?: any
-    pageData: {
-      [k: string]: any
-    }
-    router: Router
-    serverEntry: ServerEntry
-    ssrManifest: any
+export async function renderToHTML(options: {
+  params: any
+  url: string
+  path: string
+  req?: any
+  res?: any
+  pageData: {
+    [k: string]: any
   }
-) {
+  router: Router
+  serverEntry: ServerEntry
+  ssrManifest: any
+}) {
   const context: { url: string; pageDataStore: any; router: Router } = {
     url: options.url,
     pageDataStore: {},
@@ -180,8 +159,8 @@ export async function renderToHTML(
       )}
       </script>
       <script type="module" src="/@vite/client"></script>
-      <script type="module" src="/@fs/${api.resolveVueApp(
-        'client-entry.js'
+      <script type="module" src="/@fs/${require.resolve(
+        `@ream/vue-app/client-entry.js`
       )}"></script>`,
     htmlAttrs: () => headHTML.htmlAttrs,
     bodyAttrs: () => headHTML.bodyAttrs,

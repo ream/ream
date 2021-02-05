@@ -1,7 +1,7 @@
 import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
 import { createHead } from '@vueuse/head'
 import { useRoute } from 'vue-router'
-import { AppComponent } from '/.ream/templates/client-routes.js'
+import { AppComponent } from '/.ream/templates/shared-exports.js'
 import { onCreatedApp } from '/.ream/templates/enhance-app.js'
 
 export const createApp = ({ router, pageDataStore }) => {

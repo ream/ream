@@ -8,7 +8,7 @@ import { normalizePluginsArray } from './utils/normalize-plugins-array'
 import { Store, store } from './store'
 import { createServer } from 'http'
 import { remove, existsSync } from 'fs-extra'
-import { OWN_APP_DIR, OWN_DIR } from './utils/constants'
+import { OWN_DIR } from './utils/constants'
 
 export interface Options {
   rootDir?: string
@@ -94,10 +94,6 @@ export class Ream {
     return this.resolveRootDir('.ream', ...args)
   }
 
-  resolveVueApp(...args: string[]) {
-    return resolve(OWN_APP_DIR, ...args)
-  }
-
   resolveOwnDir(...args: string[]) {
     return resolve(OWN_DIR, ...args)
   }
@@ -157,8 +153,8 @@ export class Ream {
       shouldCleanDir: this.isDev,
       shouldPrepreFiles: this.isDev,
     })
-    const { getRequestHandler } = await import('./server/create-server')
-    const server = await getRequestHandler(this)
+    const { createServer } = await import('./server')
+    const server = await createServer(this)
     return server
   }
 

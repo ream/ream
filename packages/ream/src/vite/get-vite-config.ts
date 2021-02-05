@@ -3,7 +3,6 @@ import { UserConfig as ViteConfig, Plugin } from 'vite'
 import vuePlugin from '@vitejs/plugin-vue'
 import path from 'path'
 import { babelPlugin } from './plugins/babel'
-import { OWN_APP_DIR } from '../utils/constants'
 
 const CLIENT_APP_DIR = path.join(__dirname, '../../vue-app')
 
@@ -35,12 +34,11 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
     ? undefined
-    : api.resolveVueApp(server ? 'server-entry.js' : 'client-entry.js')
+    : require.resolve(
+        `@ream/vue-app/${server ? 'server-entry.js' : 'client-entry.js'}`
+      )
   return {
     root: api.rootDir,
-    alias: {
-      '@own-app-dir': OWN_APP_DIR,
-    },
     plugins: [
       reamAliasPlugin(api),
       vuePlugin({

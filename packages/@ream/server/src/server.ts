@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
 import connect, { NextFunction } from 'connect'
-import { pathToRegexp, execPathRegexp } from '../utils/route-helpers'
+import { pathToRegexp, execPathRegexp } from './route-helpers'
 import { send, SendData, status } from './response-helpers'
 
 export type ReamServerHandler = (

@@ -1,42 +1,69 @@
-import { FetchError } from 'ream/fetch'
-import { Ream } from '../node'
+import path from 'path'
+import { FetchError } from '@ream/fetch'
+import type { Router } from 'vue-router'
 import { Server } from './server'
-import {
-  render,
-  renderToHTML,
-  getErrorComponent,
-  getPreloadData,
-} from './render'
+import { render, renderToHTML, getPreloadData } from './render'
 
-export async function getRequestHandler(api: Ream) {
+export type GetDocumentArgs = {
+  head(): string
+  main(): string
+  scripts(): string
+  htmlAttrs(): string
+  bodyAttrs(): string
+}
+
+export type ServerEntry = {
+  render: any
+  createClientRouter: (url: string) => Promise<Router>
+  _document: () => Promise<{
+    default: (args: GetDocumentArgs) => string | Promise<string>
+  }>
+  ErrorComponent: any
+}
+
+type LoadServerEntry = () => Promise<ServerEntry> | ServerEntry
+
+type CreateServerContext = {
+  /**
+   * Development mode
+   * @default {false}
+   */
+  dev?: boolean
+  /**
+   * Path to generated `.ream` folder
+   * @default {`.ream`}
+   */
+  dotReamDir?: string
+  devMiddleware?: any
+  loadServerEntry?: LoadServerEntry
+  ssrFixStacktrace?: (err: Error) => void
+}
+
+export async function createServer(ctx: CreateServerContext = {}) {
+  const dotReamDir = path.resolve(ctx.dotReamDir || '.ream')
+
   const server = new Server()
 
   let ssrManifest: any
   let serverEntry: any
 
-  const loadServerEntry = async () => {
-    if (api.viteDevServer) {
-      serverEntry = await api.viteDevServer
-        // @ts-ignore
-        .ssrLoadModule(`@own-app-dir/server-entry.js`)
-        .then((res: any) => res.default)
-    } else {
-      serverEntry = require(api.resolveDotReam(`server/server-entry.js`))
-        .default
-    }
-  }
+  const loadServerEntry: LoadServerEntry =
+    ctx.loadServerEntry ||
+    (() => require(path.join(dotReamDir, 'server/server-entry.js')).default)
 
-  if (api.isDev) {
-    const { createDevMiddleware } = await import('./dev-middlewares')
-    const middleware = await createDevMiddleware(api)
-    server.use(middleware)
+  if (ctx.dev) {
+    if (ctx.devMiddleware) {
+      server.use(ctx.devMiddleware)
+    }
     ssrManifest = {}
   } else {
-    ssrManifest = require(api.resolveDotReam('client/ssr-manifest.json'))
+    ssrManifest = require(path.join(dotReamDir, 'client/ssr-manifest.json'))
   }
 
   server.use(async (req, res, next) => {
-    await loadServerEntry()
+    if (ctx.dev || !serverEntry) {
+      serverEntry = await loadServerEntry()
+    }
     next()
   })
 
@@ -48,17 +75,17 @@ export async function getRequestHandler(api: Ream) {
         req.url = `/${req.url}`
       }
     }
-    await render(api, req, res, next, {
+    await render(req, res, next, {
       ssrManifest,
       serverEntry,
       isPreloadRequest,
+      dotReamDir,
     })
   })
 
   server.onError(async (err, req, res, next) => {
-    if (api.isDev && api.viteDevServer) {
-      // @ts-ignore
-      // api.viteDevServer.ssrFixStacktrace(err)
+    if (ctx.ssrFixStacktrace) {
+      ctx.ssrFixStacktrace(err)
     }
     console.error('server error', err.stack)
 
@@ -71,13 +98,13 @@ export async function getRequestHandler(api: Ream) {
           !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
       }
       const router = await serverEntry.createClientRouter(req.url)
-      const ErrorComponent = await getErrorComponent(api)
+      const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
       const preloadResult = await getPreloadData([ErrorComponent], {
         req,
         res,
         params: req.params,
       })
-      const html = await renderToHTML(api, {
+      const html = await renderToHTML({
         params: req.params,
         path: req.path,
         url: req.url,
@@ -88,7 +115,7 @@ export async function getRequestHandler(api: Ream) {
           ...preloadResult.data,
           error: {
             statusCode: res.statusCode,
-            stack: api.isDev ? err.stack : undefined,
+            stack: ctx.dev ? err.stack : undefined,
           },
         },
         serverEntry,
@@ -99,7 +126,7 @@ export async function getRequestHandler(api: Ream) {
     } catch (error) {
       res.statusCode = 500
       res.send(
-        api.isDev
+        ctx.dev
           ? `<h1>Error occurs while rendering error page:</h1><pre>${error.stack}</pre>`
           : 'server error'
       )

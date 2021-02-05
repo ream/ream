@@ -2,7 +2,7 @@ import 'vite/dynamic-import-polyfill'
 import '/.ream/templates/global-imports.js'
 import { reactive } from 'vue'
 import { createWebHistory, createRouter } from 'vue-router'
-import { clientRoutes } from '/.ream/templates/client-routes.js'
+import { clientRoutes } from '/.ream/templates/shared-exports.js'
 import { createApp } from './create-app'
 import { getBeforeResolve } from './get-before-resolve'
 

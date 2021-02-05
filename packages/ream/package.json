@@ -29,30 +29,25 @@
   "dependencies": {
     "@babel/core": "^7.12.10",
     "@ream/common": "5.0.0-alpha.0",
-    "@ream/fetch": "5.0.0-alpha.3",
     "@vitejs/plugin-vue": "1.1.0",
     "@vue/compiler-sfc": "3.0.5",
-    "@vue/server-renderer": "3.0.5",
-    "@vueuse/head": "^0.2.3",
     "cac": "6.6.1",
     "chokidar": "3.4.2",
-    "connect": "3.7.0",
     "consola": "2.15.0",
     "debug": "^4.3.1",
     "fast-glob": "3.2.4",
     "fs-extra": "9.0.1",
     "hash-sum": "2.0.0",
     "joycon": "2.2.5",
-    "path-to-regexp": "6.1.0",
     "resolve-from": "5.0.0",
     "serialize-javascript": "4.0.0",
     "serve-static": "1.14.1",
-    "vite": "2.0.0-beta.64",
-    "vue": "3.0.5",
-    "vue-router": "4.0.3"
+    "vite": "2.0.0-beta.64"
+  },
+  "peerDependencies": {
+    "@ream/server": "*"
   },
   "devDependencies": {
-    "@types/connect": "^3.4.34",
     "@types/debug": "^4.1.5",
     "@types/fs-extra": "9.0.4",
     "@types/hash-sum": "1.0.0",
