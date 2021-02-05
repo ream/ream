@@ -1,33 +1,31 @@
 <template>
   <div class="page">
-    <h1>{{ message }}</h1>
+    <h1>{{ page.message }}</h1>
     <Nav />
-    <button @click="count++">{{ count }}</button>
+    <button @click="page.count++">{{ page.count }}</button>
   </div>
 </template>
 
 <script lang="ts">
 export const preload = async () => {
   return {
-    props: {
+    data: {
       message: 'hello world',
+      count: 0,
     },
   }
 }
 </script>
 
 <script setup lang="ts">
-import { ref, computed, defineProps } from 'vue'
+import { computed } from 'vue'
+import { usePageData } from 'ream/data'
 import { useHead } from 'ream/head'
 import Nav from '../components/Nav.vue'
 
-const props = defineProps({
-  message: String,
-})
-
-const count = ref(0)
+const page = usePageData()
 
 useHead({
-  title: computed(() => `${count.value} - ${props.message}`),
+  title: computed(() => `${page.count} - ${page.message}`),
 })
 </script>

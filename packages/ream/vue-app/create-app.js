@@ -1,17 +1,24 @@
-import { h, createSSRApp } from 'vue'
+import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
 import { createHead } from '@vueuse/head'
-import { RouterView } from 'vue-router'
-import { onCreatedApp } from '/.ream/templates/enhance-app'
+import { useRoute } from 'vue-router'
+import { AppComponent } from '/.ream/templates/client-routes.js'
+import { onCreatedApp } from '/.ream/templates/enhance-app.js'
 
-export const createApp = ({ pagePropsStore, router }) => {
+export const createApp = ({ router, pageDataStore }) => {
   const app = createSSRApp({
-    data() {
+    setup() {
+      const store = isReactive(pageDataStore)
+        ? pageDataStore
+        : reactive(pageDataStore)
+      const route = useRoute()
+      const page = computed(() => store[route.path])
       return {
-        pagePropsStore,
+        pageDataStore: store,
+        page,
       }
     },
-    setup() {
-      return () => h(RouterView)
+    render() {
+      return h(AppComponent)
     },
   })
 

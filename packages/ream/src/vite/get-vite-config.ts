@@ -39,11 +39,14 @@ export const getViteConfig = (api: Ream): ViteConfig => {
     },
     plugins: [
       reamAliasPlugin(api),
-      babelPlugin(),
       vuePlugin({
         include: [/\.vue$/],
       }),
+      babelPlugin(),
     ],
+    ssr: {
+      external: ['vue', 'vue-router'],
+    },
     server: {
       middlewareMode: api.isDev,
       hmr: {

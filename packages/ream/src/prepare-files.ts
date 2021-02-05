@@ -35,11 +35,8 @@ export async function prepareFiles(api: Ream) {
           path: "${route.path}",
           ${route.routeName ? `name: "${route.routeName}",` : ``}
           component: function() {
-            return Promise.all([
-              getAppComponent(),
-              getErrorComponent(),
-              import("${getRelativePathToTemplatesDir(route.file)}")
-            ]).then(wrapPage)
+            return import("${getRelativePathToTemplatesDir(route.file)}")
+              .then(wrapPage)
           },
           ${
             route.children
@@ -67,39 +64,37 @@ export async function prepareFiles(api: Ream) {
     ]`
 
     const clientRoutesContent = `
-    import { h } from 'vue'
+    import { h, defineAsyncComponent } from 'vue'
+    import { usePageData } from 'ream/data'
 
-    var getAppComponent = function() {
-      return import("${getRelativePathToTemplatesDir(routesInfo.appFile)}")
-    }
-    var getErrorComponent = function() {
+    var ErrorComponent = defineAsyncComponent(function() {
       return import("${getRelativePathToTemplatesDir(routesInfo.errorFile)}")
-    }
+    })
 
-    var wrapPage = function(res) {
-      var _app = res[0], _error = res[1], page = res[2]
-      var Component = page.default
+    var wrapPage = function(page) {
       return {
         $$preload: page.preload,
         $$clientPreload: page.clientPreload,
         $$staticPreload: page.staticPreload,
         $$getStaticPaths: page.getStaticPaths,
-        render: function () {
-          var pagePropsStore = this.$root.pagePropsStore
-          var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
-          if (pageProps && pageProps.error) {
-            Component = _error.default
+        setup: function () {
+          return function() {
+            var Component = page.default
+            var pageData = usePageData()
+            if (pageData && pageData.error) {
+              Component = ErrorComponent
+            }
+            return h(Component)
           }
-          return h(_app.default, {
-            Component: Component,
-            pageProps: pageProps,
-            key: this.$route.path
-          })
         }
       }
     }
 
-    export const clientRoutes = ${stringifyClientRoutes(routesInfo.routes)}
+    export var AppComponent = defineAsyncComponent(function() {
+      return import("${getRelativePathToTemplatesDir(routesInfo.appFile)}")
+    })
+
+    export var clientRoutes = ${stringifyClientRoutes(routesInfo.routes)}
     `
 
     await outputFile(

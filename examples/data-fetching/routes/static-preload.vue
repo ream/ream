@@ -1,34 +1,32 @@
 <template>
   <div class="posts">
-    <h1>Posts</h1>
-    <ul>
-      <li v-for="post in posts" :key="post.title">
-        {{ post.title }}
-      </li>
-    </ul>
+    <h1>It's {{ date }}</h1>
     <Nav />
   </div>
 </template>
 
-<script>
-export const staticPreload = async () => {
-  const arr = new Array(100).fill(null)
+<script lang="ts">
+import type { Preload } from 'ream'
+
+type PageData = {
+  date: string
+}
+
+export const staticPreload: Preload<PageData> = async () => {
   return {
-    props: {
-      posts: arr.map((_, index) => ({
-        title: `${index} post`,
-      })),
+    data: {
+      date: new Date().toLocaleString(),
     },
   }
 }
 </script>
 
-<script setup>
-import { defineProps } from 'vue'
+<script setup lang="ts">
+import { usePageData } from 'ream/data'
 import { useHead } from 'ream/head'
 import Nav from '../components/Nav.vue'
 
-defineProps({ posts: null })
+const { date } = usePageData<PageData>()
 
 useHead({ title: `static preload` })
 </script>

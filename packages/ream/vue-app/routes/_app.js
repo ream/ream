@@ -1,9 +1,9 @@
 import { h, defineComponent } from 'vue'
+import { RouterView } from 'vue-router'
 
 export default defineComponent({
   name: 'DefaultApp',
-  props: ['Component', 'pageProps'],
-  setup({ Component, pageProps }) {
-    return () => h(Component, pageProps)
+  setup() {
+    return () => h(RouterView)
   },
 })

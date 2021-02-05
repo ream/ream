@@ -1,9 +1,10 @@
 import { h, defineComponent } from 'vue'
+import { usePageData } from 'ream/data'
 
 export default defineComponent({
   name: 'DefaultError',
-  props: ['error'],
-  setup({ error }) {
+  setup() {
+    const { error } = usePageData()
     return () =>
       h(
         'div',

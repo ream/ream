@@ -14,13 +14,11 @@ export interface PreloadContext {
   res: ReamServerResponse
 }
 
-export interface PreloadResult {
+export type PreloadResult<TData> = {
   /**
-   * Pass to page component as props
+   * Page data
    */
-  props: {
-    [k: string]: any
-  }
+  data: TData
 }
 
 type PreloadFactory<ContextType = any, ResultType = any> = (
@@ -30,14 +28,18 @@ type PreloadFactory<ContextType = any, ResultType = any> = (
 /**
  * Always preload data on the server-side
  */
-export type Preload = PreloadFactory<PreloadContext, PreloadResult>
+export type Preload<
+  TData extends { [key: string]: any } = { [key: string]: any }
+> = PreloadFactory<PreloadContext, PreloadResult<TData>>
 
 export type StaticPreloadContext = Omit<PreloadContext, 'req' | 'res'>
 
 /**
  * For static export
  */
-export type StaticPreload = PreloadFactory<StaticPreloadContext, PreloadResult>
+export type StaticPreload<
+  TData extends { [key: string]: any } = { [key: string]: any }
+> = PreloadFactory<StaticPreloadContext, PreloadResult<TData>>
 
 export type StaticPathsResult = {
   paths: Array<{

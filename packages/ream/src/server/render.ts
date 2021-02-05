@@ -94,12 +94,12 @@ export async function render(
     if (hasStaticHTML) {
       res.end(await readFile(staticPreloadOutputPath, 'utf8'))
     } else {
-      const { props } = await getPreloadData(components, {
+      const preloadResult = await getPreloadData(components, {
         req,
         res,
         params: req.params,
       })
-      const result = serializeJavascript(props, { isJSON: true })
+      const result = serializeJavascript(preloadResult, { isJSON: true })
       res.end(result)
       if (shouldExport) {
         outputFile(staticPreloadOutputPath, result, 'utf8').catch(console.error)
@@ -113,7 +113,7 @@ export async function render(
       res.end(html)
     } else {
       debug(`Rendering HTML for ${req.url} on the fly`)
-      const { props } = await getPreloadData(components, {
+      const preloadResult = await getPreloadData(components, {
         req,
         res,
         params: req.params,
@@ -124,7 +124,7 @@ export async function render(
         path: req.path,
         req,
         res,
-        props,
+        pageData: preloadResult.data,
         serverEntry,
         router,
         ssrManifest,
@@ -146,7 +146,7 @@ export async function renderToHTML(
     path: string
     req?: any
     res?: any
-    props: {
+    pageData: {
       [k: string]: any
     }
     router: Router
@@ -154,13 +154,13 @@ export async function renderToHTML(
     ssrManifest: any
   }
 ) {
-  const context: { url: string; pagePropsStore: any; router: Router } = {
+  const context: { url: string; pageDataStore: any; router: Router } = {
     url: options.url,
-    pagePropsStore: {},
+    pageDataStore: {},
     router: options.router,
   }
-  context.pagePropsStore = {
-    [options.path]: options.props,
+  context.pageDataStore = {
+    [options.path]: options.pageData,
   }
 
   const app = await options.serverEntry.render(context)
@@ -174,7 +174,7 @@ export async function renderToHTML(
     scripts: () => `
       <script>INITIAL_STATE=${serializeJavaScript(
         {
-          pagePropsStore: context.pagePropsStore,
+          pageDataStore: context.pageDataStore,
         },
         { isJSON: true }
       )}
@@ -194,9 +194,10 @@ export async function getPreloadData(
   components: any[],
   options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
 ) {
-  const props = {}
+  const data = {}
   for (const component of components) {
     const preload = component.$$staticPreload || component.$$preload
+
     const result =
       preload &&
       (await preload({
@@ -205,10 +206,10 @@ export async function getPreloadData(
         params: options.params,
       }))
     if (result) {
-      Object.assign(props, result.props)
+      Object.assign(data, result.data)
     }
   }
   return {
-    props,
+    data,
   }
 }

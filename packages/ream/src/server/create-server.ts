@@ -1,4 +1,3 @@
-import serveStatic from 'serve-static'
 import { FetchError } from 'ream/fetch'
 import { Ream } from '../node'
 import { Server } from './server'
@@ -73,7 +72,7 @@ export async function getRequestHandler(api: Ream) {
       }
       const router = await serverEntry.createClientRouter(req.url)
       const ErrorComponent = await getErrorComponent(api)
-      const { props } = await getPreloadData([ErrorComponent], {
+      const preloadResult = await getPreloadData([ErrorComponent], {
         req,
         res,
         params: req.params,
@@ -85,8 +84,8 @@ export async function getRequestHandler(api: Ream) {
         req,
         res,
         router,
-        props: {
-          ...props,
+        pageData: {
+          ...preloadResult.data,
           error: {
             statusCode: res.statusCode,
             stack: api.isDev ? err.stack : undefined,

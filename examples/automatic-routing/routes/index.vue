@@ -1,16 +1,8 @@
 <script lang="ts" setup>
 import { useHead } from 'ream/head'
-import { defineProps } from 'vue'
 
 useHead({
   title: 'Home',
-})
-
-defineProps({
-  name: {
-    type: String,
-    required: true,
-  },
 })
 </script>
 

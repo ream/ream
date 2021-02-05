@@ -13,15 +13,31 @@ export const babelPlugin = (): Plugin => {
     },
 
     transform(code, id, ssr) {
-      if (ssr || !/\.[jt]sx$/.test(id)) return
+      if (ssr || id.includes('node_modules')) return
+
+      if (!/\.[jt]sx$/.test(id) && !/\.vue$/.test(id)) {
+        return
+      }
 
       const result = transformSync(code, {
         sourceFileName: id,
         sourceMaps: needSourceMap,
         plugins: [transformPageExports],
       })
-
-      return result && { code: result.code!, map: result.map }
+      return (
+        result && {
+          code: result.code!.replace(
+            `import.meta.hot.accept(({
+  default: updated,
+  _rerender_only
+}) => {`,
+            `
+$&
+`
+          ),
+          map: result.map,
+        }
+      )
     },
   }
 }
