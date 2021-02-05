@@ -1,6 +1,6 @@
 <template>
   <div class="posts">
-    <h1>It's {{ date }}</h1>
+    <h1>It's {{ page.date }}</h1>
     <Nav />
   </div>
 </template>
@@ -26,7 +26,7 @@ import { usePageData } from 'ream/data'
 import { useHead } from 'ream/head'
 import Nav from '../components/Nav.vue'
 
-const { date } = usePageData<PageData>()
+const page = usePageData<PageData>()
 
 useHead({ title: `static preload` })
 </script>
