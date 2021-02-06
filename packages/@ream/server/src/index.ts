@@ -1,6 +1,7 @@
 import path from 'path'
 import { FetchError } from '@ream/fetch'
 import type { Router } from 'vue-router'
+import serveStatic from 'serve-static'
 import { Server } from './server'
 import { render, renderToHTML, getPreloadData } from './render'
 
@@ -30,22 +31,24 @@ type CreateServerContext = {
    */
   dev?: boolean
   /**
-   * Path to generated `.ream` folder
+   * Path to your project
+   * i.e. the directory where we create the .ream folder
    * @default {`.ream`}
    */
-  dotReamDir?: string
+  cwd?: string
   devMiddleware?: any
   loadServerEntry?: LoadServerEntry
   ssrFixStacktrace?: (err: Error) => void
 }
 
 export async function createServer(ctx: CreateServerContext = {}) {
-  const dotReamDir = path.resolve(ctx.dotReamDir || '.ream')
+  const dotReamDir = path.resolve(ctx.cwd || '.', '.ream')
 
   const server = new Server()
 
   let ssrManifest: any
   let serverEntry: any
+  let scripts: string | undefined
 
   const loadServerEntry: LoadServerEntry =
     ctx.loadServerEntry ||
@@ -58,6 +61,17 @@ export async function createServer(ctx: CreateServerContext = {}) {
     ssrManifest = {}
   } else {
     ssrManifest = require(path.join(dotReamDir, 'client/ssr-manifest.json'))
+    const manifest = require(path.join(dotReamDir, 'client/manifest.json'))
+    for (const key of Object.keys(manifest)) {
+      const value: any = manifest[key]
+      if (value.isEntry) {
+        scripts = `<script type="module" src="/${value.file}"></script>`
+        break
+      }
+    }
+
+    const serveStaticFiles = serveStatic(path.join(dotReamDir, 'client'))
+    server.use(serveStaticFiles as any)
   }
 
   server.use(async (req, res, next) => {
@@ -80,6 +94,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
       serverEntry,
       isPreloadRequest,
       dotReamDir,
+      scripts,
     })
   })
 
@@ -120,6 +135,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
         },
         serverEntry,
         ssrManifest,
+        scripts,
       })
       res.setHeader('content-type', 'text-html')
       res.end(html)

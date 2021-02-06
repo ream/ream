@@ -4,6 +4,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "bin": {
+    "ream-server": "dist/cli.js"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -11,9 +14,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --dts"
+    "build": "tsup src/index.ts src/cli.ts --dts"
   },
   "dependencies": {
+    "cac": "6.7.1",
     "@ream/vue-app": "0.0.0",
     "@ream/fetch": "5.0.0-alpha.3",
     "@vue/server-renderer": "3.0.5",
@@ -21,6 +25,7 @@
     "vue": "3.0.5",
     "vue-router": "4.0.3",
     "connect": "3.7.0",
-    "path-to-regexp": "6.1.0"
+    "path-to-regexp": "6.1.0",
+    "serve-static": "1.14.1"
   }
 }

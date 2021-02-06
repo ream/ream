@@ -37,11 +37,13 @@ export async function render(
     ssrManifest,
     serverEntry,
     isPreloadRequest,
+    scripts,
   }: {
     dotReamDir: string
     ssrManifest?: any
     serverEntry: ServerEntry
     isPreloadRequest?: boolean
+    scripts?: string
   }
 ) {
   const router = await serverEntry.createClientRouter(req.url)
@@ -110,6 +112,7 @@ export async function render(
         serverEntry,
         router,
         ssrManifest,
+        scripts,
       })
       const result = `<!DOCTYPE>${html}`
       res.end(result)
@@ -132,7 +135,14 @@ export async function renderToHTML(options: {
   router: Router
   serverEntry: ServerEntry
   ssrManifest: any
+  scripts?: string
 }) {
+  const scripts =
+    options.scripts ||
+    `<script type="module" src="/@vite/client"></script>
+  <script type="module" src="/@fs/${require.resolve(
+    `@ream/vue-app/client-entry.js`
+  )}"></script>`
   const context: { url: string; pageDataStore: any; router: Router } = {
     url: options.url,
     pageDataStore: {},
@@ -158,10 +168,8 @@ export async function renderToHTML(options: {
         { isJSON: true }
       )}
       </script>
-      <script type="module" src="/@vite/client"></script>
-      <script type="module" src="/@fs/${require.resolve(
-        `@ream/vue-app/client-entry.js`
-      )}"></script>`,
+      ${scripts}
+      `,
     htmlAttrs: () => headHTML.htmlAttrs,
     bodyAttrs: () => headHTML.bodyAttrs,
   })

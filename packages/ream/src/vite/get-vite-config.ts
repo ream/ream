@@ -64,6 +64,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       cssCodeSplit: false,
       ssrManifest,
       ssr: server,
+      manifest: !api.isDev && !server,
       rollupOptions: entry
         ? {
             input: entry,

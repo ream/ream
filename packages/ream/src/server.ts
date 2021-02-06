@@ -8,7 +8,7 @@ export const createServer = async (api: Ream) => {
   api.viteDevServer = await createViteServer(viteConfig)
 
   const server = await _createServer({
-    dotReamDir: api.resolveDotReam(),
+    cwd: api.rootDir,
     loadServerEntry: async () => {
       const serverEntry = await api.viteDevServer!.ssrLoadModule(
         `@ream/vue-app/server-entry.js`
