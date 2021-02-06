@@ -29,3 +29,9 @@ useHead({
   title: computed(() => `${page.count} - ${page.message}`),
 })
 </script>
+
+<style scoped>
+.page {
+  background-color: red;
+}
+</style>

@@ -61,7 +61,6 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       outDir: server
         ? api.resolveDotReam('server')
         : api.resolveDotReam('client'),
-      cssCodeSplit: false,
       ssrManifest,
       ssr: server,
       manifest: !api.isDev && !server,

@@ -28,6 +28,34 @@ export type ServerRouteLoader = {
   load: () => Promise<{ default: ReamServerHandler }>
 }
 
+function renderPreloadLinks(modules: Set<string>, manifest: any): string {
+  let links = ''
+  const seen = new Set()
+  modules.forEach((id) => {
+    const files: string[] | undefined = manifest[id]
+    if (files) {
+      files.forEach((file) => {
+        if (!seen.has(file)) {
+          seen.add(file)
+          links += renderPreloadLink(file)
+        }
+      })
+    }
+  })
+  return links
+}
+
+function renderPreloadLink(file: string): string {
+  if (file.endsWith('.js')) {
+    return `<link rel="modulepreload" crossorigin href="${file}">`
+  } else if (file.endsWith('.css')) {
+    return `<link rel="stylesheet" href="${file}">`
+  } else {
+    // TODO
+    return ''
+  }
+}
+
 export async function render(
   req: ReamServerRequest,
   res: ReamServerResponse,
@@ -143,7 +171,12 @@ export async function renderToHTML(options: {
   <script type="module" src="/@fs/${require.resolve(
     `@ream/vue-app/client-entry.js`
   )}"></script>`
-  const context: { url: string; pageDataStore: any; router: Router } = {
+  const context: {
+    url: string
+    pageDataStore: any
+    router: Router
+    modules?: Set<string>
+  } = {
     url: options.url,
     pageDataStore: {},
     router: options.router,
@@ -153,12 +186,15 @@ export async function renderToHTML(options: {
   }
 
   const app = await options.serverEntry.render(context)
-  const appHTML = await renderToString(app)
+  const appHTML = await renderToString(app, context)
+  const preloadLinks = context.modules
+    ? renderPreloadLinks(context.modules, options.ssrManifest)
+    : ''
   const head: Head = app.config.globalProperties.$head
   const headHTML = renderHeadToString(head)
   const { default: getDocument } = await options.serverEntry._document()
   const html = await getDocument({
-    head: () => `${headHTML.headTags}`,
+    head: () => `${headHTML.headTags}${preloadLinks}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
     scripts: () => `
       <script>INITIAL_STATE=${serializeJavaScript(
