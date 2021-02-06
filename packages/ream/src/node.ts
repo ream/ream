@@ -51,8 +51,8 @@ export class Ream {
     if (options.srcDir) {
       this.srcDir = join(this.rootDir, options.srcDir)
     } else {
-      const hasRoutesInSrc = existsSync(join(this.rootDir, 'src/routes'))
-      this.srcDir = hasRoutesInSrc ? join(this.rootDir, 'src') : this.rootDir
+      const hasPagesInSrc = existsSync(join(this.rootDir, 'src/pages'))
+      this.srcDir = hasPagesInSrc ? join(this.rootDir, 'src') : this.rootDir
     }
     this.isDev = Boolean(options.dev)
     if (!process.env.NODE_ENV) {
@@ -96,15 +96,6 @@ export class Ream {
 
   resolveOwnDir(...args: string[]) {
     return resolve(OWN_DIR, ...args)
-  }
-
-  get routesInfo(): {
-    routes: Route[]
-    errorFile: string
-    documentFile: string
-    appFile: string
-  } {
-    return require(this.resolveDotReam('manifest/routes-info.json'))
   }
 
   get plugins() {

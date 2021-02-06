@@ -12,4 +12,4 @@ Sometimes you don't need to (or can't) dynamically render a website, so Ream als
 
 To do so you need to change your build script from `ream build` to `ream export`, your project will be built and exported to `.ream/export` folder, then you can deploy this folder to any static site hosting service like [GitHub Pages](https://pages.github.com), [ZEIT Now](https://zeit.co), [Netlify](https://netlify.com) or [Render](https://render.com).
 
-Note that while using `ream export`, you don't have to use the [`staticPaths`](/docs/data-fetching#static-paths) option because Ream will crawl `<a>` elements on every page, so pages with dynamic routes will be covered if they are referenced in other pages.
+Note that while using `ream export`, you don't have to use the [`staticPaths`](/docs/data-fetching#static-paths) option because Ream will crawl `<a>` elements on every page, so pages with dynamic path will be covered if they are referenced in other pages.

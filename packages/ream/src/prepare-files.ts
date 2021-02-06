@@ -7,21 +7,21 @@ import path from 'path'
 import { filesToRoutes } from './utils/load-routes'
 
 export async function prepareFiles(api: Ream) {
-  const routesDir = api.resolveSrcDir('routes')
+  const pagesDir = api.resolveSrcDir('pages')
   const routesFilePattern = '**/*.{vue,ts,tsx,js,jsx}'
 
-  if (!(await pathExists(routesDir))) {
-    throw new Error(`${routesDir} doesn't exist`)
+  if (!(await pathExists(pagesDir))) {
+    throw new Error(`${pagesDir} doesn't exist`)
   }
 
   const files = await glob(routesFilePattern, {
-    cwd: routesDir,
+    cwd: pagesDir,
     onlyFiles: true,
     ignore: ['node_modules', 'dist'],
   })
 
   const writeRoutes = async () => {
-    const routesInfo = filesToRoutes(files, routesDir)
+    const routesInfo = filesToRoutes(files, pagesDir)
 
     const getRelativePathToTemplatesDir = (p: string) => {
       return path.relative(api.resolveDotReam('templates'), p)
@@ -169,7 +169,7 @@ export async function prepareFiles(api: Ream) {
   if (api.isDev) {
     const { watch } = await import('chokidar')
     watch(routesFilePattern, {
-      cwd: routesDir,
+      cwd: pagesDir,
       ignoreInitial: true,
     })
       .on('add', async (file) => {

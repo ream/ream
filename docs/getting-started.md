@@ -8,7 +8,7 @@
 npm init ream-app my-app
 ```
 
-After the installation is complete, follow the instructions to start the development server. Try editing `routes/index.vue` and see the result on your browser.
+After the installation is complete, follow the instructions to start the development server. Try editing `pages/index.vue` and see the result on your browser.
 
 ## Manual Setup
 

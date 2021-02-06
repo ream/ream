@@ -55,12 +55,12 @@ export default {
 
 The signature `staticPreload` is almost the same as `preload`, both of them are executed on server-side, but `staticPreload` will tell Ream to pre-render the page at build time:
 
-- For dynamic routes (i.e. containing `[id]` in file name), Ream renders them at request time but will cache the result, and subsequent requests will use the cache instead.
-- For static routes, it's rendered at build time.
+- For dynamic path (i.e. containing `[id]` in file name), Ream renders them at request time but will cache the result, and subsequent requests will use the cache instead.
+- For static path, it's rendered at build time.
 
 ### Static Paths
 
-For dynamic routes which use the `staticPreload` function, you can also render them at build time by using the `staticPaths` option, suppose that you have a page that uses dynamic routes named `src/routes/posts/[id].vue`
+For dynamic path which use the `staticPreload` function, you can still render them at build time by using the `staticPaths` option, suppose that you have a page that uses dynamic path named `src/pages/posts/[id].vue`
 
 ```vue
 <script>

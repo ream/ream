@@ -6,6 +6,6 @@
   },
   "files": [
     "*.js",
-    "routes"
+    "pages"
   ]
 }

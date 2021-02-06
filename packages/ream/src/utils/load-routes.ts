@@ -3,14 +3,14 @@ import { Route } from './route'
 
 export const filesToRoutes = (files: string[], dir: string) => {
   const routes: Route[] = []
-  let errorFile: string = require.resolve(`@ream/vue-app/routes/_error.js`)
+  let errorFile: string = require.resolve(`@ream/vue-app/pages/_error.js`)
   let appFile: string | undefined = require.resolve(
-    `@ream/vue-app/routes/_app.js`
+    `@ream/vue-app/pages/_app.js`
   )
   let documentFile: string | undefined = require.resolve(
-    `@ream/vue-app/routes/_document.js`
+    `@ream/vue-app/pages/_document.js`
   )
-  let notFoundFile = require.resolve(`@ream/vue-app/routes/404.js`)
+  let notFoundFile = require.resolve(`@ream/vue-app/pages/404.js`)
 
   for (const file of files) {
     const slug = file
