@@ -4,15 +4,12 @@
     "access": "public"
   },
   "version": "5.0.0-alpha.3",
-  "type": "module",
   "files": [
     "*.js",
     "*.d.ts"
   ],
   "main": "index.js",
-  "browser": "browser.js",
   "dependencies": {
-    "node-fetch": "^2.6.0",
-    "unfetch": "^4.1.0"
+    "node-fetch": "^2.6.0"
   }
 }

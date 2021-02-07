@@ -5,13 +5,17 @@ const cli = cac(`ream-server`)
 
 cli
   .command('[cwd]', 'Start production server')
-  .action(async (cwd: string = '.') => {
+  .option('-p, --port <port>', 'Server port')
+  .action(async (cwd: string = '.', options: { port?: number }) => {
+    const port = `${options.port || 3000}`
+    process.env.PORT = port
+
     const { createServer } = await import('./')
     const server = await createServer({
       cwd,
     })
-    server.listen(3000)
-    console.log(`> http://localhost:3000`)
+    server.listen(port)
+    console.log(`> http://localhost:${port}`)
   })
 
 cli.parse()

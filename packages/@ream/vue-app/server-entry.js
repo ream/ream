@@ -1,3 +1,4 @@
+import '@ream/fetch'
 import '/.ream/templates/global-imports.js'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createApp } from './create-app'
@@ -5,7 +6,7 @@ import {
   clientRoutes,
   ErrorComponent,
 } from '/.ream/templates/shared-exports.js'
-import { _document } from '/.ream/templates/server-exports.js'
+import { _document, serverRoutes } from '/.ream/templates/server-exports.js'
 
 export default {
   async render(context) {
@@ -26,6 +27,8 @@ export default {
   },
 
   _document,
+
+  serverRoutes,
 
   ErrorComponent,
 }

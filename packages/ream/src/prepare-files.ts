@@ -48,20 +48,27 @@ export async function prepareFiles(api: Ream) {
         .join(',')}
     ]`
 
-    const stringifyServerRoutes = (routes: Route[]): string => `[
-      ${routes
-        .filter((route) => route.isServerRoute)
-        .map((route) => {
-          return `{
-          path: "${path}",
-          meta: {load: () => import("${getRelativePathToTemplatesDir(
-            route.file
-          )}")},
-          component: {setup(){}}
-        }`
-        })
-        .join(',')}
-    ]`
+    const stringifyServerRoutes = (routes: Route[]): string => {
+      const serverRoutes = routes.filter((route) => route.isServerRoute)
+      return `[
+        ${serverRoutes
+          .map((route) => {
+            return `{
+            path: "${route.path}",
+            meta: {load: () => import("${getRelativePathToTemplatesDir(
+              route.file
+            )}")},
+            component: {}
+          }`
+          })
+          .join(',')}${serverRoutes.length === 0 ? '' : ','}
+          {
+            path: '/:404(.*)',
+            name: '404',
+            component: {}
+          }
+      ]`
+    }
 
     const sharedExportsContent = `
     import { h, defineAsyncComponent } from 'vue'
@@ -130,7 +137,6 @@ export async function prepareFiles(api: Ream) {
     await outputFile(
       api.resolveDotReam('templates/global-imports.js'),
       `
-      import '@ream/fetch'
       ${api.config.css
         .map((file) => `import ${JSON.stringify(file)}`)
         .join('\n')}

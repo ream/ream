@@ -1,9 +1,9 @@
 import path from 'path'
-import { FetchError } from '@ream/fetch'
 import type { Router } from 'vue-router'
 import serveStatic from 'serve-static'
 import { Server } from './server'
 import { render, renderToHTML, getPreloadData } from './render'
+import { createServerRouter } from './router'
 
 export type GetDocumentArgs = {
   head(): string
@@ -49,6 +49,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
   let ssrManifest: any
   let serverEntry: any
   let scripts: string | undefined
+  let serverRouter: Router | undefined
 
   const loadServerEntry: LoadServerEntry =
     ctx.loadServerEntry ||
@@ -82,6 +83,26 @@ export async function createServer(ctx: CreateServerContext = {}) {
   })
 
   server.use(async (req, res, next) => {
+    if (!req.path.startsWith('/api/')) {
+      return next()
+    }
+
+    if (!serverRouter || ctx.dev) {
+      serverRouter = createServerRouter(serverEntry.serverRoutes)
+    }
+
+    serverRouter!.push(req.url)
+    await serverRouter.isReady()
+    const { matched } = serverRouter.currentRoute.value
+    const route = matched[0]
+    if (route.name === '404') {
+      return next()
+    }
+    const mod = await route.meta.load()
+    mod.default(req, res, next)
+  })
+
+  server.use(async (req, res, next) => {
     const isPreloadRequest = req.path.endsWith('.preload.json')
     if (isPreloadRequest) {
       req.url = req.url.replace(/(\/index)?\.preload\.json/, '')
@@ -105,7 +126,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
     console.error('server error', err.stack)
 
     try {
-      const response = (err as FetchError).response as Response | undefined
+      const response = (err as any).response as Response | undefined
       if (response) {
         res.statusCode = response.status
       } else {

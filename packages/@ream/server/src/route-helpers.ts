@@ -33,10 +33,3 @@ export function compileToPath(pattern: string, params: any) {
 }
 
 export { pathToRegexp } from 'path-to-regexp'
-
-// Everything in the form of `:whatever`
-const DYNAMIC_ROUTE_RE = /^:(.+)/
-
-export function isDynamicSegment(segment: string) {
-  return DYNAMIC_ROUTE_RE.test(segment)
-}
