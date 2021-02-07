@@ -1,3 +1,4 @@
+import fs from 'fs-extra'
 import { Ream } from '../node'
 import { UserConfig as ViteConfig, Plugin } from 'vite'
 import vuePlugin from '@vitejs/plugin-vue'
@@ -30,6 +31,41 @@ const reamAliasPlugin = (api: Ream): Plugin => {
   }
 }
 
+const moveManifestPlugin = (manifestDir: string): Plugin => {
+  return {
+    name: 'ream:move-manifest',
+
+    async writeBundle(_, bundle) {
+      const files = []
+      for (const file in bundle) {
+        const value = bundle[file]
+        if (
+          file === 'manifest.json' ||
+          (file === 'ssr-manifest.json' && value.type === 'asset')
+        ) {
+          files.push({
+            name: file === 'manifest.json' ? 'client-manifest.json' : file,
+            // @ts-ignore
+            content: value.source,
+          })
+          delete bundle[file]
+        }
+      }
+      if (files.length > 0) {
+        await Promise.all(
+          files.map(async (file) => {
+            await fs.outputFile(
+              path.join(manifestDir, file.name),
+              file.content,
+              'utf8'
+            )
+          })
+        )
+      }
+    },
+  }
+}
+
 export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
@@ -45,6 +81,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
         include: [/\.vue$/],
       }),
       babelPlugin(),
+      moveManifestPlugin(api.resolveDotReam('manifest')),
     ],
     ssr: {
       external: ['vue', 'vue-router'],

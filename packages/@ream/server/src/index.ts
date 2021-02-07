@@ -61,10 +61,13 @@ export async function createServer(ctx: CreateServerContext = {}) {
     }
     ssrManifest = {}
   } else {
-    ssrManifest = require(path.join(dotReamDir, 'client/ssr-manifest.json'))
-    const manifest = require(path.join(dotReamDir, 'client/manifest.json'))
-    for (const key of Object.keys(manifest)) {
-      const value: any = manifest[key]
+    ssrManifest = require(path.join(dotReamDir, 'manifest/ssr-manifest.json'))
+    const clientManifest = require(path.join(
+      dotReamDir,
+      'manifest/client-manifest.json'
+    ))
+    for (const key of Object.keys(clientManifest)) {
+      const value: any = clientManifest[key]
       if (value.isEntry) {
         scripts = `<script type="module" src="/${value.file}"></script>`
         break

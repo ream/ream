@@ -129,12 +129,6 @@ export async function prepareFiles(api: Ream) {
     )
 
     await outputFile(
-      api.resolveDotReam('manifest/routes-info.json'),
-      JSON.stringify(routesInfo, null, 2),
-      'utf8'
-    )
-
-    await outputFile(
       api.resolveDotReam('templates/global-imports.js'),
       `
       ${api.config.css
