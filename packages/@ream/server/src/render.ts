@@ -9,7 +9,6 @@ import {
   ReamServerResponse,
   ReamServerHandler,
 } from './server'
-import { NextFunction } from 'connect'
 import { readFile, pathExists, outputFile } from 'fs-extra'
 import serializeJavascript from 'serialize-javascript'
 import { getOutputHTMLPath, getStaticPreloadOutputPath } from './paths-helpers'
@@ -56,99 +55,114 @@ function renderPreloadLink(file: string): string {
   }
 }
 
-export async function render(
-  req: ReamServerRequest,
-  res: ReamServerResponse,
-  next: NextFunction,
-  {
-    dotReamDir,
-    ssrManifest,
-    serverEntry,
-    isPreloadRequest,
-    scripts,
-  }: {
-    dotReamDir: string
-    ssrManifest?: any
-    serverEntry: ServerEntry
-    isPreloadRequest?: boolean
-    scripts?: string
-  }
-) {
-  const router = await serverEntry.createClientRouter(req.url)
+export async function render({
+  url,
+  req,
+  res,
+  dotReamDir,
+  ssrManifest,
+  serverEntry,
+  isPreloadRequest,
+  scripts,
+}: {
+  url: string
+  req?: ReamServerRequest
+  res?: ReamServerResponse
+  dotReamDir: string
+  ssrManifest?: any
+  serverEntry: ServerEntry
+  isPreloadRequest?: boolean
+  scripts?: string
+}): Promise<{
+  statusCode: number
+  body: string
+  headers: { [k: string]: string }
+}> {
+  const router = await serverEntry.createClientRouter(url)
   const matchedRoutes = router.currentRoute.value.matched
+  let statusCode = 200
 
   if (matchedRoutes[0].name === '404') {
-    res.statusCode = 404
+    statusCode = 404
   }
 
-  const { params } = router.currentRoute.value
-  req.params = params
-
-  if (req.method !== 'GET') {
-    return res.end('unsupported method')
+  const route = router.currentRoute.value
+  if (req) {
+    req.params = route.params
   }
 
   const components = matchedRoutes.map((route) => route.components.default)
   const exportDir = path.join(dotReamDir, 'export')
-  const staticHTMLPath = join(exportDir, getOutputHTMLPath(req.path))
+  const staticHTMLPath = join(exportDir, getOutputHTMLPath(route.path))
   const staticPreloadOutputPath = join(
     exportDir,
-    getStaticPreloadOutputPath(req.path)
+    getStaticPreloadOutputPath(route.path)
   )
   // Export the page as static HTML after request
   const shouldExport =
+    // @ts-ignore
     components.every((component) => !component.$$preload) && IS_PROD
   // If there's already a exported static HTML file
   const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
   if (isPreloadRequest) {
     debug(`Rendering preload JSON`)
-    res.setHeader('content-type', 'application/json')
+    const headers = {
+      'content-type': 'application/json',
+    }
+
+    let body = ''
+
     if (hasStaticHTML) {
-      res.end(await readFile(staticPreloadOutputPath, 'utf8'))
+      body = await readFile(staticPreloadOutputPath, 'utf8')
     } else {
       const preloadResult = await getPreloadData(components, {
         req,
         res,
-        params: req.params,
+        params: route.params,
       })
-      const result = serializeJavascript(preloadResult, { isJSON: true })
-      res.end(result)
+      body = serializeJavascript(preloadResult, { isJSON: true })
       if (shouldExport) {
-        outputFile(staticPreloadOutputPath, result, 'utf8').catch(console.error)
+        outputFile(staticPreloadOutputPath, body, 'utf8').catch(console.error)
       }
     }
-  } else {
-    res.setHeader('content-type', 'text/html')
-    if (hasStaticHTML) {
-      debug(`Rendering pre-geneated static HTML file`)
-      const html = await readFile(staticHTMLPath, 'utf8')
-      res.end(html)
-    } else {
-      debug(`Rendering HTML for ${req.url} on the fly`)
-      const preloadResult = await getPreloadData(components, {
-        req,
-        res,
-        params: req.params,
-      })
-      const html = await renderToHTML({
-        params: req.params,
-        url: req.url,
-        path: req.path,
-        req,
-        res,
-        pageData: preloadResult.data,
-        serverEntry,
-        router,
-        ssrManifest,
-        scripts,
-      })
-      const result = `<!DOCTYPE>${html}`
-      res.end(result)
-      if (shouldExport) {
-        outputFile(staticHTMLPath, result, 'utf8').catch(console.error)
-      }
+
+    return {
+      headers,
+      body,
+      statusCode,
     }
   }
+
+  const headers = { 'content-type': 'text/html' }
+  let body = ''
+  if (hasStaticHTML) {
+    debug(`Rendering pre-geneated static HTML file`)
+    body = await readFile(staticHTMLPath, 'utf8')
+  } else {
+    debug(`Rendering HTML for ${url} on the fly`)
+    const preloadResult = await getPreloadData(components, {
+      req,
+      res,
+      params: route.params,
+    })
+    const html = await renderToHTML({
+      params: route.params,
+      url,
+      path: route.path,
+      req,
+      res,
+      pageData: preloadResult.data,
+      serverEntry,
+      router,
+      ssrManifest,
+      scripts,
+    })
+    body = `<!DOCTYPE>${html}`
+    if (shouldExport) {
+      outputFile(staticHTMLPath, body, 'utf8').catch(console.error)
+    }
+  }
+  return { headers, body, statusCode }
 }
 
 export async function renderToHTML(options: {

@@ -1,4 +1,4 @@
-import { ReamServerResponse } from '..'
+import type { ReamServerResponse } from './server'
 
 const TYPE = 'content-type'
 const OSTREAM = 'application/octet-stream'

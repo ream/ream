@@ -41,6 +41,21 @@ type CreateServerContext = {
   ssrFixStacktrace?: (err: Error) => void
 }
 
+export { render, renderToHTML, getPreloadData }
+
+export const getScripts = (dotReamDir: string) => {
+  const clientManifest = require(path.join(
+    dotReamDir,
+    'manifest/client-manifest.json'
+  ))
+  for (const key of Object.keys(clientManifest)) {
+    const value: any = clientManifest[key]
+    if (value.isEntry) {
+      return `<script type="module" src="/${value.file}"></script>`
+    }
+  }
+}
+
 export async function createServer(ctx: CreateServerContext = {}) {
   const dotReamDir = path.resolve(ctx.cwd || '.', '.ream')
 
@@ -62,17 +77,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
     ssrManifest = {}
   } else {
     ssrManifest = require(path.join(dotReamDir, 'manifest/ssr-manifest.json'))
-    const clientManifest = require(path.join(
-      dotReamDir,
-      'manifest/client-manifest.json'
-    ))
-    for (const key of Object.keys(clientManifest)) {
-      const value: any = clientManifest[key]
-      if (value.isEntry) {
-        scripts = `<script type="module" src="/${value.file}"></script>`
-        break
-      }
-    }
+    scripts = getScripts(dotReamDir)
 
     const serveStaticFiles = serveStatic(path.join(dotReamDir, 'client'))
     server.use(serveStaticFiles as any)
@@ -106,6 +111,10 @@ export async function createServer(ctx: CreateServerContext = {}) {
   })
 
   server.use(async (req, res, next) => {
+    if (req.method !== 'GET') {
+      return next()
+    }
+
     const isPreloadRequest = req.path.endsWith('.preload.json')
     if (isPreloadRequest) {
       req.url = req.url.replace(/(\/index)?\.preload\.json/, '')
@@ -113,13 +122,22 @@ export async function createServer(ctx: CreateServerContext = {}) {
         req.url = `/${req.url}`
       }
     }
-    await render(req, res, next, {
+    const result = await render({
+      url: req.url,
+      req,
+      res,
       ssrManifest,
       serverEntry,
       isPreloadRequest,
       dotReamDir,
       scripts,
     })
+
+    res.statusCode = result.statusCode
+    for (const key in result.headers) {
+      res.setHeader(key, result.headers[key])
+    }
+    res.send(result.body)
   })
 
   server.onError(async (err, req, res, next) => {

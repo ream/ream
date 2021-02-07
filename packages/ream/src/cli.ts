@@ -42,7 +42,7 @@ cli
       rootDir,
       dev: false,
     })
-    await app.export().catch(handleError)
+    await app.build(true).catch(handleError)
   })
 
 cli
