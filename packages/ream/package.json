@@ -5,8 +5,7 @@
   "files": [
     "/dist",
     "/*.js",
-    "/*.d.ts",
-    "/vue-app"
+    "/*.d.ts"
   ],
   "main": "dist/index.js",
   "bin": "dist/cli.js",

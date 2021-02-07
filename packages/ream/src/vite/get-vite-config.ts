@@ -94,7 +94,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       },
     },
     build: {
-      minify: !api.isDev,
+      minify: !api.isDev && !process.env.DEBUG,
       outDir: server
         ? api.resolveDotReam('server')
         : api.resolveDotReam('client'),
