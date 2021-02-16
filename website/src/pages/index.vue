@@ -1,8 +1,15 @@
+<script setup lang="ts">
+import { useHead } from 'ream/head'
+import Header from '@/components/Header.vue'
+import Footer from '@/components/Footer.vue'
+
+useHead({
+  title: `Ream - A Vue 3 framework for building amazing apps`,
+})
+</script>
+
 <template>
   <div>
-    <Head>
-      <title>Ream - A Vue 3 framework for building amazing apps</title>
-    </Head>
     <Header />
     <div class="main">
       <div class="max-w-2xl text-center mx-auto my-32 px-5">
@@ -33,17 +40,3 @@
     <Footer />
   </div>
 </template>
-
-<script>
-import { Head } from 'ream/head'
-import Header from '@/components/Header.vue'
-import Footer from '@/components/Footer.vue'
-
-export default {
-  components: {
-    Header,
-    Footer,
-    Head,
-  },
-}
-</script>

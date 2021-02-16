@@ -5,6 +5,12 @@ import { Server } from './server'
 import { render, renderToHTML, getPreloadData } from './render'
 import { createServerRouter } from './router'
 
+export {
+  ReamServerHandler,
+  ReamServerRequest,
+  ReamServerResponse,
+} from './server'
+
 export type GetDocumentArgs = {
   head(): string
   main(): string
@@ -43,7 +49,7 @@ type CreateServerContext = {
 
 export { render, renderToHTML, getPreloadData }
 
-export const getScripts = (dotReamDir: string) => {
+export const extractClientManifest = (dotReamDir: string) => {
   const clientManifest = require(path.join(
     dotReamDir,
     'manifest/client-manifest.json'
@@ -51,7 +57,14 @@ export const getScripts = (dotReamDir: string) => {
   for (const key of Object.keys(clientManifest)) {
     const value: any = clientManifest[key]
     if (value.isEntry) {
-      return `<script type="module" src="/${value.file}"></script>`
+      return {
+        scripts: `<script type="module" src="/${value.file}"></script>`,
+        styles: value.css
+          ? value.css.map(
+              (name: string) => `<link rel="stylesheet" href="/${name}">`
+            )
+          : '',
+      }
     }
   }
 }
@@ -63,7 +76,8 @@ export async function createServer(ctx: CreateServerContext = {}) {
 
   let ssrManifest: any
   let serverEntry: any
-  let scripts: string | undefined
+  let scripts = ''
+  let styles = ''
   let serverRouter: Router | undefined
 
   const loadServerEntry: LoadServerEntry =
@@ -77,7 +91,11 @@ export async function createServer(ctx: CreateServerContext = {}) {
     ssrManifest = {}
   } else {
     ssrManifest = require(path.join(dotReamDir, 'manifest/ssr-manifest.json'))
-    scripts = getScripts(dotReamDir)
+    const extractedAssets = extractClientManifest(dotReamDir)
+    if (extractedAssets) {
+      scripts = extractedAssets.scripts
+      styles = extractedAssets.styles
+    }
 
     const serveStaticFiles = serveStatic(path.join(dotReamDir, 'client'))
     server.use(serveStaticFiles as any)
@@ -131,6 +149,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
       isPreloadRequest,
       dotReamDir,
       scripts,
+      styles,
     })
 
     res.statusCode = result.statusCode
@@ -178,6 +197,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
         serverEntry,
         ssrManifest,
         scripts,
+        styles,
       })
       res.setHeader('content-type', 'text-html')
       res.end(html)

@@ -24,16 +24,15 @@ export async function buildAndLaunch({
   await remove(join(appDir, '.ream'))
   const port = await getPort()
   const ream = new Ream({
-    dir: appDir,
+    rootDir: appDir,
     dev: dev,
     server: {
       port,
     },
   })
-  await ream.build()
   let server: Server | undefined
   if (exportSite) {
-    await ream.export()
+    await ream.build(true)
     const serveStaticHandler = serveStatic(ream.resolveDotReam('export')) as any
     const s = polka()
     s.use(serveStaticHandler)
@@ -42,6 +41,7 @@ export async function buildAndLaunch({
       console.log(`Serve exported site at http://localhost:${port}`)
     })
   } else {
+    await ream.build()
     server = await ream.serve()
   }
   const browser = await puppeteer.launch({

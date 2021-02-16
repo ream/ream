@@ -15,7 +15,11 @@ export const babelPlugin = (): Plugin => {
     transform(code, id, ssr) {
       if (ssr || id.includes('node_modules')) return
 
-      if (!/\.[jt]sx$/.test(id) && !/\.vue$/.test(id)) {
+      if (
+        !/\.[jt]sx$/.test(id) &&
+        !/\.vue$/.test(id) &&
+        !id.endsWith('?vue&type=script&lang.ts')
+      ) {
         return
       }
 

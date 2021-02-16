@@ -64,6 +64,7 @@ export async function render({
   serverEntry,
   isPreloadRequest,
   scripts,
+  styles,
 }: {
   url: string
   req?: ReamServerRequest
@@ -72,7 +73,8 @@ export async function render({
   ssrManifest?: any
   serverEntry: ServerEntry
   isPreloadRequest?: boolean
-  scripts?: string
+  scripts: string
+  styles: string
 }): Promise<{
   statusCode: number
   body: string
@@ -156,6 +158,7 @@ export async function render({
       router,
       ssrManifest,
       scripts,
+      styles,
     })
     body = `<!DOCTYPE>${html}`
     if (shouldExport) {
@@ -177,7 +180,8 @@ export async function renderToHTML(options: {
   router: Router
   serverEntry: ServerEntry
   ssrManifest: any
-  scripts?: string
+  scripts: string
+  styles: string
 }) {
   const scripts =
     options.scripts ||
@@ -208,7 +212,7 @@ export async function renderToHTML(options: {
   const headHTML = renderHeadToString(head)
   const { default: getDocument } = await options.serverEntry._document()
   const html = await getDocument({
-    head: () => `${headHTML.headTags}${preloadLinks}`,
+    head: () => `${headHTML.headTags}${options.styles}${preloadLinks}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
     scripts: () => `
       <script>INITIAL_STATE=${serializeJavaScript(

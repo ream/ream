@@ -1,7 +1,7 @@
 import { resolve, join } from 'path'
-import type { ViteDevServer } from 'vite'
+import type { SetRequired } from 'type-fest'
+import type { ViteDevServer, UserConfig as ViteConfig } from 'vite'
 import resolveFrom from 'resolve-from'
-import { Route } from './utils/route'
 import { loadConfig } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
 import { normalizePluginsArray } from './utils/normalize-plugins-array'
@@ -33,13 +33,17 @@ export type ReamConfig = {
   server?: {
     port?: number
   }
+  vite?: (
+    viteConfig: ViteConfig,
+    opts: { isDev: boolean; ssr?: boolean }
+  ) => void
 }
 
 export class Ream {
   rootDir: string
   srcDir: string
   isDev: boolean
-  config: Required<ReamConfig>
+  config: SetRequired<ReamConfig, 'env' | 'plugins' | 'css' | 'server'>
   configPath?: string
   store: Store
   viteDevServer?: ViteDevServer
@@ -65,6 +69,7 @@ export class Ream {
     )
     this.configPath = configPath
     this.config = {
+      ...projectConfig,
       env: {
         ...projectConfig.env,
         ...configOverride.env,

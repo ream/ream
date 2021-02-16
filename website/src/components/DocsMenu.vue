@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import menu from '@/data/menu'
+</script>
+
 <template>
   <div class="sticky docs-menu">
     <div v-for="item in menu" :key="item.text">
@@ -15,19 +19,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent } from 'vue'
-import menu from '@/data/menu'
-
-export default defineComponent({
-  data() {
-    return {
-      menu,
-    }
-  },
-})
-</script>
 
 <style scoped>
 .docs-menu {

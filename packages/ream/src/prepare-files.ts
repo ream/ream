@@ -72,7 +72,7 @@ export async function prepareFiles(api: Ream) {
 
     const sharedExportsContent = `
     import { h, defineAsyncComponent } from 'vue'
-    import { usePageData } from 'ream/data'
+    import { usePreloadData } from 'ream/data'
 
     var ErrorComponent = defineAsyncComponent(function() {
       return import("${getRelativePathToTemplatesDir(routesInfo.errorFile)}")
@@ -91,7 +91,7 @@ export async function prepareFiles(api: Ream) {
         setup: function () {
           return function() {
             var Component = page.default
-            var pageData = usePageData()
+            var pageData = usePreloadData()
             if (pageData && pageData.error) {
               Component = ErrorComponent
             }
@@ -138,20 +138,25 @@ export async function prepareFiles(api: Ream) {
       'utf8'
     )
 
+    const enhanceAppFiles = [...store.state.pluginsFiles['enhance-app']]
     await outputFile(
       api.resolveDotReam('templates/enhance-app.js'),
       `
+      ${enhanceAppFiles
+        .map((file, index) => {
+          return `import * as enhanceApp_${index} from "${file}"`
+        })
+        .join('\n')}
+
     var files = [
-      ${[...store.state.pluginsFiles['enhance-app']].map((file) => {
-        return `require(${JSON.stringify(file)})`
-      })}
+      ${enhanceAppFiles.map((_, i) => `enhanceApp_${i}`).join(',')}
     ]
 
     var exec = function(name, context) {
       for (var i = 0; i < files.length; i++) {
-        var file = files[i]
-        if (file[name]) {
-          file[name](context)
+        var mod = files[i]
+        if (mod[name]) {
+          mod[name](context)
         }
       }
     }

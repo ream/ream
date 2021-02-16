@@ -10,7 +10,10 @@ module.exports = {
   ],
   css: [
     'prismjs/themes/prism-tomorrow.css',
-    '@/css/tailwind.css',
-    '@/css/main.css'
-  ]
+    '/@windicss/windi.css',
+    '@/css/main.css',
+  ],
+  vite(config) {
+    config.plugins.push(require('vite-plugin-windicss').default())
+  },
 }

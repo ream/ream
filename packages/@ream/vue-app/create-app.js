@@ -11,7 +11,7 @@ export const createApp = ({ router, pageDataStore }) => {
         ? pageDataStore
         : reactive(pageDataStore)
       const route = useRoute()
-      const page = computed(() => store[route.path])
+      const page = computed(() => store[route.path] || {})
       return {
         pageDataStore: store,
         page,

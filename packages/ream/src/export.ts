@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
 import type { ServerEntry } from '@ream/server'
-import { render, getScripts } from '@ream/server'
+import { render, extractClientManifest } from '@ream/server'
 
 export const exportSite = async (dotReamDir: string) => {
   const ssrManifest = require(path.join(
@@ -12,7 +12,10 @@ export const exportSite = async (dotReamDir: string) => {
     dotReamDir,
     'server/server-entry.js'
   )).default
-  const scripts = getScripts(dotReamDir)
+  const { scripts, styles } = extractClientManifest(dotReamDir) || {
+    scripts: '',
+    styles: '',
+  }
   const exportPage = async (url: string) => {
     const result = await render({
       url,
@@ -20,6 +23,7 @@ export const exportSite = async (dotReamDir: string) => {
       ssrManifest,
       serverEntry,
       scripts,
+      styles,
     })
     const file = path.join(
       dotReamDir,

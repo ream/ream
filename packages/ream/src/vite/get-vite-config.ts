@@ -35,7 +35,7 @@ const moveManifestPlugin = (manifestDir: string): Plugin => {
   return {
     name: 'ream:move-manifest',
 
-    async writeBundle(_, bundle) {
+    async writeBundle(options, bundle) {
       const files = []
       for (const file in bundle) {
         const value = bundle[file]
@@ -45,6 +45,7 @@ const moveManifestPlugin = (manifestDir: string): Plugin => {
         ) {
           files.push({
             name: file === 'manifest.json' ? 'client-manifest.json' : file,
+            originalPath: path.join(options.dir!, file),
             // @ts-ignore
             content: value.source,
           })
@@ -54,6 +55,7 @@ const moveManifestPlugin = (manifestDir: string): Plugin => {
       if (files.length > 0) {
         await Promise.all(
           files.map(async (file) => {
+            await fs.remove(file.originalPath)
             await fs.outputFile(
               path.join(manifestDir, file.name),
               file.content,
@@ -73,7 +75,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     : require.resolve(
         `@ream/vue-app/${server ? 'server-entry.js' : 'client-entry.js'}`
       )
-  return {
+  const config = {
     root: api.rootDir,
     plugins: [
       reamAliasPlugin(api),
@@ -83,7 +85,18 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       babelPlugin(),
       moveManifestPlugin(api.resolveDotReam('manifest')),
     ],
+    define: {
+      ...api.store.state.constants,
+      'import.meta.env.REAM_SRC_DIR': JSON.stringify(api.resolveSrcDir()),
+      'import.meta.env.REAM_ROOT_DIR': JSON.stringify(api.resolveRootDir()),
+    },
+    resolve: {
+      alias: {
+        '@': api.resolveSrcDir(),
+      },
+    },
     ssr: {
+      // https://vitejs.dev/config/#ssr-external
       external: ['vue', 'vue-router'],
     },
     server: {
@@ -108,4 +121,10 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
         : {},
     },
   }
+
+  if (api.config.vite) {
+    api.config.vite(config, { isDev: api.isDev, ssr: server })
+  }
+
+  return config
 }

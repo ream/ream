@@ -2,7 +2,7 @@ import {
   ReamServerHandler,
   ReamServerRequest,
   ReamServerResponse,
-} from './server/server'
+} from '@ream/server'
 
 interface IParams {
   [k: string]: string

@@ -19,11 +19,11 @@ export const preload = async () => {
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePageData } from 'ream/data'
+import { usePreloadData } from 'ream/data'
 import { useHead } from 'ream/head'
 import Nav from '../components/Nav.vue'
 
-const page = usePageData()
+const page = usePreloadData()
 
 useHead({
   title: computed(() => `${page.count} - ${page.message}`),

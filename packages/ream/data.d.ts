@@ -1,1 +1,1 @@
-export const usePageData: <TData = any>() => TData
+export const usePreloadData: <TData = any>() => TData

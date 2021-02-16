@@ -1,6 +1,6 @@
-import { getCurrentInstance } from 'vue'
+import { getCurrentInstance, computed } from 'vue'
 
-export const usePageData = () => {
+export const usePreloadData = () => {
   const vm = getCurrentInstance()
-  return vm.root.setupState.page
+  return computed(() => vm.root.setupState.page)
 }
