@@ -1,4 +1,4 @@
-import { Ream } from './node'
+import { Ream } from './'
 import { resolveFiles } from './utils/resolve-files'
 import { store } from './store'
 

@@ -1,6 +1,6 @@
 import glob from 'fast-glob'
 import { outputFile, pathExists } from 'fs-extra'
-import { Ream } from './node'
+import { Ream } from './'
 import { store } from './store'
 import { Route } from './utils/route'
 import path from 'path'

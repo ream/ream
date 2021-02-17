@@ -3,9 +3,7 @@
   "name": "ream",
   "description": "The Vue Framework",
   "files": [
-    "/dist",
-    "/*.js",
-    "/*.d.ts"
+    "/dist"
   ],
   "main": "dist/index.js",
   "bin": "dist/cli.js",

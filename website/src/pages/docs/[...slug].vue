@@ -2,8 +2,8 @@
 import { defineComponent, computed } from 'vue'
 import type { StaticPreload } from 'ream'
 import { renderMarkdown } from '@/lib/render-markdown'
-import { useHead } from 'ream/head'
-import { usePreloadData } from 'ream/data'
+import { useHead } from '@ream/app'
+import { usePreloadData } from '@ream/app'
 import Header from '@/components/Header.vue'
 import DocsMenu from '@/components/DocsMenu.vue'
 

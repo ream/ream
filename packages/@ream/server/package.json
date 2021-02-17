@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "cac": "6.7.1",
-    "@ream/vue-app": "0.0.0",
+    "@ream/app": "0.0.0",
     "@ream/fetch": "5.0.0-alpha.3",
     "@vue/server-renderer": "3.0.5",
     "@vueuse/head": "^0.2.3",

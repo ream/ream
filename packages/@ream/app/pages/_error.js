@@ -1,6 +1,6 @@
 import { h, defineComponent } from 'vue'
-import { usePreloadResult } from 'ream/data'
-import { useHead } from 'ream/head'
+import { usePreloadResult } from '@ream/app'
+import { useHead } from '@ream/app'
 
 export default defineComponent({
   name: 'DefaultError',

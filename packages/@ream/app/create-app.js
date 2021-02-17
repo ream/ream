@@ -1,7 +1,7 @@
 import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
 import { createHead } from '@vueuse/head'
-import { useRoute } from 'vue-router'
-import { RouterView } from 'vue-router'
+import { useRoute, RouterView } from 'vue-router'
+import { ReamLink } from './'
 import {
   AppComponent,
   NotFoundComponent,
@@ -48,6 +48,8 @@ export const createApp = ({ router, initialState }) => {
 
   app.use(router)
   app.use(head)
+
+  app.component(ReamLink.name, ReamLink)
 
   onCreatedApp({ app, router })
 

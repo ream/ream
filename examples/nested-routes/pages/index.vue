@@ -1,5 +1,5 @@
 <template>
   <div>
-    <router-link to="/user/egoist">/user/egoist</router-link>
+    <ream-link to="/user/egoist">/user/egoist</ream-link>
   </div>
 </template>

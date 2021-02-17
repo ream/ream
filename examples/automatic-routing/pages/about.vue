@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useHead } from 'ream/head'
+import { useHead } from '@ream/app'
 import { RouterLink } from 'vue-router'
 
 useHead({

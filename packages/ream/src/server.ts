@@ -1,6 +1,6 @@
 import { createServer as _createServer } from '@ream/server'
 import { createServer as createViteServer } from 'vite'
-import type { Ream } from './node'
+import type { Ream } from './'
 import { getViteConfig } from './vite/get-vite-config'
 
 export const createServer = async (api: Ream) => {
@@ -11,7 +11,7 @@ export const createServer = async (api: Ream) => {
     cwd: api.rootDir,
     loadServerEntry: async () => {
       const serverEntry = await api.viteDevServer!.ssrLoadModule(
-        `@ream/vue-app/server-entry.js`
+        `@ream/app/server-entry.js`
       )
       return serverEntry.default
     },

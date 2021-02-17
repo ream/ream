@@ -1,5 +1,5 @@
 import { h } from 'vue'
-import { useHead } from 'ream/head'
+import { useHead } from '@ream/app'
 
 export default {
   name: 'NotFound',

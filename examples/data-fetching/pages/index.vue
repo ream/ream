@@ -19,8 +19,8 @@ export const preload = async () => {
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePreloadData } from 'ream/data'
-import { useHead } from 'ream/head'
+import { usePreloadData } from '@ream/app'
+import { useHead } from '@ream/app'
 import Nav from '../components/Nav.vue'
 
 const page = usePreloadData()

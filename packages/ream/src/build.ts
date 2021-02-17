@@ -1,4 +1,4 @@
-import { Ream } from './node'
+import { Ream } from '.'
 import { getViteConfig } from './vite/get-vite-config'
 import { build as viteBuild } from 'vite'
 

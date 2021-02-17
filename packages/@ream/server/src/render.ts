@@ -207,7 +207,7 @@ export async function renderToHTML(options: {
     options.scripts ||
     `<script type="module" src="/@vite/client"></script>
   <script type="module" src="/@fs/${require.resolve(
-    `@ream/vue-app/client-entry.js`
+    `@ream/app/client-entry.js`
   )}"></script>`
   const context: {
     url: string

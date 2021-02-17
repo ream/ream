@@ -28,7 +28,7 @@ watch(
   <header class="header bg-blue-500 text-white fixed w-full top-0 z-10">
     <div class="px-5 flex h-full items-center justify-between mx-auto">
       <h1 class="text-2xl font-bold">
-        <router-link to="/">Ream</router-link>
+        <ream-link to="/">Ream</ream-link>
       </h1>
       <div class="hidden lg:flex space-x-8">
         <a

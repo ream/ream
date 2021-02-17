@@ -9,11 +9,11 @@ import menu from '@/data/menu'
         {{ item.text }}
       </div>
       <div v-for="child in item.children" :key="child.text">
-        <router-link
+        <ream-link
           class="menu-item-link"
           :class="{ active: $route.path === child.link }"
           :to="child.link"
-          >{{ child.text }}</router-link
+          >{{ child.text }}</ream-link
         >
       </div>
     </div>

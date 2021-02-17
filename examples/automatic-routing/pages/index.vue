@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useHead } from 'ream/head'
+import { useHead } from '@ream/app'
 
 useHead({
   title: 'Home',
@@ -11,7 +11,7 @@ useHead({
     <h1>Home</h1>
     <ul>
       <li>
-        <router-link to="/about">About</router-link>
+        <ream-link to="/about">About</ream-link>
       </li>
     </ul>
   </div>

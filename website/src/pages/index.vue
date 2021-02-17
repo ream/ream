@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useHead } from 'ream/head'
+import { useHead } from '@ream/app'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 
@@ -22,10 +22,10 @@ useHead({
           This website is still a work-in-progress, read with caution.
         </h3>
         <div class="my-8 flex space-x-3 justify-center">
-          <router-link
+          <ream-link
             to="/docs/getting-started"
             class="bg-blue-500 hover:bg-blue-700 text-white rounded-lg h-12 items-center inline-flex px-5"
-            >Documentation</router-link
+            >Documentation</ream-link
           >
           <a
             href="https://github.com/sponsors/egoist"

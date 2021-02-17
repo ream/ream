@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import { usePreloadData } from 'ream/data'
+import { usePreloadData } from '@ream/app'
 
 export const preload = async () => {
   const posts = await fetch(`/api/posts`).then((res) => res.json())

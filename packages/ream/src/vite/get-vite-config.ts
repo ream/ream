@@ -1,5 +1,5 @@
 import fs from 'fs-extra'
-import { Ream } from '../node'
+import { Ream } from '../'
 import { UserConfig as ViteConfig, Plugin } from 'vite'
 import vuePlugin from '@vitejs/plugin-vue'
 import path from 'path'
@@ -73,7 +73,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const entry = api.isDev
     ? undefined
     : require.resolve(
-        `@ream/vue-app/${server ? 'server-entry.js' : 'client-entry.js'}`
+        `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
       )
   const config = {
     root: api.rootDir,
