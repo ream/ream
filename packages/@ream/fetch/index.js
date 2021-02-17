@@ -1,15 +1,12 @@
-var fetch = require('node-fetch')
-var { handleError, FetchError } = require('./shared')
+import nodeFetch from 'node-fetch'
 
-global.fetch = function (url, opts) {
+const { env } = process
+
+const fetch = function (url, opts) {
   if (url && url[0] === '/') {
-    url = `http://localhost:${process.env.PORT}${url}`
+    url = `http://localhost:${env.PORT}${url}`
   }
-  return fetch(url, opts)
+  return nodeFetch(url, opts)
 }
 
-exports.fetch = function (url, opts) {
-  return global.fetch(url, opts).then(handleError)
-}
-
-exports.FetchError = FetchError
+global.fetch = fetch

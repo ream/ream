@@ -1,11 +1,8 @@
 export type Route = {
-  routePath: string
-  entryName: string
-  absolutePath: string
-  relativePath: string
-  isClientRoute: boolean
+  name?: string
+  routeName?: string
+  path: string
+  file: string
   isServerRoute: boolean
-  index: number
-  score: number
-  is404: boolean
+  children?: Route[]
 }

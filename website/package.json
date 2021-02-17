@@ -15,6 +15,7 @@
     "@types/prismjs": "^1.16.0",
     "marked": "^1.1.1",
     "prismjs": "^1.20.0",
-    "tailwindcss": "^1.5.2"
+    "tailwindcss": "^2.0.3",
+    "vite-plugin-windicss": "^0.1.14"
   }
 }

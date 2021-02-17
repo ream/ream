@@ -1,6 +1,6 @@
 import { dirname, join } from 'path'
 import resolveFrom from 'resolve-from'
-import { ReamPluginConfigItem } from '../node'
+import { ReamPluginConfigItem } from '../'
 import { ReamPlugin } from '../types'
 
 function requireMain(pluginDir: string): ReamPlugin | null {

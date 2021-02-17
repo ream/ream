@@ -9,9 +9,7 @@
     "*.d.ts"
   ],
   "main": "index.js",
-  "browser": "browser.js",
   "dependencies": {
-    "node-fetch": "^2.6.0",
-    "unfetch": "^4.1.0"
+    "node-fetch": "^2.6.0"
   }
 }

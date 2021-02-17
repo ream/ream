@@ -1,175 +1,149 @@
 import glob from 'fast-glob'
-import { pathToRoutes, pathToRoute } from './utils/path-to-routes'
 import { outputFile, pathExists } from 'fs-extra'
-import { Ream } from './node'
+import { Ream } from './'
 import { store } from './store'
 import { Route } from './utils/route'
-import { sortRoutesByScore } from './utils/rank-routes'
-import {
-  SERVER_PRELOAD_INDICATOR,
-  STATIC_PRELOAD_INDICATOR,
-} from './babel/constants'
-
-function getRoutes(_routes: Route[], ownRoutesDir: string) {
-  const routes: Route[] = [..._routes]
-
-  const patterns = [
-    {
-      require: (route: Route) => route.entryName === 'routes/_error',
-      filename: '_error.js',
-    },
-    {
-      require: (route: Route) => route.entryName === 'routes/_app',
-      filename: '_app.js',
-    },
-    {
-      require: (route: Route) => route.entryName === 'routes/_document',
-      filename: '_document.js',
-    },
-    {
-      require: (route: Route) => route.entryName === 'routes/404',
-      filename: '404.js',
-    },
-  ]
-  for (const pattern of patterns) {
-    if (!routes.some(pattern.require)) {
-      routes.push(pathToRoute(pattern.filename, ownRoutesDir, routes.length))
-    }
-  }
-  return sortRoutesByScore(routes)
-}
+import path from 'path'
+import { filesToRoutes } from './utils/load-routes'
 
 export async function prepareFiles(api: Ream) {
-  const pattern = '**/*.{vue,js,ts,jsx,tsx}'
-  const routesDir = api.resolveSrcDir('routes')
+  const pagesDir = api.resolveSrcDir('pages')
+  const routesFilePattern = '**/*.{vue,ts,tsx,js,jsx}'
 
-  if (!(await pathExists(routesDir))) {
-    throw new Error(`${routesDir} doesn't exist`)
+  if (!(await pathExists(pagesDir))) {
+    throw new Error(`${pagesDir} doesn't exist`)
   }
 
-  const files = new Set(
-    await glob(pattern, {
-      cwd: routesDir,
-    })
-  )
+  const files = await glob(routesFilePattern, {
+    cwd: pagesDir,
+    onlyFiles: true,
+    ignore: ['node_modules', 'dist'],
+  })
 
   const writeRoutes = async () => {
-    const routes = getRoutes(
-      pathToRoutes([...files], routesDir),
-      api.resolveVueApp('routes')
-    )
+    const routesInfo = filesToRoutes(files, pagesDir)
 
-    let appRoute: Route
-    let errorRoute: Route
-    for (const route of routes) {
-      if (route.entryName === 'routes/_app') {
-        appRoute = route
-      } else if (route.entryName === 'routes/_error') {
-        errorRoute = route
-      }
+    const getRelativePathToTemplatesDir = (p: string) => {
+      return path.relative(api.resolveDotReam('templates'), p)
     }
 
-    const clientRoutesContent = `
-    import { h } from 'vue'
-
-    var getAppComponent = function() {
-      return import(/* webpackChunkName: "${appRoute!.entryName}" */ "${
-      appRoute!.absolutePath
-    }")
-    }
-    var getErrorComponent = function() {
-      return import(/* webpackChunkName: "${errorRoute!.entryName}" */ "${
-      errorRoute!.absolutePath
-    }")
-    }
-
-    var wrapPage = function(res) {
-      var _app = res[0], _error = res[1], page = res[2]
-      var Component = page.default
-      return {
-        preload: page.preload,
-        hasServerPreload: page["${SERVER_PRELOAD_INDICATOR}"] || page["${STATIC_PRELOAD_INDICATOR}"],
-        render: function () {
-          var pagePropsStore = this.$root.pagePropsStore
-          var pageProps = pagePropsStore && pagePropsStore[this.$route.path]
-          if (pageProps && pageProps.error) {
-            Component = _error.default
-          }
-          return h(_app.default, {
-            Component: Component,
-            pageProps: pageProps,
-            key: this.$route.path
+    const stringifyClientRoutes = (routes: Route[]): string => {
+      const clientRoutes = routes.filter((route) => !route.isServerRoute)
+      return `[
+        ${clientRoutes
+          .map((route) => {
+            return `{
+            path: "${route.path}",
+            ${route.routeName ? `name: "${route.routeName}",` : ``}
+            component: function() {
+              return import("${getRelativePathToTemplatesDir(route.file)}")
+                .then(wrapPage)
+            },
+            ${
+              route.children
+                ? `children: ${stringifyClientRoutes(route.children)}`
+                : ``
+            }
+          }`
           })
+          .join(',')}${clientRoutes.length === 0 ? '' : ','}
+          // Adding a 404 route to suppress vue-router warning
+          {
+            name: '404',
+            path: '/:404(.*)',
+            component: import.meta.env.DEV ? {
+              render() {
+                return h('h1','error: this component should not be rendered')
+              }
+            } : {}
+          }
+      ]`
+    }
+
+    const stringifyServerRoutes = (routes: Route[]): string => {
+      const serverRoutes = routes.filter((route) => route.isServerRoute)
+      return `[
+        ${serverRoutes
+          .map((route) => {
+            return `{
+            path: "${route.path}",
+            meta: {load: () => import("${getRelativePathToTemplatesDir(
+              route.file
+            )}")},
+            component: {}
+          }`
+          })
+          .join(',')}${serverRoutes.length === 0 ? '' : ','}
+          {
+            name: '404',
+            path: '/:404(.*)',
+            component: {}
+          }
+      ]`
+    }
+
+    // Exports that will be used in both server and client code
+    const sharedExportsContent = `
+    import { h, defineAsyncComponent } from 'vue'
+
+    var ErrorComponent = defineAsyncComponent(function() {
+      return import("${getRelativePathToTemplatesDir(routesInfo.errorFile)}")
+    })
+
+    var AppComponent = defineAsyncComponent(function() {
+      return import("${getRelativePathToTemplatesDir(routesInfo.appFile)}")
+    })
+
+    var NotFoundComponent = defineAsyncComponent(function() {
+      return import("${getRelativePathToTemplatesDir(routesInfo.notFoundFile)}")
+    })
+
+    var wrapPage = function(page) {
+      return {
+        name: 'PageWrapper',
+        $$preload: page.preload,
+        $$staticPreload: page.staticPreload,
+        $$getStaticPaths: page.getStaticPaths,
+        setup: function () {
+          return function() {
+            var Component = page.default
+            return h(Component)
+          }
         }
       }
     }
 
-    var routes = [
-      ${routes
-        .filter((route) => route.isClientRoute)
-        .map((route) => {
-          return `{
-          path: ${JSON.stringify(route.routePath)},
-          component: function() {
-            return Promise.all([
-              getAppComponent(),
-              getErrorComponent(),
-              import(/* webpackChunkName: ${JSON.stringify(
-                route.entryName
-              )} */ ${JSON.stringify(route.absolutePath)})
-            ]).then(wrapPage)
-          }
-        }`
-        })
-        .join(',')}
-    ]
+    var clientRoutes = ${stringifyClientRoutes(routesInfo.routes)}
 
     export {
-      routes
+      clientRoutes,
+      ErrorComponent,
+      AppComponent,
+      NotFoundComponent
     }
     `
 
     await outputFile(
-      api.resolveDotReam('templates/client-routes.js'),
-      clientRoutesContent,
+      api.resolveDotReam('templates/shared-exports.js'),
+      sharedExportsContent,
       'utf8'
     )
 
-    const allRoutesContent = `
-    var routes = {}
-    
-    ${routes
-      .map((route) => {
-        return `routes[${JSON.stringify(route.entryName)}] = {
-          type: "${route.isServerRoute ? 'server' : 'client'}",
-          load: () => import(/* webpackChunkName: "${
-            route.entryName
-          }" */ ${JSON.stringify(route.absolutePath)})
-        }`
-      })
-      .join('\n')}
+    const serverExportsContent = `
+   export const serverRoutes = ${stringifyServerRoutes(routesInfo.routes)}
 
-    export {
-      routes
-    }
+   export const _document = () => import("${routesInfo.documentFile}")
     `
 
     await outputFile(
-      api.resolveDotReam('templates/all-routes.js'),
-      allRoutesContent,
-      'utf8'
-    )
-
-    await outputFile(
-      api.resolveDotReam('manifest/routes-info.json'),
-      JSON.stringify(routes, null, 2),
+      api.resolveDotReam('templates/server-exports.js'),
+      serverExportsContent,
       'utf8'
     )
 
     await outputFile(
       api.resolveDotReam('templates/global-imports.js'),
       `
-      import '@ream/fetch'
       ${api.config.css
         .map((file) => `import ${JSON.stringify(file)}`)
         .join('\n')}
@@ -177,20 +151,25 @@ export async function prepareFiles(api: Ream) {
       'utf8'
     )
 
+    const enhanceAppFiles = [...store.state.pluginsFiles['enhance-app']]
     await outputFile(
       api.resolveDotReam('templates/enhance-app.js'),
       `
+      ${enhanceAppFiles
+        .map((file, index) => {
+          return `import * as enhanceApp_${index} from "${file}"`
+        })
+        .join('\n')}
+
     var files = [
-      ${[...store.state.pluginsFiles['enhance-app']].map((file) => {
-        return `require(${JSON.stringify(file)})`
-      })}
+      ${enhanceAppFiles.map((_, i) => `enhanceApp_${i}`).join(',')}
     ]
 
     var exec = function(name, context) {
       for (var i = 0; i < files.length; i++) {
-        var file = files[i]
-        if (file[name]) {
-          file[name](context)
+        var mod = files[i]
+        if (mod[name]) {
+          mod[name](context)
         }
       }
     }
@@ -207,16 +186,16 @@ export async function prepareFiles(api: Ream) {
 
   if (api.isDev) {
     const { watch } = await import('chokidar')
-    watch(pattern, {
-      cwd: routesDir,
+    watch(routesFilePattern, {
+      cwd: pagesDir,
       ignoreInitial: true,
     })
       .on('add', async (file) => {
-        files.add(file)
+        files.push(file)
         await writeRoutes()
       })
       .on('unlink', async (file) => {
-        files.delete(file)
+        files.splice(files.indexOf(file), 1)
         await writeRoutes()
       })
   }

@@ -1,7 +1,11 @@
 /* eslint-disable */
 // Google analytics integration for Vue.js renderer
 export function onCreatedApp({ router }) {
-  if (process.browser && !__DEV__ && process.env.GA_TRACKING_ID) {
+  if (
+    !import.meta.env.SSR &&
+    import.meta.env.PROD &&
+    import.meta.env.GA_TRACKING_ID
+  ) {
     function doNotTrackEnabled() {
       const dntNumber = parseInt(
         navigator.msDoNotTrack || // Internet Explorer 9 and 10 vendor prefix
@@ -32,13 +36,13 @@ export function onCreatedApp({ router }) {
       m.parentNode.insertBefore(a, m)
     })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga')
 
-    ga('create', process.env.GA_TRACKING_ID, 'auto')
+    ga('create', import.meta.env.GA_TRACKING_ID, 'auto')
 
-    if (process.env.GA_ANONYMIZE_IP) {
+    if (import.meta.env.GA_ANONYMIZE_IP) {
       ga('set', 'anonymizeIp', true)
     }
 
-    router.afterEach(to => {
+    router.afterEach((to) => {
       ga('set', 'page', to.fullPath)
       ga('send', 'pageview')
     })

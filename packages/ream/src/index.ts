@@ -1,54 +1,176 @@
-import {
-  ReamServerHandler,
-  ReamServerRequest,
-  ReamServerResponse,
-} from './server/server'
+import { resolve, join } from 'path'
+import type { SetRequired } from 'type-fest'
+import type { ViteDevServer, UserConfig as ViteConfig } from 'vite'
+import resolveFrom from 'resolve-from'
+import { loadConfig } from './utils/load-config'
+import { loadPlugins } from './load-plugins'
+import { normalizePluginsArray } from './utils/normalize-plugins-array'
+import { Store, store } from './store'
+import { createServer } from 'http'
+import { remove, existsSync } from 'fs-extra'
+import { OWN_DIR } from './utils/constants'
 
-interface IParams {
-  [k: string]: string
-}
-
-export interface PreloadContext {
-  params: IParams
-  req: ReamServerRequest
-  res: ReamServerResponse
-}
-
-export interface PreloadResult {
-  /**
-   * Pass to page component as props
-   */
-  props: {
-    [k: string]: any
+export interface Options {
+  rootDir?: string
+  srcDir?: string
+  dev?: boolean
+  server?: {
+    port?: number | string
   }
 }
 
-type PreloadFactory<ContextType = any, ResultType = any> = (
-  ctx: ContextType
-) => ResultType | Promise<ResultType>
+export type ReamPluginConfigItem =
+  | string
+  | [string]
+  | [string, { [k: string]: any }]
 
-export type Preload = PreloadFactory<PreloadContext, PreloadResult>
-
-/**
- * Always preload data on the server-side
- */
-export type ServerPreload = PreloadFactory<PreloadContext, PreloadResult>
-
-export type StaticPreloadContext = Omit<PreloadContext, 'req' | 'res'>
-
-/**
- * For static export
- */
-export type StaticPreload = PreloadFactory<StaticPreloadContext, PreloadResult>
-
-export type StaticPathsResult = {
-  paths: Array<{
-    params: {
-      [k: string]: string
-    }
-  }>
+export type ReamConfig = {
+  env?: {
+    [k: string]: string | boolean | number
+  }
+  plugins?: Array<ReamPluginConfigItem>
+  css?: string[]
+  server?: {
+    port?: number
+  }
+  vite?: (
+    viteConfig: ViteConfig,
+    opts: { isDev: boolean; ssr?: boolean }
+  ) => void
 }
 
-export type StaticPaths = () => StaticPathsResult | Promise<StaticPathsResult>
+export class Ream {
+  rootDir: string
+  srcDir: string
+  isDev: boolean
+  config: SetRequired<ReamConfig, 'env' | 'plugins' | 'css' | 'server'>
+  configPath?: string
+  store: Store
+  viteDevServer?: ViteDevServer
+  // Used by `export` command, addtional routes like server routes and *.preload.json
+  exportedServerRoutes?: Set<string>
 
-export { ReamServerHandler, ReamServerRequest, ReamServerResponse }
+  constructor(options: Options = {}, configOverride: ReamConfig = {}) {
+    this.rootDir = resolve(options.rootDir || '.')
+    if (options.srcDir) {
+      this.srcDir = join(this.rootDir, options.srcDir)
+    } else {
+      const hasPagesInSrc = existsSync(join(this.rootDir, 'src/pages'))
+      this.srcDir = hasPagesInSrc ? join(this.rootDir, 'src') : this.rootDir
+    }
+    this.isDev = Boolean(options.dev)
+    if (!process.env.NODE_ENV) {
+      process.env.NODE_ENV = this.isDev ? 'development' : 'production'
+    }
+    this.store = store
+
+    const { data: projectConfig = {}, path: configPath } = loadConfig(
+      this.rootDir
+    )
+    this.configPath = configPath
+    this.config = {
+      ...projectConfig,
+      env: {
+        ...projectConfig.env,
+        ...configOverride.env,
+      },
+      plugins: [
+        ...(configOverride.plugins || []),
+        ...(projectConfig.plugins || []),
+      ],
+      css: projectConfig.css || [],
+      server: {
+        ...projectConfig.server,
+        port: projectConfig.server?.port || 3000,
+      },
+    }
+    process.env.PORT = String(this.config.server.port)
+  }
+
+  resolveRootDir(...args: string[]) {
+    return resolve(this.rootDir, ...args)
+  }
+
+  resolveSrcDir(...args: string[]) {
+    return resolve(this.srcDir, ...args)
+  }
+
+  resolveDotReam(...args: string[]) {
+    return this.resolveRootDir('.ream', ...args)
+  }
+
+  resolveOwnDir(...args: string[]) {
+    return resolve(OWN_DIR, ...args)
+  }
+
+  get plugins() {
+    return normalizePluginsArray(this.config.plugins, this.rootDir)
+  }
+
+  async prepare({
+    shouldCleanDir,
+    shouldPrepreFiles,
+  }: {
+    shouldCleanDir: boolean
+    shouldPrepreFiles: boolean
+  }) {
+    // Plugins are loaded in every situations
+    // TODO: some plugins should only be loaded at build time
+    await loadPlugins(this)
+
+    if (shouldCleanDir) {
+      // Remove everything but cache
+      await Promise.all(
+        ['templates', 'manifest', 'server', 'client', 'export'].map((name) => {
+          return remove(this.resolveDotReam(name))
+        })
+      )
+    }
+
+    // Preparing for webpack build process
+    if (shouldPrepreFiles) {
+      console.log('Preparing Ream files')
+      const { prepareFiles } = await import('./prepare-files')
+      await prepareFiles(this)
+    }
+  }
+
+  localResolve(name: string) {
+    return resolveFrom.silent(this.rootDir, name)
+  }
+
+  localRequire(name: string) {
+    const path = this.localResolve(name)
+    return path && require(path)
+  }
+
+  async getRequestHandler() {
+    await this.prepare({
+      shouldCleanDir: this.isDev,
+      shouldPrepreFiles: this.isDev,
+    })
+    const { createServer } = await import('./server')
+    const server = await createServer(this)
+    return server
+  }
+
+  async serve() {
+    const handler = await this.getRequestHandler()
+    const server = createServer(handler)
+    server.listen(this.config.server.port)
+    console.log(`> http://localhost:${this.config.server.port}`)
+    return server
+  }
+
+  async build(shouldExport?: boolean) {
+    await this.prepare({ shouldCleanDir: true, shouldPrepreFiles: true })
+    const { build } = await import('./build')
+    await build(this)
+    if (shouldExport) {
+      const { exportSite } = await import('./export')
+      await exportSite(this.resolveDotReam())
+    }
+  }
+}
+
+export * from './types'

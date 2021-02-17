@@ -1,13 +1,13 @@
 <template>
   <ul>
     <li>
-      <router-link to="/">Home</router-link>
+      <ream-link to="/">Home</ream-link>
     </li>
     <li>
-      <router-link to="/posts">Preload Posts</router-link>
+      <ream-link to="/posts">Preload Posts</ream-link>
     </li>
     <li>
-      <router-link to="/static-preload">Static Preload Posts</router-link>
+      <ream-link to="/static-preload">Static Preload Posts</ream-link>
     </li>
   </ul>
 </template>

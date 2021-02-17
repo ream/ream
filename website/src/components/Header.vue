@@ -1,11 +1,34 @@
+<script setup lang="ts">
+import { watch, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import DocsMenu from './DocsMenu.vue'
+
+const route = useRoute()
+const showDropdown = ref(false)
+const navLinks = [
+  {
+    title: 'GitHub',
+    link: 'https://github.com/ream/ream',
+  },
+  {
+    title: 'Twitter',
+    link: 'https://twitter.com/_egoistlily',
+  },
+]
+
+watch(
+  () => route.path,
+  () => {
+    showDropdown.value = false
+  }
+)
+</script>
+
 <template>
   <header class="header bg-blue-500 text-white fixed w-full top-0 z-10">
-    <Head>
-      <!-- <body :data-no-scroll="showDropdown" /> -->
-    </Head>
     <div class="px-5 flex h-full items-center justify-between mx-auto">
       <h1 class="text-2xl font-bold">
-        <router-link to="/">Ream</router-link>
+        <ream-link to="/">Ream</ream-link>
       </h1>
       <div class="hidden lg:flex space-x-8">
         <a
@@ -78,47 +101,6 @@
     </div>
   </header>
 </template>
-
-<script lang="ts">
-import { defineComponent, watch, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { Head } from 'ream/head'
-import DocsMenu from './DocsMenu.vue'
-
-export default defineComponent({
-  components: {
-    DocsMenu,
-    Head,
-  },
-
-  setup() {
-    const route = useRoute()
-    const showDropdown = ref(false)
-    const navLinks = [
-      {
-        title: 'GitHub',
-        link: 'https://github.com/ream/ream',
-      },
-      {
-        title: 'Twitter',
-        link: 'https://twitter.com/_egoistlily',
-      },
-    ]
-
-    watch(
-      () => route.path,
-      () => {
-        showDropdown.value = false
-      }
-    )
-
-    return {
-      showDropdown,
-      navLinks,
-    }
-  },
-})
-</script>
 
 <style scoped>
 .header {

@@ -6,21 +6,25 @@
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
     "test": "npm run build && npm run test:unit && npm run test:integration",
     "build": "lerna run build --ignore website",
+    "build-ream": "yarn workspace ream build",
+    "watch-ream": "yarn workspace ream watch",
     "ream": "node ./packages/ream/dist/cli"
   },
   "workspaces": [
     "packages/ream",
     "packages/ream-server",
     "packages/@ream/*",
-    "website"
+    "website",
+    "examples/data-fetching"
   ],
   "devDependencies": {
     "@types/jest": "^26.0.7",
+    "esbuild-register": "^2.0.0",
     "jest": "^25.3.0",
     "lerna": "^3.20.2",
     "prettier": "^2.0.5",
     "ts-jest": "^25.3.1",
-    "tsup": "^3.4.0",
-    "typescript": "^3.8.3"
+    "tsup": "^4.0.0",
+    "typescript": "^4.1.3"
   }
 }

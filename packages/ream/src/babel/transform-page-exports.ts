@@ -7,41 +7,21 @@
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 import { PluginObj, NodePath, types as BabelTypes } from '@babel/core'
-import {
-  SERVER_PRELOAD_INDICATOR,
-  STATIC_PRELOAD_INDICATOR,
-  GET_STATIC_PATHS_INDICATOR,
-} from './constants'
 
-const EXPORT_SERVER_PRELOAD = `serverPreload`
+const EXPORT_PRELOAD = `preload`
 const EXPORT_STATIC_PRELOAD = `staticPreload`
 const EXPORT_GET_STATIC_PATHS = `getStaticPaths`
 
-type DATA_EXPORT_ID =
-  | typeof EXPORT_SERVER_PRELOAD
+type SERVER_ONLY_EXPORT_ID =
+  | typeof EXPORT_PRELOAD
   | typeof EXPORT_STATIC_PRELOAD
   | typeof EXPORT_GET_STATIC_PATHS
 
-const exportPatterns: Array<{
-  input: DATA_EXPORT_ID
-  output:
-    | typeof SERVER_PRELOAD_INDICATOR
-    | typeof STATIC_PRELOAD_INDICATOR
-    | typeof GET_STATIC_PATHS_INDICATOR
-}> = [
-  {
-    input: EXPORT_SERVER_PRELOAD,
-    output: SERVER_PRELOAD_INDICATOR,
-  },
-  {
-    input: EXPORT_STATIC_PRELOAD,
-    output: STATIC_PRELOAD_INDICATOR,
-  },
-  {
-    input: EXPORT_GET_STATIC_PATHS,
-    output: GET_STATIC_PATHS_INDICATOR,
-  },
-]
+const serverOnlyExportNames: Set<SERVER_ONLY_EXPORT_ID> = new Set([
+  EXPORT_PRELOAD,
+  EXPORT_STATIC_PRELOAD,
+  EXPORT_GET_STATIC_PATHS,
+])
 
 export type PluginOpts = {}
 
@@ -128,7 +108,7 @@ const createMarkImport = (state: PluginState) =>
 type PluginState = {
   refs: Set<NodePath<BabelTypes.Identifier>>
   opts: PluginOpts
-  dataExports: Set<DATA_EXPORT_ID>
+  serverOnlyExports: Set<SERVER_ONLY_EXPORT_ID>
 }
 
 export default function pageExportsTransforms({
@@ -141,7 +121,7 @@ export default function pageExportsTransforms({
       Program: {
         enter(path, state) {
           state.refs = new Set()
-          state.dataExports = new Set()
+          state.serverOnlyExports = new Set()
 
           const markImport = createMarkImport(state)
           const markFunction = createMarkFunction(state)
@@ -223,7 +203,7 @@ export default function pageExportsTransforms({
                     t.variableDeclaration('var', [
                       t.variableDeclarator(
                         t.identifier(exportName),
-                        t.booleanLiteral(true)
+                        t.numericLiteral(1)
                       ),
                     ])
                   )
@@ -232,13 +212,13 @@ export default function pageExportsTransforms({
 
               let shouldRemove = false
 
-              // Handle re-exports
+              // Handle re-exports: export { preload } from './foo'
               path.node.specifiers = path.node.specifiers.filter((spec) => {
                 const { name } = spec.exported
-                for (const pattern of exportPatterns) {
-                  if (name === pattern.input) {
-                    insertIndicator(path, pattern.output)
-                    state.dataExports.add(pattern.input)
+                for (const serverOnlyExportName of serverOnlyExportNames) {
+                  if (name === serverOnlyExportName) {
+                    insertIndicator(path, serverOnlyExportName)
+                    state.serverOnlyExports.add(serverOnlyExportName)
                     return false
                   }
                 }
@@ -256,13 +236,14 @@ export default function pageExportsTransforms({
               if (declaration && declaration.type === 'VariableDeclaration') {
                 declaration.declarations = declaration.declarations.filter(
                   (declarator: BabelTypes.VariableDeclarator) => {
-                    for (const pattern of exportPatterns) {
+                    for (const name of serverOnlyExportNames) {
                       if (
                         (declarator.id as BabelTypes.Identifier).name ===
-                        pattern.input
+                          name &&
+                        declarator.init?.type.includes('Function') // ArrowFunctionExpression or FunctionExpression
                       ) {
-                        insertIndicator(path, pattern.output)
-                        state.dataExports.add(pattern.input)
+                        insertIndicator(path, name)
+                        state.serverOnlyExports.add(name)
                         return false
                       }
                     }
@@ -275,11 +256,11 @@ export default function pageExportsTransforms({
               }
 
               if (declaration && declaration.type === 'FunctionDeclaration') {
-                for (const pattern of exportPatterns) {
-                  if (declaration.id.name === pattern.input) {
+                for (const name of serverOnlyExportNames) {
+                  if (declaration.id.name === name) {
                     shouldRemove = true
-                    state.dataExports.add(pattern.input)
-                    insertIndicator(path, pattern.output)
+                    state.serverOnlyExports.add(name)
+                    insertIndicator(path, name)
                   }
                 }
               }
@@ -290,17 +271,18 @@ export default function pageExportsTransforms({
             },
           })
 
-          if (state.dataExports.size === 0) {
+          if (state.serverOnlyExports.size === 0) {
+            // No server-spcific exports found
             // No need to clean unused references then
             return
           }
 
           if (
-            state.dataExports.has(EXPORT_SERVER_PRELOAD) &&
-            state.dataExports.has(EXPORT_STATIC_PRELOAD)
+            state.serverOnlyExports.has(EXPORT_PRELOAD) &&
+            state.serverOnlyExports.has(EXPORT_STATIC_PRELOAD)
           ) {
             throw new Error(
-              `You can't use ${EXPORT_SERVER_PRELOAD} and ${EXPORT_STATIC_PRELOAD} on the same page, use ${EXPORT_STATIC_PRELOAD} if you want to pre-render the page at build time, otherwise use ${EXPORT_SERVER_PRELOAD}`
+              `You can't use ${EXPORT_PRELOAD} and ${EXPORT_STATIC_PRELOAD} on the same page, use ${EXPORT_STATIC_PRELOAD} if you want to pre-render the page at build time, otherwise use ${EXPORT_PRELOAD}`
             )
           }
 

@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import menu from '@/data/menu'
+</script>
+
 <template>
   <div class="sticky docs-menu">
     <div v-for="item in menu" :key="item.text">
@@ -5,29 +9,16 @@
         {{ item.text }}
       </div>
       <div v-for="child in item.children" :key="child.text">
-        <router-link
+        <ream-link
           class="menu-item-link"
           :class="{ active: $route.path === child.link }"
           :to="child.link"
-          >{{ child.text }}</router-link
+          >{{ child.text }}</ream-link
         >
       </div>
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent } from 'vue'
-import menu from '@/data/menu'
-
-export default defineComponent({
-  data() {
-    return {
-      menu,
-    }
-  },
-})
-</script>
 
 <style scoped>
 .docs-menu {

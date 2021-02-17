@@ -27,7 +27,7 @@ describe(`export static site`, () => {
 
     it(`should export data as json file`, async () => {
       const { statusCode, content } = await app.visit(
-        '/static-preload.serverpreload.json'
+        '/static-preload.preload.json'
       )
       expect(statusCode).toBe(200)
       expect(content).toBe(`{"message":"static preload"}`)

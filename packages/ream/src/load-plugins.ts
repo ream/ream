@@ -1,4 +1,4 @@
-import { Ream } from './node'
+import { Ream } from './'
 import { resolveFiles } from './utils/resolve-files'
 import { store } from './store'
 
@@ -16,13 +16,6 @@ export async function loadPlugins(api: Ream) {
     )
     if (enhanceAppPath) {
       store.addPluginFile('enhance-app', enhanceAppPath)
-    }
-    const chainWebpackPath = await resolveFiles(
-      ['chain-webpack.js'],
-      plugin.pluginDir
-    )
-    if (chainWebpackPath) {
-      store.addPluginFile('chain-webpack', chainWebpackPath)
     }
     if (apply) {
       try {

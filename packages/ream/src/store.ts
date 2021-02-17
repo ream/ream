@@ -7,7 +7,6 @@ type State = {
   pluginsFiles: {
     'enhance-app': Set<string>
     'enhance-server': Set<string>
-    'chain-webpack': Set<string>
   }
 }
 
@@ -17,7 +16,6 @@ export class Store {
     pluginsFiles: {
       'enhance-app': new Set(),
       'enhance-server': new Set(),
-      'chain-webpack': new Set(),
     },
   }
 

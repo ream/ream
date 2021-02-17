@@ -1,14 +1,22 @@
-import { join } from 'path'
+import path from 'path'
 import fs from 'fs'
 import marked from 'marked'
 import Prism from 'prismjs'
 
-require('prismjs/components/prism-json')
-require('prismjs/components/prism-bash')
+import 'prismjs/components/prism-json'
+import 'prismjs/components/prism-bash'
 
-const docsDir = join(__dirname, '../../../docs')
+const docsDir = path.join(import.meta.env.REAM_ROOT_DIR, '../docs')
 
 export async function renderMarkdown(slug: string) {
+  const file = path.join(docsDir, `${slug}.md`)
+
+  if (!fs.existsSync(file)) {
+    return false
+  }
+
+  const content = await fs.promises.readFile(file, 'utf8')
+
   const renderer = new marked.Renderer()
   const heading = renderer.heading
   const env = { title: '' }
@@ -20,10 +28,6 @@ export async function renderMarkdown(slug: string) {
     return heading.call(this, text, level, raw, slugger)
   }
 
-  const content = await fs.promises.readFile(
-    join(docsDir, `${slug}.md`),
-    'utf8'
-  )
   const html = marked(content, {
     renderer,
     highlight(input, lang) {
