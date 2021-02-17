@@ -16,7 +16,15 @@ export const createApp = ({ router, initialState }) => {
         ? initialState
         : reactive(initialState)
       const route = useRoute()
-      const preloadResult = computed(() => store[route.path] || {})
+      const preloadResult = computed(() => {
+        if (store[route.path]) {
+          return store[route.path]
+        }
+        if (Object.keys(store) === 1 && store['/404.html']) {
+          return store['/404.html']
+        }
+        return {}
+      })
       return {
         initialState: store,
         preloadResult,
