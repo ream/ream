@@ -161,7 +161,7 @@ export async function render({
     if (statusCode === 404) {
       preloadResult.notFound = true
     }
-    const html = await renderToHTML({
+    body = await renderToHTML({
       params: route.params,
       url,
       path: route.path,
@@ -174,7 +174,6 @@ export async function render({
       scripts,
       styles,
     })
-    body = `<!DOCTYPE>${html}`
     if (shouldExport) {
       cacheFiles.set(staticHTMLPath, body)
       if (preloadResult.hasPreload) {

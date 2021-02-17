@@ -1,5 +1,5 @@
 import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
-import { createHead } from '@vueuse/head'
+import { createHead, useHead } from '@vueuse/head'
 import { useRoute, RouterView } from 'vue-router'
 import { ReamLink } from './'
 import {
@@ -12,6 +12,12 @@ import { onCreatedApp } from '/.ream/templates/enhance-app.js'
 export const createApp = ({ router, initialState }) => {
   const app = createSSRApp({
     setup() {
+      useHead({
+        meta: [
+          { charset: 'utf-8' },
+          { name: 'viewport', content: 'width=device-width,initial-scale=1' },
+        ],
+      })
       const store = isReactive(initialState)
         ? initialState
         : reactive(initialState)
