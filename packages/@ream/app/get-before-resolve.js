@@ -10,6 +10,14 @@ export const loadPageData = async (to, next = noop) => {
     return next()
   }
 
+  // @ts-ignore
+  const initialState = window._ream.initialState
+
+  if (to.name === '404') {
+    initialState[to.path] = { notFound: true }
+    return next()
+  }
+
   const components = to.matched.map((m) => m.components.default)
   const hasPreload = components.some(
     (component) => component.$$preload || component.$$staticPreload
@@ -17,9 +25,6 @@ export const loadPageData = async (to, next = noop) => {
   if (!hasPreload) {
     return next()
   }
-
-  // @ts-ignore
-  const initialState = window._ream.initialState
 
   const fetchPage = async (next) => {
     const result = {}

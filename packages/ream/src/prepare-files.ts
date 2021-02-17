@@ -47,11 +47,15 @@ export async function prepareFiles(api: Ream) {
           }`
           })
           .join(',')}${clientRoutes.length === 0 ? '' : ','}
-          // Adding a 404
+          // Adding a 404 route to suppress vue-router warning
           {
             name: '404',
             path: '/:404(.*)',
-            component: wrapPage({})
+            component: import.meta.env.DEV ? {
+              render() {
+                return h('h1','error: this component should not be rendered')
+              }
+            } : {}
           }
       ]`
     }
@@ -96,6 +100,7 @@ export async function prepareFiles(api: Ream) {
 
     var wrapPage = function(page) {
       return {
+        name: 'PageWrapper',
         $$preload: page.preload,
         $$staticPreload: page.staticPreload,
         $$getStaticPaths: page.getStaticPaths,
