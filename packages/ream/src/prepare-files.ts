@@ -27,26 +27,34 @@ export async function prepareFiles(api: Ream) {
       return path.relative(api.resolveDotReam('templates'), p)
     }
 
-    const stringifyClientRoutes = (routes: Route[]): string => `[
-      ${routes
-        .filter((route) => !route.isServerRoute)
-        .map((route) => {
-          return `{
-          path: "${route.path}",
-          ${route.routeName ? `name: "${route.routeName}",` : ``}
-          component: function() {
-            return import("${getRelativePathToTemplatesDir(route.file)}")
-              .then(wrapPage)
-          },
-          ${
-            route.children
-              ? `children: ${stringifyClientRoutes(route.children)}`
-              : ``
+    const stringifyClientRoutes = (routes: Route[]): string => {
+      const clientRoutes = routes.filter((route) => !route.isServerRoute)
+      return `[
+        ${clientRoutes
+          .map((route) => {
+            return `{
+            path: "${route.path}",
+            ${route.routeName ? `name: "${route.routeName}",` : ``}
+            component: function() {
+              return import("${getRelativePathToTemplatesDir(route.file)}")
+                .then(wrapPage)
+            },
+            ${
+              route.children
+                ? `children: ${stringifyClientRoutes(route.children)}`
+                : ``
+            }
+          }`
+          })
+          .join(',')}${clientRoutes.length === 0 ? '' : ','}
+          // Adding a 404
+          {
+            name: '404',
+            path: '/:404(.*)',
+            component: wrapPage({})
           }
-        }`
-        })
-        .join(',')}
-    ]`
+      ]`
+    }
 
     const stringifyServerRoutes = (routes: Route[]): string => {
       const serverRoutes = routes.filter((route) => route.isServerRoute)
@@ -63,16 +71,17 @@ export async function prepareFiles(api: Ream) {
           })
           .join(',')}${serverRoutes.length === 0 ? '' : ','}
           {
-            path: '/:404(.*)',
             name: '404',
+            path: '/:404(.*)',
             component: {}
           }
       ]`
     }
 
+    // Exports that will be used in both server and client code
     const sharedExportsContent = `
     import { h, defineAsyncComponent } from 'vue'
-    import { usePreloadData } from 'ream/data'
+    import { usePreloadResult } from 'ream/data'
 
     var ErrorComponent = defineAsyncComponent(function() {
       return import("${getRelativePathToTemplatesDir(routesInfo.errorFile)}")
@@ -82,17 +91,22 @@ export async function prepareFiles(api: Ream) {
       return import("${getRelativePathToTemplatesDir(routesInfo.appFile)}")
     })
 
+    var NotFoundComponent = defineAsyncComponent(function() {
+      return import("${getRelativePathToTemplatesDir(routesInfo.notFoundFile)}")
+    })
+
     var wrapPage = function(page) {
       return {
         $$preload: page.preload,
-        $$clientPreload: page.clientPreload,
         $$staticPreload: page.staticPreload,
         $$getStaticPaths: page.getStaticPaths,
         setup: function () {
           return function() {
             var Component = page.default
-            var pageData = usePreloadData()
-            if (pageData && pageData.error) {
+            var result = usePreloadResult()
+            if (result.value.notFound) {
+              Component = NotFoundComponent
+            } else if (result.value.error) {
               Component = ErrorComponent
             }
             return h(Component)

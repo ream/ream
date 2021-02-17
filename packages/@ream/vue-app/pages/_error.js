@@ -1,10 +1,11 @@
 import { h, defineComponent } from 'vue'
-import { usePreloadData } from 'ream/data'
+import { usePreloadResult } from 'ream/data'
 
 export default defineComponent({
   name: 'DefaultError',
   setup() {
-    const { error } = usePreloadData()
+    const result = usePreloadResult()
+    const { error } = result.value
     return () =>
       h(
         'div',

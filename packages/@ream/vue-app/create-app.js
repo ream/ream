@@ -4,17 +4,17 @@ import { useRoute } from 'vue-router'
 import { AppComponent } from '/.ream/templates/shared-exports.js'
 import { onCreatedApp } from '/.ream/templates/enhance-app.js'
 
-export const createApp = ({ router, pageDataStore }) => {
+export const createApp = ({ router, initialState }) => {
   const app = createSSRApp({
     setup() {
-      const store = isReactive(pageDataStore)
-        ? pageDataStore
-        : reactive(pageDataStore)
+      const store = isReactive(initialState)
+        ? initialState
+        : reactive(initialState)
       const route = useRoute()
-      const page = computed(() => store[route.path] || {})
+      const preloadResult = computed(() => store[route.path] || {})
       return {
-        pageDataStore: store,
-        page,
+        initialState: store,
+        preloadResult,
       }
     },
     render() {

@@ -197,6 +197,10 @@ export async function createServer(ctx: CreateServerContext = {}) {
         res,
         params: req.params,
       })
+      preloadResult.error = {
+        statusCode: res.statusCode,
+        stack: ctx.dev ? err.stack : undefined,
+      }
       const html = await renderToHTML({
         params: req.params,
         path: req.path,
@@ -204,13 +208,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
         req,
         res,
         router,
-        pageData: {
-          ...preloadResult.data,
-          error: {
-            statusCode: res.statusCode,
-            stack: ctx.dev ? err.stack : undefined,
-          },
-        },
+        preloadResult,
         serverEntry,
         ssrManifest,
         scripts,

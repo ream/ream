@@ -17,34 +17,28 @@ export const loadPageData = async (to, next = noop) => {
   }
 
   // @ts-ignore
-  const pageDataStore = window._ream.pageDataStore
+  const initialState = window._ream.initialState
 
   const fetchPage = async (next) => {
-    const data = {}
-    let hasFetched = false
+    const result = {}
 
     for (const component of components) {
-      if (component.$$clientPreload) {
-        const result = await component.$$clientPreload({
-          params: to.params,
-          query: to.query,
-        })
-        Object.assign(data, result.data)
-      } else if (
-        !hasFetched &&
-        (component.$$preload || component.$$staticPreload)
-      ) {
-        const result = await fetch(getPreloadPath(to.path)).then((res) =>
+      if (component.$$preload || component.$$staticPreload) {
+        const _result = await fetch(getPreloadPath(to.path)).then((res) =>
           res.json()
         )
-        Object.assign(data, result.data)
+        Object.assign(result, _result)
+        // We only need to fetch server once
+        break
       }
     }
-    pageDataStore[to.path] = data
+
+    initialState[to.path] = result
+
     next && next()
   }
-  const prevData = pageDataStore[to.path]
-  if (prevData && prevData.$cacheFirst) {
+  const prevResult = initialState[to.path]
+  if (prevResult && prevResult.cacheFirst) {
     // Page props already exist, use cache and reinvalidate
     next()
     fetchPage()

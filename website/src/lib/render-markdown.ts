@@ -9,6 +9,14 @@ import 'prismjs/components/prism-bash'
 const docsDir = path.join(import.meta.env.REAM_ROOT_DIR, '../docs')
 
 export async function renderMarkdown(slug: string) {
+  const file = path.join(docsDir, `${slug}.md`)
+
+  if (!fs.existsSync(file)) {
+    return false
+  }
+
+  const content = await fs.promises.readFile(file, 'utf8')
+
   const renderer = new marked.Renderer()
   const heading = renderer.heading
   const env = { title: '' }
@@ -20,10 +28,6 @@ export async function renderMarkdown(slug: string) {
     return heading.call(this, text, level, raw, slugger)
   }
 
-  const content = await fs.promises.readFile(
-    path.join(docsDir, `${slug}.md`),
-    'utf8'
-  )
   const html = marked(content, {
     renderer,
     highlight(input, lang) {

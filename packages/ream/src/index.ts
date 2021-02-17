@@ -14,12 +14,14 @@ export interface PreloadContext {
   res: ReamServerResponse
 }
 
-export type PreloadResult<TData> = {
-  /**
-   * Page data
-   */
-  data: TData
-}
+export type PreloadResult<TData> =
+  | {
+      /**
+       * Page data
+       */
+      data: TData
+    }
+  | { notFound: true }
 
 type PreloadFactory<ContextType = any, ResultType = any> = (
   ctx: ContextType

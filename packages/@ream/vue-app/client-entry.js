@@ -11,11 +11,11 @@ const router = createRouter({
   routes: clientRoutes,
 })
 
-const pageDataStore = reactive(window.INITIAL_STATE.pageDataStore)
+const initialState = reactive(window.INITIAL_STATE)
 
 const { app } = createApp({
   router,
-  pageDataStore,
+  initialState,
 })
 
 router.isReady().then(() => {
@@ -24,7 +24,7 @@ router.isReady().then(() => {
   window._ream = {
     app: vm,
     router,
-    pageDataStore,
+    initialState,
   }
 
   router.beforeResolve(getBeforeResolve(vm))

@@ -8,12 +8,12 @@ import Header from '@/components/Header.vue'
 import DocsMenu from '@/components/DocsMenu.vue'
 
 export const staticPreload: StaticPreload = async ({ params }) => {
-  const { title, content } = await renderMarkdown(params.slug)
+  const result = await renderMarkdown(params.slug)
+  if (!result) {
+    return { notFound: true }
+  }
   return {
-    data: {
-      title,
-      content,
-    },
+    data: result,
   }
 }
 
@@ -25,7 +25,6 @@ export default defineComponent({
 
   setup() {
     const preloadData = usePreloadData()
-
     const title = computed(
       () => `${preloadData.value.title} - Ream Documentation`
     )

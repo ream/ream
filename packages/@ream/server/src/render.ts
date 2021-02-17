@@ -127,6 +127,9 @@ export async function render({
         res,
         params: route.params,
       })
+      if (statusCode === 404) {
+        preloadResult.notFound = true
+      }
       body = serializeJavascript(preloadResult, { isJSON: true })
       if (shouldExport) {
         cacheFiles.set(staticPreloadOutputPath, body)
@@ -155,13 +158,16 @@ export async function render({
       res,
       params: route.params,
     })
+    if (statusCode === 404) {
+      preloadResult.notFound = true
+    }
     const html = await renderToHTML({
       params: route.params,
       url,
       path: route.path,
       req,
       res,
-      pageData: preloadResult.data,
+      preloadResult,
       serverEntry,
       router,
       ssrManifest,
@@ -188,7 +194,7 @@ export async function renderToHTML(options: {
   path: string
   req?: any
   res?: any
-  pageData: {
+  preloadResult: {
     [k: string]: any
   }
   router: Router
@@ -205,16 +211,16 @@ export async function renderToHTML(options: {
   )}"></script>`
   const context: {
     url: string
-    pageDataStore: any
+    initialState: any
     router: Router
     modules?: Set<string>
   } = {
     url: options.url,
-    pageDataStore: {},
+    initialState: {},
     router: options.router,
   }
-  context.pageDataStore = {
-    [options.path]: options.pageData,
+  context.initialState = {
+    [options.path]: options.preloadResult,
   }
 
   const app = await options.serverEntry.render(context)
@@ -229,12 +235,9 @@ export async function renderToHTML(options: {
     head: () => `${headHTML.headTags}${options.styles}${preloadLinks}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
     scripts: () => `
-      <script>INITIAL_STATE=${serializeJavaScript(
-        {
-          pageDataStore: context.pageDataStore,
-        },
-        { isJSON: true }
-      )}
+      <script>INITIAL_STATE=${serializeJavaScript(context.initialState, {
+        isJSON: true,
+      })}
       </script>
       ${scripts}
       `,
@@ -248,26 +251,51 @@ export async function renderToHTML(options: {
 export async function getPreloadData(
   components: any[],
   options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
-) {
+): Promise<{
+  data: any
+  hasPreload?: boolean
+  notFound?: boolean
+  error?: { statusCode: number; stack?: string }
+}> {
   const data = {}
-  let hasPreload = false
+  let hasPreload: boolean | undefined
+  let notFound: boolean | undefined
+  let error: { statusCode: number; stack?: string } | undefined
+
   for (const component of components) {
     const preload = component.$$staticPreload || component.$$preload
 
     if (preload) {
       hasPreload = true
-      const result = await preload({
-        req: options.req,
-        res: options.res,
-        params: options.params,
-      })
-      if (result) {
-        Object.assign(data, result.data)
+
+      try {
+        const result = await preload({
+          req: options.req,
+          res: options.res,
+          params: options.params,
+        })
+        if (result) {
+          if (result.notFound) {
+            notFound = true
+          } else if (result.data) {
+            Object.assign(data, result.data)
+          } else if (result.error) {
+            error = result.error
+          }
+        }
+      } catch (_error) {
+        error = {
+          statusCode: 500,
+          stack:
+            process.env.NODE_ENV === 'production' ? undefined : _error.stack,
+        }
       }
     }
   }
   return {
     data,
     hasPreload,
+    notFound,
+    error,
   }
 }
