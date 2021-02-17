@@ -22,6 +22,7 @@ export type PreloadResult<TData> =
       data: TData
     }
   | { notFound: true }
+  | { error: { statusCode: number; stack?: string } }
 
 type PreloadFactory<ContextType = any, ResultType = any> = (
   ctx: ContextType

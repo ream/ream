@@ -1,9 +1,12 @@
 import { h, defineComponent } from 'vue'
 import { usePreloadResult } from 'ream/data'
+import { useHead } from 'ream/head'
 
 export default defineComponent({
   name: 'DefaultError',
   setup() {
+    useHead({ title: 'Error' })
+
     const result = usePreloadResult()
     const { error } = result.value
     return () =>

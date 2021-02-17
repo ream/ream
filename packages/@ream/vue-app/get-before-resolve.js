@@ -24,9 +24,12 @@ export const loadPageData = async (to, next = noop) => {
 
     for (const component of components) {
       if (component.$$preload || component.$$staticPreload) {
-        const _result = await fetch(getPreloadPath(to.path)).then((res) =>
-          res.json()
-        )
+        const _result = await fetch(getPreloadPath(to.path)).then((res) => {
+          if (res.status === 404) {
+            return { notFound: true }
+          }
+          return res.json()
+        })
         Object.assign(result, _result)
         // We only need to fetch server once
         break

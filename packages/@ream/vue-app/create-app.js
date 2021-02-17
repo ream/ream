@@ -1,7 +1,12 @@
 import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
 import { createHead } from '@vueuse/head'
 import { useRoute } from 'vue-router'
-import { AppComponent } from '/.ream/templates/shared-exports.js'
+import { RouterView } from 'vue-router'
+import {
+  AppComponent,
+  NotFoundComponent,
+  ErrorComponent,
+} from '/.ream/templates/shared-exports.js'
 import { onCreatedApp } from '/.ream/templates/enhance-app.js'
 
 export const createApp = ({ router, initialState }) => {
@@ -18,7 +23,14 @@ export const createApp = ({ router, initialState }) => {
       }
     },
     render() {
-      return h(AppComponent)
+      const { notFound, error } = this.preloadResult
+      let Component = RouterView
+      if (notFound) {
+        Component = NotFoundComponent
+      } else if (error) {
+        Component = ErrorComponent
+      }
+      return h(AppComponent, { Component, key: `${notFound} - ${!error}` })
     },
   })
 

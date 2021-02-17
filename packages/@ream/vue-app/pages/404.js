@@ -1,8 +1,11 @@
 import { h } from 'vue'
+import { useHead } from 'ream/head'
 
 export default {
   name: 'NotFound',
   setup() {
+    useHead({ title: '404 Not Found' })
+
     return () =>
       h(
         'div',

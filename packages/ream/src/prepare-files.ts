@@ -81,7 +81,6 @@ export async function prepareFiles(api: Ream) {
     // Exports that will be used in both server and client code
     const sharedExportsContent = `
     import { h, defineAsyncComponent } from 'vue'
-    import { usePreloadResult } from 'ream/data'
 
     var ErrorComponent = defineAsyncComponent(function() {
       return import("${getRelativePathToTemplatesDir(routesInfo.errorFile)}")
@@ -103,12 +102,6 @@ export async function prepareFiles(api: Ream) {
         setup: function () {
           return function() {
             var Component = page.default
-            var result = usePreloadResult()
-            if (result.value.notFound) {
-              Component = NotFoundComponent
-            } else if (result.value.error) {
-              Component = ErrorComponent
-            }
             return h(Component)
           }
         }
@@ -120,7 +113,8 @@ export async function prepareFiles(api: Ream) {
     export {
       clientRoutes,
       ErrorComponent,
-      AppComponent
+      AppComponent,
+      NotFoundComponent
     }
     `
 
