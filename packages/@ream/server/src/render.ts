@@ -9,7 +9,7 @@ import {
   ReamServerResponse,
   ReamServerHandler,
 } from './server'
-import { readFile, pathExists, outputFile } from 'fs-extra'
+import { readFile, pathExists } from 'fs-extra'
 import serializeJavascript from 'serialize-javascript'
 import { getOutputHTMLPath, getStaticPreloadOutputPath } from './paths-helpers'
 import { join } from 'path'
@@ -79,10 +79,14 @@ export async function render({
   statusCode: number
   body: string
   headers: { [k: string]: string }
+  cacheFiles: Map<string, string>
 }> {
-  const router = await serverEntry.createClientRouter(url)
+  const router = await serverEntry.createClientRouter()
+  router.push(url)
+  await router.isReady()
   const matchedRoutes = router.currentRoute.value.matched
   let statusCode = 200
+  const cacheFiles: Map<string, string> = new Map()
 
   if (matchedRoutes[0].name === '404') {
     statusCode = 404
@@ -94,18 +98,17 @@ export async function render({
   }
 
   const components = matchedRoutes.map((route) => route.components.default)
-  const exportDir = path.join(dotReamDir, 'export')
+  const exportDir = path.join(dotReamDir, 'client')
   const staticHTMLPath = join(exportDir, getOutputHTMLPath(route.path))
   const staticPreloadOutputPath = join(
     exportDir,
     getStaticPreloadOutputPath(route.path)
   )
-  // Export the page as static HTML after request
+  // Export the page (HTML or preload JSON file) after the request
   const shouldExport =
     // @ts-ignore
     components.every((component) => !component.$$preload) && IS_PROD
-  // If there's already a exported static HTML file
-  const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
+
   if (isPreloadRequest) {
     debug(`Rendering preload JSON`)
     const headers = {
@@ -113,8 +116,10 @@ export async function render({
     }
 
     let body = ''
-
-    if (hasStaticHTML) {
+    // If there's already a exported static preload JSON file
+    const hasStaticPreloadCache =
+      shouldExport && (await pathExists(staticPreloadOutputPath))
+    if (hasStaticPreloadCache) {
       body = await readFile(staticPreloadOutputPath, 'utf8')
     } else {
       const preloadResult = await getPreloadData(components, {
@@ -124,7 +129,7 @@ export async function render({
       })
       body = serializeJavascript(preloadResult, { isJSON: true })
       if (shouldExport) {
-        outputFile(staticPreloadOutputPath, body, 'utf8').catch(console.error)
+        cacheFiles.set(staticPreloadOutputPath, body)
       }
     }
 
@@ -132,11 +137,14 @@ export async function render({
       headers,
       body,
       statusCode,
+      cacheFiles,
     }
   }
 
   const headers = { 'content-type': 'text/html' }
   let body = ''
+  // If there's already a exported static HTML file
+  const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
   if (hasStaticHTML) {
     debug(`Rendering pre-geneated static HTML file`)
     body = await readFile(staticHTMLPath, 'utf8')
@@ -162,10 +170,16 @@ export async function render({
     })
     body = `<!DOCTYPE>${html}`
     if (shouldExport) {
-      outputFile(staticHTMLPath, body, 'utf8').catch(console.error)
+      cacheFiles.set(staticHTMLPath, body)
+      if (preloadResult.hasPreload) {
+        cacheFiles.set(
+          staticPreloadOutputPath,
+          serializeJavaScript(preloadResult, { isJSON: true })
+        )
+      }
     }
   }
-  return { headers, body, statusCode }
+  return { headers, body, statusCode, cacheFiles }
 }
 
 export async function renderToHTML(options: {
@@ -236,21 +250,24 @@ export async function getPreloadData(
   options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
 ) {
   const data = {}
+  let hasPreload = false
   for (const component of components) {
     const preload = component.$$staticPreload || component.$$preload
 
-    const result =
-      preload &&
-      (await preload({
+    if (preload) {
+      hasPreload = true
+      const result = await preload({
         req: options.req,
         res: options.res,
         params: options.params,
-      }))
-    if (result) {
-      Object.assign(data, result.data)
+      })
+      if (result) {
+        Object.assign(data, result.data)
+      }
     }
   }
   return {
     data,
+    hasPreload,
   }
 }

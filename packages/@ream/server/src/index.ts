@@ -1,5 +1,6 @@
 import path from 'path'
-import type { Router } from 'vue-router'
+import fs from 'fs-extra'
+import type { Router, RouteRecordRaw } from 'vue-router'
 import serveStatic from 'serve-static'
 import { Server } from './server'
 import { render, renderToHTML, getPreloadData } from './render'
@@ -21,11 +22,12 @@ export type GetDocumentArgs = {
 
 export type ServerEntry = {
   render: any
-  createClientRouter: (url: string) => Promise<Router>
+  createClientRouter: () => Promise<Router>
   _document: () => Promise<{
     default: (args: GetDocumentArgs) => string | Promise<string>
   }>
   ErrorComponent: any
+  serverRoutes: RouteRecordRaw[]
 }
 
 type LoadServerEntry = () => Promise<ServerEntry> | ServerEntry
@@ -69,15 +71,25 @@ export const extractClientManifest = (dotReamDir: string) => {
   }
 }
 
+export const writeCacheFiles = async (files: Map<string, string>) => {
+  await Promise.all(
+    [...files.keys()].map(async (file) => {
+      const content = files.get(file)
+      await fs.outputFile(file, content, 'utf8')
+    })
+  )
+}
+
 export async function createServer(ctx: CreateServerContext = {}) {
   const dotReamDir = path.resolve(ctx.cwd || '.', '.ream')
 
   const server = new Server()
 
   let ssrManifest: any
-  let serverEntry: any
+  let serverEntry: ServerEntry
   let scripts = ''
   let styles = ''
+  // A vue-router instance for matching server routes (aka API routes)
   let serverRouter: Router | undefined
 
   const loadServerEntry: LoadServerEntry =
@@ -157,6 +169,9 @@ export async function createServer(ctx: CreateServerContext = {}) {
       res.setHeader(key, result.headers[key])
     }
     res.send(result.body)
+
+    // Cache files
+    writeCacheFiles(result.cacheFiles).catch(console.error)
   })
 
   server.onError(async (err, req, res, next) => {
@@ -173,7 +188,9 @@ export async function createServer(ctx: CreateServerContext = {}) {
         res.statusCode =
           !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
       }
-      const router = await serverEntry.createClientRouter(req.url)
+      const router = await serverEntry.createClientRouter()
+      router.push(req.url)
+      await router.isReady()
       const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
       const preloadResult = await getPreloadData([ErrorComponent], {
         req,

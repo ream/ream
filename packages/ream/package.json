@@ -27,8 +27,9 @@
   },
   "dependencies": {
     "@babel/core": "^7.12.10",
+    "@egoist/promise-queue": "^1.1.0",
     "@ream/common": "5.0.0-alpha.0",
-    "@vitejs/plugin-vue": "1.1.0",
+    "@vitejs/plugin-vue": "1.1.4",
     "@vue/compiler-sfc": "3.0.5",
     "cac": "6.6.1",
     "chokidar": "3.4.2",
@@ -41,7 +42,7 @@
     "resolve-from": "5.0.0",
     "serialize-javascript": "4.0.0",
     "serve-static": "1.14.1",
-    "vite": "2.0.0-beta.70"
+    "vite": "2.0.0"
   },
   "peerDependencies": {
     "@ream/server": "*"

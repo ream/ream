@@ -16,13 +16,11 @@ export default {
   },
 
   // Create a router instance for the Vue app
-  async createClientRouter(url) {
+  async createClientRouter() {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: clientRoutes,
     })
-    router.push(url)
-    await router.isReady()
     return router
   },
 
