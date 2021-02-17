@@ -20,7 +20,7 @@ export const createApp = ({ router, initialState }) => {
         if (store[route.path]) {
           return store[route.path]
         }
-        if (Object.keys(store) === 1 && store['/404.html']) {
+        if (Object.keys(store).length === 1 && store['/404.html']) {
           return store['/404.html']
         }
         return {}
@@ -32,12 +32,14 @@ export const createApp = ({ router, initialState }) => {
     },
     render() {
       const { notFound, error } = this.preloadResult
+
       let Component = RouterView
       if (notFound) {
         Component = NotFoundComponent
       } else if (error) {
         Component = ErrorComponent
       }
+
       return h(AppComponent, { Component, key: `${notFound} - ${!error}` })
     },
   })
