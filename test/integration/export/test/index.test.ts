@@ -30,7 +30,9 @@ describe(`export static site`, () => {
         '/static-preload.preload.json'
       )
       expect(statusCode).toBe(200)
-      expect(content).toBe(`{"message":"static preload"}`)
+      expect(content).toBe(
+        `{"data":{"msg":"static preload"},"hasPreload":true}`
+      )
     })
   })
 })

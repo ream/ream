@@ -165,6 +165,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
     })
 
     res.statusCode = result.statusCode
+
     for (const key in result.headers) {
       res.setHeader(key, result.headers[key])
     }

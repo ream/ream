@@ -77,6 +77,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       )
   const config = {
     root: api.rootDir,
+    warn: process.env.NODE_ENV === 'test' ? 'warn' : 'info',
     plugins: [
       reamAliasPlugin(api),
       vuePlugin({

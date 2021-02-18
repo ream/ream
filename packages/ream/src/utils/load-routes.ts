@@ -18,19 +18,22 @@ export const filesToRoutes = (files: string[], dir: string) => {
       .replace(/\[\.{3}([^\]]+)\]/, ':$1(.*)')
       // Remove extension
       .replace(/\.[a-zA-Z0-9]+$/, '')
-      // Handle 404 route
-      .replace(/^404$/, ':404(.*)')
+
     const pathParts = slug.split('/')
     const absolutePath = path.join(dir, file)
 
     if (slug === '_error') {
       errorFile = absolutePath
+      continue
     } else if (slug === '_document') {
       documentFile = absolutePath
+      continue
     } else if (slug === '_app') {
       appFile = absolutePath
+      continue
     } else if (slug === '404') {
       notFoundFile = absolutePath
+      continue
     }
 
     const isServerRoute = /^api[$|\/]/.test(file)
