@@ -2066,6 +2066,17 @@
   resolved "https://registry.yarnpkg.com/@vueuse/head/-/head-0.2.3.tgz#55d38648a26c3132f2320f71236cd03148a6187d"
   integrity sha512-bAFZyUlT6+CVIwMcUw3TrtuhG/BfjS+UV5T8oH30tGPnVvqIsNuRCnNt9EbVd1GxHRDZD0K41515B5NiXPt84A==
 
+"@windicss/plugin-utils@0.4.3":
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/@windicss/plugin-utils/-/plugin-utils-0.4.3.tgz#84e85fd3cd6eaf54ca72cae276f9cf0610f45e56"
+  integrity sha512-ilddLED+sZQIA9rOwE5eYwdBEBWKREvAVkkiAOOTNf7oDcP/a1cxT3f/nE4tgfhz+MC/FKcy7NkfrqfXRdEQaQ==
+  dependencies:
+    esbuild "^0.8.49"
+    esbuild-register "^2.0.0"
+    fast-glob "^3.2.5"
+    micromatch "^4.0.2"
+    windicss "^2.1.15"
+
 "@zkochan/cmd-shim@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@zkochan/cmd-shim/-/cmd-shim-3.1.0.tgz#2ab8ed81f5bb5452a85f25758eb9b8681982fd2e"
@@ -3597,6 +3608,11 @@ esbuild@^0.8.46:
   version "0.8.47"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.8.47.tgz#5d5c59b7dcb8a20dfadf65a985e5e5ca7b24eff2"
   integrity sha512-4C9pInguP36c9CRDMSb6W1KrMfXrLIQVtI02Vglc43RBV0Dw49ODEnP6985mrz5iqCdQ2Cxmb9i670J/s3DBPA==
+
+esbuild@^0.8.49:
+  version "0.8.50"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.8.50.tgz#ebf24fde0cdad1a369789dd6fd7a820b0a01e46c"
+  integrity sha512-oidFLXssA7IccYzkqLVZSqNJDwDq8Mh/vqvrW+3fPWM7iUiC5O2bCllhnO8+K9LlyL/2Z6n+WwRJAz9fqSIVRg==
 
 escape-html@~1.0.3:
   version "1.0.3"
@@ -8683,13 +8699,13 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-vite-plugin-windicss@^0.1.14:
-  version "0.1.14"
-  resolved "https://registry.yarnpkg.com/vite-plugin-windicss/-/vite-plugin-windicss-0.1.14.tgz#f5bf0f7028d8a31548eaec6b2badbf9527fded9a"
-  integrity sha512-AeX1O4lrA/rcAfaPEDtfb1sZHdZiB9TAvowQUj5x/cURCuH3mNQp4+tBWrVJvm1tW06NR2WXy9BuNFDeVk85rw==
+vite-plugin-windicss@^0.4.3:
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/vite-plugin-windicss/-/vite-plugin-windicss-0.4.3.tgz#f86e5a3b78882caa3cdd50cba2b08770e2d627c8"
+  integrity sha512-Lnv6OhcYzcJvecTs4LIpMSfo54rSewkHrW85IVwy8hacR0krY319jXr5nwiDpSTp6HM3QJhoJ4zxHF+t5Q+Nwg==
   dependencies:
-    fast-glob "^3.2.5"
-    windicss "^2.1.6"
+    "@windicss/plugin-utils" "0.4.3"
+    windicss "^2.1.15"
 
 vite@2.0.0:
   version "2.0.0"
@@ -8816,10 +8832,10 @@ wide-align@^1.1.0:
   dependencies:
     string-width "^1.0.2 || 2"
 
-windicss@^2.1.6:
-  version "2.1.7"
-  resolved "https://registry.yarnpkg.com/windicss/-/windicss-2.1.7.tgz#2ed5bf0b3a058a392de56870c9c1a65938f71cad"
-  integrity sha512-rGIOIAe0ZEm2cW3y+oIjxTnNI/U70q10evB4ua/4oT/j0Vx2Gc6KWw3HHPe3WvgmX7KuV9cHDzHM6yM1INftfA==
+windicss@^2.1.15:
+  version "2.1.16"
+  resolved "https://registry.yarnpkg.com/windicss/-/windicss-2.1.16.tgz#69d1474f0e30951c1ade86fb350da7c7a3496623"
+  integrity sha512-nhKsjdLe8Tkf9oYFh+ZuNxo1N7PVQeRlbjePF+3F87Ti4/TD+EPH4TvAlepDMpQaDo0HqPD6h0oyTLp2ZZDhVQ==
 
 windows-release@^3.1.0:
   version "3.3.0"

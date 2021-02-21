@@ -8,11 +8,7 @@ module.exports = {
       },
     ],
   ],
-  css: [
-    'prismjs/themes/prism-tomorrow.css',
-    '/@windicss/windi.css',
-    '@/css/main.css',
-  ],
+  css: ['prismjs/themes/prism-tomorrow.css', 'windi.css', '@/css/main.css'],
   vite(config) {
     config.plugins.push(require('vite-plugin-windicss').default())
   },
