@@ -23,17 +23,15 @@ export const loadPageData = async (to, next = noop) => {
     (component) => component.$$preload || component.$$staticPreload
   )
   if (!hasPreload) {
+    initialState[to.path] = { hasPreload: false }
     return next()
   }
 
   const fetchPage = async (next) => {
     const result = {}
-    let hasPreload = false
 
     for (const component of components) {
       if (component.$$preload || component.$$staticPreload) {
-        hasPreload = true
-
         const _result = await fetch(getPreloadPath(to.path)).then((res) => {
           if (res.status === 404) {
             return { notFound: true }
@@ -51,11 +49,7 @@ export const loadPageData = async (to, next = noop) => {
       }
     }
 
-    if (hasPreload) {
-      initialState[to.path] = result
-    } else {
-      initialState[to.path] = { hasPreload: false }
-    }
+    initialState[to.path] = result
 
     next && next()
   }
