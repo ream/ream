@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { usePreloadData } from '@ream/app'
+import { usePageData } from '@ream/app'
 import { defineComponent } from 'vue'
 
 export const preload = () => {
@@ -27,7 +27,7 @@ export const preload = () => {
 
 export default defineComponent({
   setup() {
-    const data = usePreloadData()
+    const data = usePageData()
     return {
       title: data.value.title,
     }

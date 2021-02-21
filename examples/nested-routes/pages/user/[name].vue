@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { Preload, usePreloadData } from '@ream/app'
+import { Preload, usePageData } from '@ream/app'
 
 export const preload: Preload = ({ params }) => {
   return {
@@ -16,7 +16,7 @@ export const preload: Preload = ({ params }) => {
 
 export default defineComponent({
   setup() {
-    const data = usePreloadData()
+    const data = usePageData()
     return {
       message: computed(() => data.value.message),
     }

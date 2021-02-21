@@ -22,11 +22,11 @@ export const staticPreload: Preload<PageData> = async () => {
 </script>
 
 <script setup lang="ts">
-import { usePreloadData } from '@ream/app'
+import { usePageData } from '@ream/app'
 import { useHead } from '@ream/app'
 import Nav from '../components/Nav.vue'
 
-const page = usePreloadData<PageData>()
+const page = usePageData<PageData>()
 
 useHead({ title: `static preload` })
 </script>

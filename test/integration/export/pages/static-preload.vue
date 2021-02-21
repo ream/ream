@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { computed } from 'vue'
-import { usePreloadData } from '@ream/app'
+import { usePageData } from '@ream/app'
 
 export async function staticPreload() {
   return {
@@ -16,7 +16,7 @@ export async function staticPreload() {
 
 export default {
   setup() {
-    const data = usePreloadData()
+    const data = usePageData()
     return {
       msg: computed(() => data.value.msg),
     }

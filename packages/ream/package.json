@@ -10,7 +10,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo skip",
-    "watch": "tsc --watch",
+    "dev": "tsc --watch",
     "build": "tsc && chmod +x dist/cli.js",
     "prepublishOnly": "npm run build"
   },

@@ -1,3 +1,4 @@
 {
-    "volar.tsPlugin": true
+    "volar.tsPlugin": true,
+    "volar.tsPluginStatus": false
 }

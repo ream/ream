@@ -5,7 +5,7 @@ export const usePreloadResult = () => {
   return computed(() => vm.root.setupState.preloadResult)
 }
 
-export const usePreloadData = () => {
+export const usePageData = () => {
   const vm = getCurrentInstance()
   return computed(() => vm.root.setupState.preloadResult.data || {})
 }

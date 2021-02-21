@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts src/cli.ts --dts",
-    "watch": "npm run build -- --watch"
+    "dev": "npm run build -- --watch"
   },
   "dependencies": {
     "cac": "6.7.1",

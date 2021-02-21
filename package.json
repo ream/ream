@@ -6,8 +6,7 @@
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
     "test": "npm run build && npm run test:unit && npm run test:integration",
     "build": "sh scripts/build.sh",
-    "build-ream": "yarn workspace ream build",
-    "watch-ream": "yarn workspace ream watch",
+    "dev": "node -r esbuild-register scripts/dev.ts",
     "ream": "node ./packages/ream/dist/cli"
   },
   "workspaces": [

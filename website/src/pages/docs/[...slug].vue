@@ -1,9 +1,8 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import type { StaticPreload } from 'ream'
+import type { StaticPreload } from '@ream/app'
 import { renderMarkdown } from '@/lib/render-markdown'
-import { useHead } from '@ream/app'
-import { usePreloadData } from '@ream/app'
+import { useHead, usePageData } from '@ream/app'
 import Header from '@/components/Header.vue'
 import DocsMenu from '@/components/DocsMenu.vue'
 
@@ -24,7 +23,7 @@ export default defineComponent({
   },
 
   setup() {
-    const preloadData = usePreloadData()
+    const preloadData = usePageData()
     const title = computed(
       () => `${preloadData.value.title} - Ream Documentation`
     )

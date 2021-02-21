@@ -1,6 +1,6 @@
 import { PreloadResult } from './server-types'
 
-export const usePreloadData: <TData = any>() => TData
+export const usePageData: <TData = any>() => TData
 
 export const usePreloadResult: <TData = any>() => PreloadResult<TData>
 
