@@ -41,15 +41,14 @@ module.exports = {
 
 Webpack alias also work here.
 
-## `chainWebpack`
+## `vite`
 
-Extend webpack config using [webpack-chain](https://github.com/neutrinojs/webpack-chain).
+Extend Ream's internal [Vite config](https://vitejs.dev/config/).
 
 ```js
 module.exports = {
-  chainWebpack(config, { isClient, isDev }) {
-    // Disable sourcemaps forever
-    config.devtool(false)
+  vite(config, { ssr, dev }) {
+    // Mutate the config object here
   },
 }
 ```

@@ -29,21 +29,18 @@ export type ReamConfig = {
     [k: string]: string | boolean | number
   }
   plugins?: Array<ReamPluginConfigItem>
-  css?: string[]
+  imports?: string[]
   server?: {
     port?: number
   }
-  vite?: (
-    viteConfig: ViteConfig,
-    opts: { isDev: boolean; ssr?: boolean }
-  ) => void
+  vite?: (viteConfig: ViteConfig, opts: { dev: boolean; ssr?: boolean }) => void
 }
 
 export class Ream {
   rootDir: string
   srcDir: string
   isDev: boolean
-  config: SetRequired<ReamConfig, 'env' | 'plugins' | 'css' | 'server'>
+  config: SetRequired<ReamConfig, 'env' | 'plugins' | 'imports' | 'server'>
   configPath?: string
   store: Store
   viteDevServer?: ViteDevServer
@@ -78,7 +75,7 @@ export class Ream {
         ...(configOverride.plugins || []),
         ...(projectConfig.plugins || []),
       ],
-      css: projectConfig.css || [],
+      imports: projectConfig.imports || [],
       server: {
         ...projectConfig.server,
         port: projectConfig.server?.port || 3000,

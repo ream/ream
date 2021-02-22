@@ -124,7 +124,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   }
 
   if (api.config.vite) {
-    api.config.vite(config, { isDev: api.isDev, ssr: server })
+    api.config.vite(config, { dev: api.isDev, ssr: server })
   }
 
   return config

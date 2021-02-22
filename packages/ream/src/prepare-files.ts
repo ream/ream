@@ -144,7 +144,7 @@ export async function prepareFiles(api: Ream) {
     await outputFile(
       api.resolveDotReam('templates/global-imports.js'),
       `
-      ${api.config.css
+      ${api.config.imports
         .map((file) => `import ${JSON.stringify(file)}`)
         .join('\n')}
       `,
