@@ -24,7 +24,7 @@
     "execa": "5.0.0"
   },
   "devDependencies": {
-    "@types/polka": "0.5.1",
+    "@types/polka": "0.5.2",
     "ream": "^5.0.0-alpha.3",
     "@ream/server": "0.0.0"
   }
