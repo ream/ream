@@ -38,7 +38,7 @@
     "hash-sum": "2.0.0",
     "joycon": "2.2.5",
     "resolve-from": "5.0.0",
-    "serialize-javascript": "4.0.0",
+    "serialize-javascript": "5.0.1",
     "serve-static": "1.14.1",
     "vite": "2.0.1"
   },
