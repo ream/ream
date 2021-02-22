@@ -2061,10 +2061,10 @@
   resolved "https://registry.yarnpkg.com/@vueuse/head/-/head-0.2.3.tgz#55d38648a26c3132f2320f71236cd03148a6187d"
   integrity sha512-bAFZyUlT6+CVIwMcUw3TrtuhG/BfjS+UV5T8oH30tGPnVvqIsNuRCnNt9EbVd1GxHRDZD0K41515B5NiXPt84A==
 
-"@windicss/plugin-utils@0.4.3":
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/@windicss/plugin-utils/-/plugin-utils-0.4.3.tgz#84e85fd3cd6eaf54ca72cae276f9cf0610f45e56"
-  integrity sha512-ilddLED+sZQIA9rOwE5eYwdBEBWKREvAVkkiAOOTNf7oDcP/a1cxT3f/nE4tgfhz+MC/FKcy7NkfrqfXRdEQaQ==
+"@windicss/plugin-utils@0.4.4":
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/@windicss/plugin-utils/-/plugin-utils-0.4.4.tgz#fd18565a23df7896d8a4550bcecad631311db538"
+  integrity sha512-qQHtNPt0eI2K2lsFHBN5y/rbC3ndXgR+PZuKdj2oirQLKMXFyU70+GdeMShi3OkZXAwGqN08MvdoiTsC2jGEMQ==
   dependencies:
     esbuild "^0.8.49"
     esbuild-register "^2.0.0"
@@ -8632,11 +8632,11 @@ verror@1.10.0:
     extsprintf "^1.2.0"
 
 vite-plugin-windicss@^0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/vite-plugin-windicss/-/vite-plugin-windicss-0.4.3.tgz#f86e5a3b78882caa3cdd50cba2b08770e2d627c8"
-  integrity sha512-Lnv6OhcYzcJvecTs4LIpMSfo54rSewkHrW85IVwy8hacR0krY319jXr5nwiDpSTp6HM3QJhoJ4zxHF+t5Q+Nwg==
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/vite-plugin-windicss/-/vite-plugin-windicss-0.4.4.tgz#fd13fba5b55211f34768f5acfadfd743f95c24a6"
+  integrity sha512-VDQn4cO+cq7sEV2yD1n+Mg6sN4TiFZwdeuteN7uDk6gintbUAMNHyoFyZUF0Z0/vYN4Ca62HvXlXdTgheE4QYg==
   dependencies:
-    "@windicss/plugin-utils" "0.4.3"
+    "@windicss/plugin-utils" "0.4.4"
     windicss "^2.1.15"
 
 vite@2.0.1:
