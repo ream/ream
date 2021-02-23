@@ -19,14 +19,14 @@ const run = (name: string) => {
   cmd.on('exit', (code) => {
     process.exitCode = code || 0
   })
-  cmd.stdout.on('data', (data) => {
+  cmd.stdout?.on('data', (data) => {
     log(name, data)
   })
-  cmd.stderr.on('data', (data) => {
+  cmd.stderr?.on('data', (data) => {
     log(name, data)
   })
 }
 
 run('ream')
-run('@ream/server')
-run('@ream/test-utils')
+run('server')
+run('test-utils')

@@ -2,19 +2,18 @@ import path from 'path'
 import type { Router } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
-import { Head, renderHeadToString } from '@vueuse/head'
 import createDebug from 'debug'
 import {
   ReamServerRequest,
   ReamServerResponse,
   ReamServerHandler,
 } from './server'
-import { readFile, pathExists } from 'fs-extra'
 import serializeJavascript from 'serialize-javascript'
 import { getOutputHTMLPath, getStaticPreloadOutputPath } from './paths-helpers'
 import { join } from 'path'
 import type { ServerEntry } from '.'
 import { IS_PROD } from './constants'
+import { pathExists, readFile } from './fs'
 
 const debug = createDebug('ream:render')
 
@@ -81,7 +80,7 @@ export async function render({
   headers: { [k: string]: string }
   cacheFiles: Map<string, string>
 }> {
-  const router = await serverEntry.createClientRouter()
+  const router = serverEntry.createClientRouter()
   router.push(url)
   await router.isReady()
   const matchedRoutes = router.currentRoute.value.matched
@@ -97,7 +96,7 @@ export async function render({
     req.params = route.params
   }
 
-  const components = matchedRoutes.map((route) => route.components.default)
+  const components = matchedRoutes.map((route: any) => route.components.default)
   const exportDir = path.join(dotReamDir, 'client')
   const staticHTMLPath = join(exportDir, getOutputHTMLPath(route.path))
   const staticPreloadOutputPath = join(
@@ -227,8 +226,7 @@ export async function renderToHTML(options: {
   const preloadLinks = context.modules
     ? renderPreloadLinks(context.modules, options.ssrManifest)
     : ''
-  const head: Head = app.config.globalProperties.$head
-  const headHTML = renderHeadToString(head)
+  const headHTML = options.serverEntry.renderHeadToString(app)
   const { default: getDocument } = await options.serverEntry._document()
   const html = await getDocument({
     head: () => `${headHTML.headTags}${options.styles}${preloadLinks}`,

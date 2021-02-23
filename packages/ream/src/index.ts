@@ -1,4 +1,4 @@
-import { resolve, join } from 'path'
+import { resolve, join, dirname } from 'path'
 import type { SetRequired } from 'type-fest'
 import type { ViteDevServer, UserConfig as ViteConfig } from 'vite'
 import resolveFrom from 'resolve-from'
@@ -98,6 +98,11 @@ export class Ream {
 
   resolveOwnDir(...args: string[]) {
     return resolve(OWN_DIR, ...args)
+  }
+
+  resolveInPackage(pkg: string, target: string) {
+    const pkgDir = dirname(resolveFrom(process.cwd(), `${pkg}/package.json`))
+    return resolveFrom(pkgDir, target)
   }
 
   get plugins() {

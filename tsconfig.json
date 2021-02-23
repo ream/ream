@@ -1,18 +1,13 @@
 {
   "compilerOptions": {
-      "target": "es2018",
-      "module": "commonjs",
-      "declaration": true,
-      "strict": true,
-      "esModuleInterop": true,
-      "moduleResolution": "node",
-      "skipLibCheck": true,
-      "noUnusedLocals": true,
-      "baseUrl": "./",
-      "paths": {
-        "ream/*": ["packages/ream/*"],
-        "ream-server/*": ["packages/ream-server/*"],
-        "@ream/*": ["packages/@ream/*"]
-      }
+    "target": "es2018",
+    "module": "commonjs",
+    "declaration": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noImplicitAny": true
   }
 }

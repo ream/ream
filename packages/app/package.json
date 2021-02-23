@@ -1,0 +1,23 @@
+{
+  "name": "@ream/app",
+  "version": "5.0.0-alpha.3",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "pages"
+  ],
+  "dependencies": {
+    "@ream/fetch": "5.0.0-alpha.3",
+    "@vueuse/head": "^0.2.3",
+    "vue-router": "4.0.3"
+  },
+  "devDependencies": {
+    "vue": "3.0.5"
+  },
+  "peerDependencies": {
+    "vue": ">=3"
+  }
+}

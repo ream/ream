@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { watch, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute } from '@ream/app'
 import DocsMenu from './DocsMenu.vue'
 
 const route = useRoute()

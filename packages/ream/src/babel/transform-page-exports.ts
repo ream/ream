@@ -131,16 +131,16 @@ export default function pageExportsTransforms({
             // It should have been `state`
             VariableDeclarator(variablePath) {
               if (variablePath.node.id.type === 'Identifier') {
-                const local = variablePath.get('id') as NodePath<
-                  BabelTypes.Identifier
-                >
+                const local = variablePath.get(
+                  'id'
+                ) as NodePath<BabelTypes.Identifier>
                 if (isIdentifierReferenced(local)) {
                   state.refs.add(local)
                 }
               } else if (variablePath.node.id.type === 'ObjectPattern') {
-                const pattern = variablePath.get('id') as NodePath<
-                  BabelTypes.ObjectPattern
-                >
+                const pattern = variablePath.get(
+                  'id'
+                ) as NodePath<BabelTypes.ObjectPattern>
 
                 const properties = pattern.get('properties')
                 properties.forEach((p) => {
@@ -158,9 +158,9 @@ export default function pageExportsTransforms({
                   }
                 })
               } else if (variablePath.node.id.type === 'ArrayPattern') {
-                const pattern = variablePath.get('id') as NodePath<
-                  BabelTypes.ArrayPattern
-                >
+                const pattern = variablePath.get(
+                  'id'
+                ) as NodePath<BabelTypes.ArrayPattern>
 
                 const elements = pattern.get('elements')
                 elements.forEach((e) => {
@@ -214,6 +214,7 @@ export default function pageExportsTransforms({
 
               // Handle re-exports: export { preload } from './foo'
               path.node.specifiers = path.node.specifiers.filter((spec) => {
+                // @ts-ignore
                 const { name } = spec.exported
                 for (const serverOnlyExportName of serverOnlyExportNames) {
                   if (name === serverOnlyExportName) {
@@ -257,6 +258,7 @@ export default function pageExportsTransforms({
 
               if (declaration && declaration.type === 'FunctionDeclaration') {
                 for (const name of serverOnlyExportNames) {
+                  // @ts-ignore
                   if (declaration.id.name === name) {
                     shouldRemove = true
                     state.serverOnlyExports.add(name)
@@ -347,17 +349,17 @@ export default function pageExportsTransforms({
             path.traverse({
               VariableDeclarator(variablePath) {
                 if (variablePath.node.id.type === 'Identifier') {
-                  const local = variablePath.get('id') as NodePath<
-                    BabelTypes.Identifier
-                  >
+                  const local = variablePath.get(
+                    'id'
+                  ) as NodePath<BabelTypes.Identifier>
                   if (refs.has(local) && !isIdentifierReferenced(local)) {
                     ++count
                     variablePath.remove()
                   }
                 } else if (variablePath.node.id.type === 'ObjectPattern') {
-                  const pattern = variablePath.get('id') as NodePath<
-                    BabelTypes.ObjectPattern
-                  >
+                  const pattern = variablePath.get(
+                    'id'
+                  ) as NodePath<BabelTypes.ObjectPattern>
 
                   const beforeCount = count
                   const properties = pattern.get('properties')
@@ -385,9 +387,9 @@ export default function pageExportsTransforms({
                     variablePath.remove()
                   }
                 } else if (variablePath.node.id.type === 'ArrayPattern') {
-                  const pattern = variablePath.get('id') as NodePath<
-                    BabelTypes.ArrayPattern
-                  >
+                  const pattern = variablePath.get(
+                    'id'
+                  ) as NodePath<BabelTypes.ArrayPattern>
 
                   const beforeCount = count
                   const elements = pattern.get('elements')
@@ -396,9 +398,9 @@ export default function pageExportsTransforms({
                     if (e.node?.type === 'Identifier') {
                       local = e as NodePath<BabelTypes.Identifier>
                     } else if (e.node?.type === 'RestElement') {
-                      local = e.get('argument') as NodePath<
-                        BabelTypes.Identifier
-                      >
+                      local = e.get(
+                        'argument'
+                      ) as NodePath<BabelTypes.Identifier>
                     } else {
                       return
                     }

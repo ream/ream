@@ -6,7 +6,7 @@ export const usePreloadResult: <TData = any>() => PreloadResult<TData>
 
 export { useHead } from '@vueuse/head'
 
-export { useRoute, useRouter } from 'vue-router'
+export { useRoute, useRouter, RouterView as ReamView } from 'vue-router'
 
 export * from './server-types'
 

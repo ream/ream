@@ -1,16 +1,18 @@
 import path from 'path'
-import fs from 'fs-extra'
 import type { Router, RouteRecordRaw } from 'vue-router'
+import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
 import { Server } from './server'
 import { render, renderToHTML, getPreloadData } from './render'
-import { createServerRouter } from './router'
+import { outputFile } from './fs'
 
 export {
   ReamServerHandler,
   ReamServerRequest,
   ReamServerResponse,
 } from './server'
+
+export { Connect } from './connect'
 
 export type GetDocumentArgs = {
   head(): string
@@ -22,10 +24,12 @@ export type GetDocumentArgs = {
 
 export type ServerEntry = {
   render: any
-  createClientRouter: () => Promise<Router>
+  createClientRouter: () => Router
+  createServerRouter: (routes: RouteRecordRaw[]) => Router
   _document: () => Promise<{
     default: (args: GetDocumentArgs) => string | Promise<string>
   }>
+  renderHeadToString: (app: any) => HeadResult
   ErrorComponent: any
   serverRoutes: RouteRecordRaw[]
 }
@@ -75,7 +79,7 @@ export const writeCacheFiles = async (files: Map<string, string>) => {
   await Promise.all(
     [...files.keys()].map(async (file) => {
       const content = files.get(file)
-      await fs.outputFile(file, content, 'utf8')
+      await outputFile(file, content!, 'utf8')
     })
   )
 }
@@ -126,7 +130,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
     }
 
     if (!serverRouter || ctx.dev) {
-      serverRouter = createServerRouter(serverEntry.serverRoutes)
+      serverRouter = serverEntry.createServerRouter(serverEntry.serverRoutes)
     }
 
     serverRouter!.push(req.url)
@@ -182,14 +186,9 @@ export async function createServer(ctx: CreateServerContext = {}) {
     console.error('server error', err.stack)
 
     try {
-      const response = (err as any).response as Response | undefined
-      if (response) {
-        res.statusCode = response.status
-      } else {
-        res.statusCode =
-          !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
-      }
-      const router = await serverEntry.createClientRouter()
+      res.statusCode =
+        !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
+      const router = serverEntry.createClientRouter()
       router.push(req.url)
       await router.isReady()
       const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()

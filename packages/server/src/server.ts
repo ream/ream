@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
-import connect, { NextFunction } from 'connect'
+import { NextFunction, Connect } from './connect'
 import { pathToRegexp, execPathRegexp } from './route-helpers'
 import { send, SendData, status } from './response-helpers'
 
@@ -34,10 +34,10 @@ type ReamServerErrorHandler = (
 ) => void
 
 export class Server {
-  app: connect.Server
+  app: Connect
 
   constructor() {
-    this.app = connect()
+    this.app = require('connect')()
 
     this.app.use(
       // @ts-ignore

@@ -10,8 +10,10 @@ export const usePageData = () => {
   return computed(() => vm.root.setupState.preloadResult.data || {})
 }
 
-export { useHead } from '@vueuse/head'
+export { useHead, createHead } from '@vueuse/head'
 
-export { useRoute, useRouter } from 'vue-router'
+export { createSSRApp } from 'vue'
+
+export { useRoute, useRouter, RouterView as ReamView } from 'vue-router'
 
 export { ReamLink } from './link'
