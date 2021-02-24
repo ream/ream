@@ -1,0 +1,16 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "automatic-routing": "0.0.0",
+    "data-fetching": "0.0.0",
+    "@ream/app": "5.0.0-alpha.4",
+    "@ream/fetch": "5.0.0-alpha.4",
+    "@ream/plugin-google-analytics": "5.0.0-alpha.4",
+    "ream": "5.0.0-alpha.4",
+    "@ream/server": "5.0.0-alpha.4",
+    "@ream/test-utils": "5.0.0-alpha.4",
+    "website": "5.0.0-alpha.3"
+  },
+  "changesets": []
+}
