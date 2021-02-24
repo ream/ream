@@ -6,6 +6,8 @@ import { Route } from './utils/route'
 import path from 'path'
 import { filesToRoutes } from './utils/load-routes'
 
+const isAbsolutPath = (p: string) => /^\/|[a-zA-Z]:/.test(p)
+
 export async function prepareFiles(api: Ream) {
   const pagesDir = api.resolveSrcDir('pages')
   const routesFilePattern = '**/*.{vue,ts,tsx,js,jsx}'
@@ -24,6 +26,9 @@ export async function prepareFiles(api: Ream) {
     const routesInfo = filesToRoutes(files, pagesDir)
 
     const getRelativePathToTemplatesDir = (p: string) => {
+      if (!isAbsolutPath(p)) {
+        return p
+      }
       return path.relative(api.resolveDotReam('templates'), p)
     }
 

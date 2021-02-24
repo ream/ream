@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@types/polka": "0.5.2",
-    "ream": "5.0.0-alpha.3",
-    "@ream/server": "5.0.0-alpha.3"
+    "ream": "workspace:*",
+    "@ream/server": "workspace:*"
   }
 }

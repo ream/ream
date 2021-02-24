@@ -1,8 +1,8 @@
+import path from 'path'
 import fs from 'fs-extra'
 import { Ream } from '../'
 import { UserConfig as ViteConfig, Plugin } from 'vite'
 import vuePlugin from '@vitejs/plugin-vue'
-import path from 'path'
 import { babelPlugin } from './plugins/babel'
 
 const reamAliasPlugin = (api: Ream): Plugin => {
@@ -13,7 +13,7 @@ const reamAliasPlugin = (api: Ream): Plugin => {
       // Bundle @ream/app since it's written in esnext modules
       // Otherwise it will break in Node.js (SSR)
       if (source === '@ream/app' || source.startsWith('@ream/app/')) {
-        return source.replace('@ream/app', api.localResolve('@ream/app')!)
+        return api.resolveInPackage('@ream/server', source)!
       }
       return undefined
     },
@@ -61,9 +61,8 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
     ? undefined
-    : require.resolve(
-        `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
-      )
+    : `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
+
   const config = {
     root: api.rootDir,
     warn: process.env.NODE_ENV === 'test' ? 'warn' : 'info',

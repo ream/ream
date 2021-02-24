@@ -10,7 +10,7 @@
     "pages"
   ],
   "dependencies": {
-    "@ream/fetch": "5.0.0-alpha.3",
+    "@ream/fetch": "workspace:*",
     "@vueuse/head": "^0.2.3",
     "vue-router": "4.0.3"
   },
