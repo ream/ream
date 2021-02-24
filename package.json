@@ -1,11 +1,6 @@
 {
   "private": true,
   "name": "ream-workspace",
-  "workspaces": [
-    "packages/*",
-    "website",
-    "examples/*"
-  ],
   "scripts": {
     "test:unit": "jest --testPathPattern packages",
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
@@ -15,6 +10,7 @@
     "release": "node -r esbuild-register scripts/release.ts"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.14.1",
     "@ream/test-utils": "workspace:*",
     "@sucrase/jest-plugin": "^2.0.0",
     "@types/jest": "^26.0.20",
