@@ -35,7 +35,10 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-build-
             ${{ runner.os }}-
 
-      - name: Install
+      - name: Install pnpm
+        run: npm i -g pnpm
+
+      - name: Install deps
         run: pnpm i
 
       # Runs a set of commands using the runners shell
@@ -63,6 +66,9 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-${{ matrix.node-version }}-build-
             ${{ runner.os }}-
+
+      - name: Install pnpm
+        run: npm i -g pnpm
 
       - name: Install
         run: pnpm i
