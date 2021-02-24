@@ -7,7 +7,9 @@
     "/cli.js"
   ],
   "main": "dist/index.js",
-  "bin": "cli.js",
+  "bin": {
+    "ream": "cli.js"
+  },
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo skip",
