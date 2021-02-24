@@ -13,7 +13,7 @@ const reamAliasPlugin = (api: Ream): Plugin => {
       // Bundle @ream/app since it's written in esnext modules
       // Otherwise it will break in Node.js (SSR)
       if (source === '@ream/app' || source.startsWith('@ream/app/')) {
-        return api.resolveInPackage('@ream/server', source)!
+        return require.resolve(source)
       }
       return undefined
     },

@@ -138,10 +138,10 @@ test('build routes', async () => {
           'isServerRoute': true
         }
       ],
-      'appFile': '$CWD/packages/app/pages/_app.js',
-      'documentFile': '$CWD/packages/app/pages/_document.js',
-      'errorFile': '$CWD/packages/app/pages/_error.js',
-      'notFoundFile': '$CWD/packages/app/pages/404.js'
+      'appFile': '@ream/app/pages/_app.js',
+      'documentFile': '@ream/app/pages/_document.js',
+      'errorFile': '@ream/app/pages/_error.js',
+      'notFoundFile': '@ream/app/pages/404.js'
     }"
   `)
 })
