@@ -61,7 +61,9 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
     ? undefined
-    : `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
+    : require.resolve(
+        `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
+      )
 
   const config = {
     root: api.rootDir,
@@ -91,6 +93,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     ssr: {
       // https://vitejs.dev/config/#ssr-external
       external: ['vue', 'vue-router'],
+      noExternal: ['@ream/app'],
     },
     server: {
       middlewareMode: api.isDev,

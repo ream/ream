@@ -11,7 +11,7 @@ export const createServer = async (api: Ream) => {
     cwd: api.rootDir,
     loadServerEntry: async () => {
       const serverEntry = await api.viteDevServer!.ssrLoadModule(
-        `@ream/app/server-entry.js`
+        `/@fs/${require.resolve(`@ream/app/server-entry.js`)}`
       )
       return serverEntry.default
     },
