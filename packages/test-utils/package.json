@@ -1,6 +1,6 @@
 {
   "name": "@ream/test-utils",
-  "version": "5.0.0-alpha.3",
+  "version": "5.0.0-alpha.4",
   "publishConfig": {
     "access": "public"
   },
