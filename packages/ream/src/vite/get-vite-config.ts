@@ -84,12 +84,13 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
         '@': api.resolveSrcDir(),
       },
     },
+    optimizeDeps: {
+      // Don't let Vite optimize these deps with esbuild
+      exclude: ['@ream/app', '@ream/fetch'],
+    },
     ssr: {
       // https://vitejs.dev/config/#ssr-external
       external: ['vue', 'vue-router'],
-      // Let Vite transform esm to cjs
-      // To make following modules work in SSR
-      noExternal: ['@ream/app'],
     },
     server: {
       middlewareMode: api.isDev,

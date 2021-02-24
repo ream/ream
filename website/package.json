@@ -14,8 +14,8 @@
     "marked": "^2.0.0",
     "prismjs": "^1.20.0",
     "vite-plugin-windicss": "^0.4.3",
-    "ream": "5.0.0-alpha.3",
-    "@ream/server": "5.0.0-alpha.3",
-    "@ream/plugin-google-analytics": "5.0.0-alpha.3"
+    "ream": "workspace:*",
+    "@ream/server": "workspace:*",
+    "@ream/plugin-google-analytics": "workspace:*"
   }
 }

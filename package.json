@@ -16,16 +16,16 @@
   },
   "devDependencies": {
     "@ream/test-utils": "workspace:*",
+    "@sucrase/jest-plugin": "^2.0.0",
     "@types/jest": "^26.0.20",
     "@types/semver": "^7.3.4",
     "chalk": "^4.1.0",
     "dtsup": "^1.0.1",
     "esbuild-register": "^2.0.0",
     "execa": "^5.0.0",
-    "jest": "^26.6.3",
+    "jest-cli": "^26.6.3",
     "prettier": "^2.0.5",
     "semver": "^7.3.4",
-    "ts-jest": "^26.5.1",
     "tsc-watch": "^4.2.9",
     "typescript": "^4.1.3"
   }
