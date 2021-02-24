@@ -19,13 +19,13 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "cac": "6.7.1",
     "@vue/server-renderer": "3.0.5",
+    "cac": "6.7.1",
     "connect": "3.7.0",
-    "path-to-regexp": "6.1.0",
-    "serve-static": "1.14.1",
     "debug": "4.3.1",
-    "serialize-javascript": "5.0.1"
+    "path-to-regexp": "6.1.0",
+    "serialize-javascript": "5.0.1",
+    "serve-static": "1.14.1"
   },
   "devDependencies": {
     "@types/debug": "4.1.5",
@@ -33,7 +33,7 @@
     "@types/serve-static": "1.13.9"
   },
   "peerDependencies": {
-    "vue": ">=3",
-    "@ream/app": "5.0.0-alpha.3"
+    "@ream/app": "5.0.0-alpha.3",
+    "vue": ">=3"
   }
 }
