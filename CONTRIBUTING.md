@@ -2,23 +2,23 @@
 
 ## Running tests
 
-Make sure you have __Chrome__ installed on your machine.
+Make sure you have **Chrome** installed on your machine.
 
 Running all test at once:
 
 ```bash
-yarn test
+npm t
 ```
 
 Running above script is essentially running following scripts in serial:
 
 ```bash
 # Build all packages first
-yarn build
+npm run build
 # Run unit tests in ./test/unit
-yarn test:unit
+npm run test:unit
 # Run integration tests in ./test/integration
-yarn test:integration
+npm run test:integration
 ```
 
 ## Building packages
@@ -26,27 +26,27 @@ yarn test:integration
 Building all the packages:
 
 ```bash
-yarn build
+npm run build
 ```
 
 Building individual package:
 
 ```bash
-yarn workspace <package-name> build
+pnpm run build --filter <package-name>
 ```
 
 Or build and watch individual package:
 
 ```bash
-yarn workspace <package-name> watch
+pnpm run dev --filter <package-name>
 ```
 
 ## Running the integration apps
 
-Make sure you have run `yarn build` once.
+Make sure you have run `npm run build` once.
 
 ```bash
-yarn ream ./test/integration/404-page
+node packages/ream/cli ./test/integration/404-page
 # OR
-yarn ream ./examples/automatic-routing
+node packages/ream/cli ./examples/automatic-routing
 ```

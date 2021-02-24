@@ -1,2 +1,2 @@
 tasks:
-  - init: yarn install && yarn build
+  - init: pnpm install && pnpm run build
