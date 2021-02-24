@@ -3,7 +3,7 @@ import { buildAndLaunch, ProductionApp } from '@ream/test-utils'
 
 jest.setTimeout(600000)
 
-describe(`use preload`, () => {
+describe(`features`, () => {
   describe(`Production mode`, () => {
     let app: ProductionApp
 
@@ -19,8 +19,14 @@ describe(`use preload`, () => {
       done()
     })
 
+    it(`should render custom 404 page`, async () => {
+      const { statusCode, content } = await app.visit('/non-existent-page')
+      expect(statusCode).toBe(404)
+      expect(content).toContain(`Custom 404 page`)
+    })
+
     it(`should render preload`, async () => {
-      const { statusCode, content } = await app.visit('/')
+      const { statusCode, content } = await app.visit('/preload')
       expect(statusCode).toBe(200)
       expect(content).toContain(`hello world`)
     })

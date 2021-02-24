@@ -1,4 +1,4 @@
-import type { Router } from '@ream/app/router';
+import type { Router } from 'vue-router';
 import { ReamServerRequest, ReamServerResponse, ReamServerHandler } from './server';
 import type { ServerEntry } from '.';
 export declare type RenderError = {

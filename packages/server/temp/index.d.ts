@@ -1,5 +1,5 @@
-import type { Router, RouteRecordRaw } from '@ream/app/router';
-import type { HTMLResult as HeadResult } from '@ream/app/head';
+import type { Router, RouteRecordRaw } from 'vue-router';
+import type { HTMLResult as HeadResult } from '@vueuse/head';
 import { render, renderToHTML, getPreloadData } from './render';
 export { ReamServerHandler, ReamServerRequest, ReamServerResponse, } from './server';
 export { Connect } from './connect';

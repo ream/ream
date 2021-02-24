@@ -14,7 +14,7 @@ export type ProductionApp = {
   visit: (path: string) => Promise<{ statusCode?: number; content?: string }>
 }
 
-const REAM_BIN = require.resolve('ream/dist/cli.js')
+const REAM_BIN = require.resolve('ream/cli.js')
 
 export async function buildAndLaunch({
   appDir,
