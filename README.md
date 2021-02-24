@@ -1,10 +1,8 @@
-## ATTENTION: this project is under development, we aim to make it usable when Vue 3 is out. (i.e. it's not going to support Vue 2)
-
 # Ream
 
-A server-side rendering framework for Vue.js with first-class TypeScript support.
+A super fast SSR framework for Vue.js.
 
-[![sponsor egoist](https://flat.badgen.net/badge/SPONSOR/EGOIST/purple?icon=kofi&scale=1.5&labelColor=black)](https://github.com/sponsors/egoist) [![npm version](https://flat.badgen.net/npm/v/ream?scale=1.5)](https://npm.im/ream) [![build status](https://flat.badgen.net/github/status/ream/ream/master?scale=1.5)](https://github.com/ream/ream/actions) [![npm downloads](https://flat.badgen.net/npm/dm/ream?scale=1.5)](https://npm.im/ream)
+[![sponsor egoist](https://badgen.net/badge/SPONSOR/EGOIST/purple?icon=kofi&labelColor=black)](https://github.com/sponsors/egoist) [![npm version](https://badgen.net/npm/v/ream)](https://npm.im/ream) [![build status](https://badgen.net/github/status/ream/ream/main)](https://github.com/ream/ream/actions) [![npm downloads](https://badgen.net/npm/dm/ream)](https://npm.im/ream)
 
 ❤️ Please [**sponsor me**](https://github.com/sponsors/egoist) to support this project or prioritize a feature you want. I will work on this project for full-time once I have 150+ sponsors.
 
@@ -18,4 +16,4 @@ A server-side rendering framework for Vue.js with first-class TypeScript support
 
 ## License
 
-MIT &copy; EGOIST
+MIT &copy; [EGOIST](https://github.com/sponsors/egoist)
