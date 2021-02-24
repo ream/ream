@@ -12,5 +12,7 @@
     "@ream/test-utils": "5.0.0-alpha.4",
     "website": "5.0.0-alpha.3"
   },
-  "changesets": []
+  "changesets": [
+    "tasty-teachers-learn"
+  ]
 }
