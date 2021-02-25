@@ -1,10 +1,35 @@
 # Configuration
 
+Supported configuration file for Ream: `ream.config.ts` or `ream.config.js`, export the config object like this:
+
+```ts
+// ream.config.js
+
+export default {
+  // ...your config
+}
+```
+
+Or with TypeScript:unit
+
+```ts
+// ream.config.ts
+import { ReamConfig } from 'ream'
+
+const config: ReamConfig = {
+  // ...your config
+}
+
+export default config
+```
+
+All config options are documented below.
+
 ## `env`
 
 - Type: `object`
 
-Use build-time environment variables, matched variables in your app code will be replaced with supplied value.
+Use build-time environment variables, matched variables in your app code will be replaced with the supplied value.
 
 For example:
 
@@ -19,27 +44,35 @@ module.exports = {
 }
 ```
 
-Then you can use `process.env.API_ENDPOINT` in your app code.
+Then you can use `import.meta.env.API_ENDPOINT` in your app code.
 
 ## `plugins`
 
-[TODO]
+- Type: `ReamPlugin[]`
 
-## `css`
+Use Ream plugins. e.g.
+
+```ts
+import ga from '@ream/plugin-google-analytics'
+
+export default {
+  plugins: [ga()],
+}
+```
+
+## `imports`
 
 - Type: `string[]`
 
-Use global CSS.
+Prepend some `import` statements to both server and client entries, which can be useful to importing global CSS or adding some polyfills.
 
 Example:
 
 ```js
 module.exports = {
-  css: ['bulma/css/bulma.css', '@/css/style.css'],
+  imports: ['./some-polyfill'],
 }
 ```
-
-Webpack alias also work here.
 
 ## `vite`
 
