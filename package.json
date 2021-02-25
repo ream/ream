@@ -6,8 +6,7 @@
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
     "test": "npm run build && npm run test:unit && npm run test:integration",
     "build": "node -r esbuild-register  scripts/build.ts",
-    "dev": "node -r esbuild-register scripts/dev.ts",
-    "release": "node -r esbuild-register scripts/release.ts"
+    "dev": "node -r esbuild-register scripts/dev.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.14.1",

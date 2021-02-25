@@ -1,0 +1,14 @@
+{
+  "name": "create-ream-app",
+  "version": "1.0.0-alpha.0",
+  "files": [
+    "template",
+    "lib"
+  ],
+  "bin": "lib/cli.js",
+  "license": "MIT",
+  "dependencies": {
+    "cac": "^6.7.2",
+    "majo": "^0.10.1"
+  }
+}

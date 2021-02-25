@@ -46,6 +46,13 @@ importers:
       '@vueuse/head': ^0.2.3
       vue: 3.0.5
       vue-router: 4.0.3
+  packages/create-ream-app:
+    dependencies:
+      cac: 6.7.2
+      majo: 0.10.1
+    specifiers:
+      cac: ^6.7.2
+      majo: ^0.10.1
   packages/fetch:
     dependencies:
       node-fetch: 2.6.1
@@ -1661,7 +1668,6 @@ packages:
     resolution:
       integrity: sha512-LfGt47+ugCY65W4yUEyxnZKd/tJSBJD/gUAxQGiQjH7yqdhbaX2XN0Rli4+0W0DJiDONmYeh0TlJxMtXGZspIg==
   /cac/6.7.2:
-    dev: true
     engines:
       node: '>=8'
     resolution:
@@ -3975,6 +3981,14 @@ packages:
       sourcemap-codec: 1.4.8
     resolution:
       integrity: sha512-4CrMT5DOHTDk4HYDlzmwu4FVCcIYI8gauveasrdCu2IKIFOJ3f0v/8MDGJCDL9oD2ppz/Av1b0Nj345H9M+XIA==
+  /majo/0.10.1:
+    dependencies:
+      fast-glob: 3.2.5
+      mkdirp: 1.0.4
+      rimraf: 3.0.2
+    dev: false
+    resolution:
+      integrity: sha512-T65k+ZjI8u0m69DS0LqoDKskb3c1/pv+XVS7CJOWso8m/WFYvsUNjxl/r7JVdxzdIuUKseC/Nbje2cIy7baLvA==
   /make-dir/3.1.0:
     dependencies:
       semver: 6.3.0
@@ -4166,6 +4180,13 @@ packages:
       node: '>= 8.0.0'
     resolution:
       integrity: sha512-B4Sm1CDC5+ov5AYxSkyeT5HLtiDgNOLKwFlq34wr8E2O3zRdTvQiLzo599Jt9cir6VJrSenOlgvdooVYCQJIYw==
+  /mkdirp/1.0.4:
+    dev: false
+    engines:
+      node: '>=10'
+    hasBin: true
+    resolution:
+      integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
   /mock-fs/4.13.0:
     dev: true
     resolution:
