@@ -4,13 +4,12 @@ Supported configuration file for Ream: `ream.config.ts` or `ream.config.js`, exp
 
 ```ts
 // ream.config.js
-
 export default {
   // ...your config
 }
 ```
 
-Or with TypeScript:unit
+Or with TypeScript:
 
 ```ts
 // ream.config.ts

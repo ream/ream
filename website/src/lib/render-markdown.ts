@@ -5,6 +5,7 @@ import Prism from 'prismjs'
 
 import 'prismjs/components/prism-json'
 import 'prismjs/components/prism-bash'
+import 'prismjs/components/prism-typescript'
 
 const docsDir = path.join(import.meta.env.REAM_ROOT_DIR, '../docs')
 
