@@ -11,9 +11,9 @@ import {
 import serializeJavascript from 'serialize-javascript'
 import { getOutputHTMLPath, getStaticPreloadOutputPath } from './paths-helpers'
 import { join } from 'path'
-import type { ServerEntry } from '.'
+import type { ExportInfo, ServerEntry } from '.'
 import { IS_PROD } from './constants'
-import { pathExists, readFile } from './fs'
+import { readFile } from './fs'
 
 const debug = createDebug('ream:render')
 
@@ -64,6 +64,7 @@ export async function render({
   isPreloadRequest,
   scripts,
   styles,
+  exportInfo,
 }: {
   url: string
   req?: ReamServerRequest
@@ -74,6 +75,7 @@ export async function render({
   isPreloadRequest?: boolean
   scripts: string
   styles: string
+  exportInfo?: ExportInfo
 }): Promise<{
   statusCode: number
   body: string
@@ -104,9 +106,10 @@ export async function render({
     getStaticPreloadOutputPath(route.path)
   )
   // Export the page (HTML or preload JSON file) after the request
+  const fullRawPath = route.matched.map((m) => m.path).join('/')
+  const isExported = exportInfo?.staticPaths.includes(route.path)
   const shouldExport =
-    // @ts-ignore
-    components.every((component) => !component.$$preload) && IS_PROD
+    IS_PROD && components.every((component) => !component.$$preload)
 
   if (isPreloadRequest) {
     debug(`Rendering preload JSON`)
@@ -115,23 +118,33 @@ export async function render({
     }
 
     let body = ''
-    // If there's already a exported static preload JSON file
-    const hasStaticPreloadCache =
-      shouldExport && (await pathExists(staticPreloadOutputPath))
-    if (hasStaticPreloadCache) {
+
+    // Try loading the export cache
+    if (isExported) {
       body = await readFile(staticPreloadOutputPath, 'utf8')
-    } else {
-      const preloadResult = await getPreloadData(components, {
-        req,
-        res,
-        params: route.params,
-      })
-      if (statusCode === 404) {
-        preloadResult.notFound = true
-      }
-      body = serializeJavascript(preloadResult, { isJSON: true })
-      if (shouldExport) {
-        cacheFiles.set(staticPreloadOutputPath, body)
+    }
+
+    // No cache is founded
+    if (!body) {
+      // Static pages that should not fallback to render on demand
+      // Show 404
+      if (shouldExport && !exportInfo?.fallbackPathsRaw.includes(fullRawPath)) {
+        body = `{"data":{},"notFound": true}`
+      } else {
+        const preloadResult = await getPreloadData(components, {
+          req,
+          res,
+          params: route.params,
+        })
+        if (statusCode === 404) {
+          preloadResult.notFound = true
+        }
+        body = serializeJavascript(preloadResult, { isJSON: true })
+
+        // Save the cache
+        if (shouldExport) {
+          cacheFiles.set(staticPreloadOutputPath, body)
+        }
       }
     }
 
@@ -145,21 +158,25 @@ export async function render({
 
   const headers = { 'content-type': 'text/html' }
   let body = ''
-  // If there's already a exported static HTML file
-  const hasStaticHTML = shouldExport && (await pathExists(staticHTMLPath))
-  if (hasStaticHTML) {
+  if (isExported) {
     debug(`Rendering pre-geneated static HTML file`)
     body = await readFile(staticHTMLPath, 'utf8')
   } else {
     debug(`Rendering HTML for ${url} on the fly`)
-    const preloadResult = await getPreloadData(components, {
-      req,
-      res,
-      params: route.params,
-    })
-    if (statusCode === 404) {
-      preloadResult.notFound = true
+    let preloadResult: PreloadResult
+    if (shouldExport && !exportInfo?.fallbackPathsRaw.includes(fullRawPath)) {
+      preloadResult = { notFound: true, data: {} }
+    } else {
+      preloadResult = await getPreloadData(components, {
+        req,
+        res,
+        params: route.params,
+      })
+      if (statusCode === 404) {
+        preloadResult.notFound = true
+      }
     }
+
     body = await renderToHTML({
       params: route.params,
       url,
@@ -245,22 +262,30 @@ export async function renderToHTML(options: {
   return `<!DOCTYPE html>${html}`
 }
 
+type PreloadResult = {
+  data: any
+  hasPreload?: boolean
+  isStatic?: boolean
+  notFound?: boolean
+  error?: { statusCode: number; stack?: string }
+}
+
 export async function getPreloadData(
   components: any[],
   options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
-): Promise<{
-  data: any
-  hasPreload?: boolean
-  notFound?: boolean
-  error?: { statusCode: number; stack?: string }
-}> {
+): Promise<PreloadResult> {
   const data = {}
-  let hasPreload: boolean | undefined
+  let hasPreload: boolean = false
+  let isStatic: boolean = false
   let notFound: boolean | undefined
   let error: { statusCode: number; stack?: string } | undefined
 
   for (const component of components) {
     const preload = component.$$staticPreload || component.$$preload
+
+    if (component.$$staticPreload) {
+      isStatic = true
+    }
 
     if (preload) {
       hasPreload = true
@@ -292,6 +317,7 @@ export async function getPreloadData(
   return {
     data,
     hasPreload,
+    isStatic,
     notFound,
     error,
   }

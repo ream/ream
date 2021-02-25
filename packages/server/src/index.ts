@@ -32,9 +32,17 @@ export type ServerEntry = {
   renderHeadToString: (app: any) => HeadResult
   ErrorComponent: any
   serverRoutes: RouteRecordRaw[]
+  clientRoutes: RouteRecordRaw[]
 }
 
 type LoadServerEntry = () => Promise<ServerEntry> | ServerEntry
+
+export type ExportInfo = {
+  /** The paths that have been exported at build time */
+  staticPaths: string[]
+  /** The raw paths that should fallback to render on demand */
+  fallbackPathsRaw: string[]
+}
 
 type CreateServerContext = {
   /**
@@ -51,6 +59,7 @@ type CreateServerContext = {
   devMiddleware?: any
   loadServerEntry?: LoadServerEntry
   ssrFixStacktrace?: (err: Error) => void
+  loadExportInfo?: () => ExportInfo
 }
 
 export { render, renderToHTML, getPreloadData }
@@ -99,6 +108,10 @@ export async function createServer(ctx: CreateServerContext = {}) {
   const loadServerEntry: LoadServerEntry =
     ctx.loadServerEntry ||
     (() => require(path.join(dotReamDir, 'server/server-entry.js')).default)
+
+  const exportInfo = ctx.dev
+    ? undefined
+    : (require(path.join(dotReamDir, 'meta/export-info.json')) as ExportInfo)
 
   if (ctx.dev) {
     if (ctx.devMiddleware) {
@@ -166,6 +179,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
       dotReamDir,
       scripts,
       styles,
+      exportInfo,
     })
 
     res.statusCode = result.statusCode

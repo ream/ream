@@ -20,8 +20,15 @@ export declare type ServerEntry = {
     renderHeadToString: (app: any) => HeadResult;
     ErrorComponent: any;
     serverRoutes: RouteRecordRaw[];
+    clientRoutes: RouteRecordRaw[];
 };
 declare type LoadServerEntry = () => Promise<ServerEntry> | ServerEntry;
+export declare type ExportInfo = {
+    /** The paths that have been exported at build time */
+    staticPaths: string[];
+    /** The raw paths that should fallback to render on demand */
+    fallbackPathsRaw: string[];
+};
 declare type CreateServerContext = {
     /**
      * Development mode
@@ -37,6 +44,7 @@ declare type CreateServerContext = {
     devMiddleware?: any;
     loadServerEntry?: LoadServerEntry;
     ssrFixStacktrace?: (err: Error) => void;
+    loadExportInfo?: () => ExportInfo;
 };
 export { render, renderToHTML, getPreloadData };
 export declare const extractClientManifest: (dotReamDir: string) => {

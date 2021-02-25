@@ -165,19 +165,23 @@ importers:
       serve-static: 1.14.1
   website:
     devDependencies:
+      '@ream/app': link:../packages/app
       '@ream/plugin-google-analytics': link:../packages/plugin-google-analytics
       '@ream/server': link:../packages/server
       '@types/marked': 1.2.2
       '@types/prismjs': 1.16.3
+      fast-glob: 3.2.5
       marked: 2.0.0
       prismjs: 1.23.0
       ream: link:../packages/ream
       vite-plugin-windicss: 0.4.12
     specifiers:
+      '@ream/app': workspace:*
       '@ream/plugin-google-analytics': workspace:*
       '@ream/server': workspace:*
       '@types/marked': ^1.1.0
       '@types/prismjs': ^1.16.0
+      fast-glob: 3.2.5
       marked: ^2.0.0
       prismjs: ^1.20.0
       ream: workspace:*

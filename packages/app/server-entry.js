@@ -40,6 +40,8 @@ export default {
 
   _document,
 
+  clientRoutes,
+
   serverRoutes,
 
   ErrorComponent,

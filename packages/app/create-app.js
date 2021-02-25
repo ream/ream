@@ -1,7 +1,7 @@
 import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
 import { createHead, useHead } from '@vueuse/head'
-import { useRoute, RouterView } from 'vue-router'
-import { ReamLink } from './'
+import { RouterView } from 'vue-router'
+import { ReamLink, useRoutePath } from './'
 import {
   AppComponent,
   NotFoundComponent,
@@ -21,10 +21,10 @@ export const createApp = ({ router, initialState }) => {
       const store = isReactive(initialState)
         ? initialState
         : reactive(initialState)
-      const route = useRoute()
+      const routePath = useRoutePath()
       const preloadResult = computed(() => {
-        if (store[route.path]) {
-          return store[route.path]
+        if (store[routePath.value]) {
+          return store[routePath.value]
         }
         if (Object.keys(store).length === 1 && store['/404.html']) {
           return store['/404.html']

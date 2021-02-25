@@ -1,4 +1,4 @@
-import { filesToRoutes } from '../load-routes'
+import { filesToRoutes } from './load-routes'
 
 test('build routes', async () => {
   const routes = filesToRoutes(

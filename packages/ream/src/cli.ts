@@ -30,19 +30,19 @@ cli
       rootDir,
       dev: false,
     })
-    await app.build().catch(handleError)
-  })
-
-cli
-  .command('export [dir]', 'Export a hybrid site to a static site')
-  .action(async (rootDir) => {
-    const { Ream } = await import('./')
-    const app = new Ream({
-      rootDir,
-      dev: false,
-    })
     await app.build(true).catch(handleError)
   })
+
+// cli
+//   .command('export [dir]', 'Export a hybrid site to a static site')
+//   .action(async (rootDir) => {
+//     const { Ream } = await import('./')
+//     const app = new Ream({
+//       rootDir,
+//       dev: false,
+//     })
+//     await app.build(true).catch(handleError)
+//   })
 
 cli
   .command('start [dir]', 'Start a production server')

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import menu from '@/data/menu'
+import { useRoutePath } from '@ream/app'
+
+const routePath = useRoutePath()
 </script>
 
 <template>
@@ -11,7 +14,7 @@ import menu from '@/data/menu'
       <div v-for="child in item.children" :key="child.text">
         <ream-link
           class="menu-item-link"
-          :class="{ active: $route.path === child.link }"
+          :class="{ active: routePath === child.link }"
           :to="child.link"
           >{{ child.text }}</ream-link
         >

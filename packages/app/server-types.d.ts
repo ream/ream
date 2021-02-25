@@ -44,14 +44,23 @@ export type StaticPreload<
   TData extends { [key: string]: any } = { [key: string]: any }
 > = PreloadFactory<StaticPreloadContext, PreloadResult<TData>>
 
-export type StaticPathsResult = {
+export type GetStaticPathsResult = {
   paths: Array<{
     params: {
       [k: string]: string
     }
   }>
+  /**
+   * pages not included in prerendered paths will result in the 404 page
+   * set `fallback` to `true` to render those pages on the first request instead
+   * in the background, Ream will statically generate the requested path HTML and JSON
+   * and subsequent requests to the same path will serve the generated page
+   */
+  fallback?: boolean
 }
 
-export type StaticPaths = () => StaticPathsResult | Promise<StaticPathsResult>
+export type GetStaticPaths = () =>
+  | GetStaticPathsResult
+  | Promise<GetStaticPathsResult>
 
 export { ReamServerHandler, ReamServerRequest, ReamServerResponse }

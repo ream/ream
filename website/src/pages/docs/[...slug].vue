@@ -1,6 +1,8 @@
 <script lang="ts">
+import path from 'path'
+import glob from 'fast-glob'
 import { defineComponent, computed } from 'vue'
-import type { StaticPreload } from '@ream/app'
+import type { StaticPreload, GetStaticPaths } from '@ream/app'
 import { renderMarkdown } from '@/lib/render-markdown'
 import { useHead, usePageData } from '@ream/app'
 import Header from '@/components/Header.vue'
@@ -16,6 +18,15 @@ export const staticPreload: StaticPreload = async ({ params }) => {
   }
 }
 
+export const getStaticPaths: GetStaticPaths = async () => {
+  const files = await glob('**/*.md', {
+    cwd: path.join(import.meta.env.REAM_ROOT_DIR, '../docs'),
+  })
+  return {
+    paths: files.map((file) => ({ params: { slug: file.replace('.md', '') } })),
+  }
+}
+
 export default defineComponent({
   components: {
     Header,
@@ -24,9 +35,10 @@ export default defineComponent({
 
   setup() {
     const preloadData = usePageData()
-    const title = computed(
-      () => `${preloadData.value.title} - Ream Documentation`
-    )
+
+    const title = computed(() => {
+      return `${preloadData.value.title} - Ream Documentation`
+    })
 
     useHead({
       title,

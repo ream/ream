@@ -6,6 +6,7 @@
     "dev": "ream",
     "build": "ream build",
     "export": "ream export",
+    "start": "ream-server",
     "test": "echo lol"
   },
   "devDependencies": {
@@ -16,6 +17,8 @@
     "vite-plugin-windicss": "^0.4.3",
     "ream": "workspace:*",
     "@ream/server": "workspace:*",
-    "@ream/plugin-google-analytics": "workspace:*"
+    "@ream/plugin-google-analytics": "workspace:*",
+    "@ream/app": "workspace:*",
+    "fast-glob": "3.2.5"
   }
 }

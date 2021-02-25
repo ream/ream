@@ -1,6 +1,6 @@
 import type { Router } from 'vue-router';
 import { ReamServerRequest, ReamServerResponse, ReamServerHandler } from './server';
-import type { ServerEntry } from '.';
+import type { ExportInfo, ServerEntry } from '.';
 export declare type RenderError = {
     statusCode: number;
 };
@@ -10,7 +10,7 @@ export declare type ServerRouteLoader = {
         default: ReamServerHandler;
     }>;
 };
-export declare function render({ url, req, res, dotReamDir, ssrManifest, serverEntry, isPreloadRequest, scripts, styles, }: {
+export declare function render({ url, req, res, dotReamDir, ssrManifest, serverEntry, isPreloadRequest, scripts, styles, exportInfo, }: {
     url: string;
     req?: ReamServerRequest;
     res?: ReamServerResponse;
@@ -20,6 +20,7 @@ export declare function render({ url, req, res, dotReamDir, ssrManifest, serverE
     isPreloadRequest?: boolean;
     scripts: string;
     styles: string;
+    exportInfo?: ExportInfo;
 }): Promise<{
     statusCode: number;
     body: string;
@@ -43,16 +44,19 @@ export declare function renderToHTML(options: {
     scripts: string;
     styles: string;
 }): Promise<string>;
-export declare function getPreloadData(components: any[], options: {
-    req?: ReamServerRequest;
-    res?: ReamServerResponse;
-    params: any;
-}): Promise<{
+declare type PreloadResult = {
     data: any;
     hasPreload?: boolean;
+    isStatic?: boolean;
     notFound?: boolean;
     error?: {
         statusCode: number;
         stack?: string;
     };
-}>;
+};
+export declare function getPreloadData(components: any[], options: {
+    req?: ReamServerRequest;
+    res?: ReamServerResponse;
+    params: any;
+}): Promise<PreloadResult>;
+export {};

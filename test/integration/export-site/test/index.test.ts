@@ -8,7 +8,7 @@ describe(`export static site`, () => {
 
   beforeAll(async () => {
     const appDir = join(__dirname, '../')
-    app = await buildAndLaunch({ appDir, dev: false, export: true })
+    app = await buildAndLaunch({ appDir, dev: false })
   })
 
   afterAll(async (done) => {
@@ -29,6 +29,8 @@ describe(`export static site`, () => {
       '/static-preload.preload.json'
     )
     expect(statusCode).toBe(200)
-    expect(content).toBe(`{"data":{"msg":"static preload"},"hasPreload":true}`)
+    expect(content).toBe(
+      `{"data":{"msg":"static preload"},"hasPreload":true,"isStatic":true}`
+    )
   })
 })
