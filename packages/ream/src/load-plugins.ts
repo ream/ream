@@ -1,27 +1,16 @@
 import { Ream } from './'
-import { resolveFiles } from './utils/resolve-files'
 import { store } from './store'
 
 export async function loadPlugins(api: Ream) {
-  const plugins = api.plugins
+  const plugins = api.config.plugins
 
   for (const plugin of plugins) {
-    const { main, defaultName } = plugin
-    const apply = main?.apply
-    const config = main?.config || {}
-    const pluginName = config.name || defaultName
-    const enhanceAppPath = await resolveFiles(
-      ['enhance-app.js', 'enhance-app.ts'],
-      plugin.pluginDir
-    )
-    if (enhanceAppPath) {
-      store.addPluginFile('enhance-app', enhanceAppPath)
-    }
+    const { name, apply } = plugin
     if (apply) {
       try {
-        apply(store, plugin.options || {})
+        apply(store)
       } catch (error) {
-        error.message = `Failed to load plugin "${pluginName}", ${error.message}`
+        error.message = `Failed to load plugin "${name}", ${error.message}`
         throw error
       }
     }

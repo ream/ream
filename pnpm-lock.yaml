@@ -59,7 +59,10 @@ importers:
     specifiers:
       node-fetch: ^2.6.0
   packages/plugin-google-analytics:
-    specifiers: {}
+    devDependencies:
+      ream: link:../ream
+    specifiers:
+      ream: workspace:*
   packages/ream:
     dependencies:
       '@babel/core': 7.13.1

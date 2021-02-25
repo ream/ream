@@ -65,9 +65,8 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
         `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
       )
 
-  const config = {
+  const config: ViteConfig = {
     root: api.rootDir,
-    warn: process.env.NODE_ENV === 'test' ? 'warn' : 'info',
     plugins: [
       reamAliasPlugin(api),
       vuePlugin({
@@ -89,7 +88,9 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
       exclude: ['@ream/app', '@ream/fetch'],
+      include: ['vue', 'vue-router', '@vueuse/head'],
     },
+    // @ts-expect-error vite does not expose these experimental stuff in types yet
     ssr: {
       // https://vitejs.dev/config/#ssr-external
       external: ['vue', 'vue-router'],

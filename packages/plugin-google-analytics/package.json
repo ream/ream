@@ -5,9 +5,13 @@
     "access": "public"
   },
   "files": [
-    "/*.js"
+    "*.js",
+    "*.d.ts"
   ],
   "scripts": {
     "test": "echo skip"
+  },
+  "devDependencies": {
+    "ream": "workspace:*"
   }
 }

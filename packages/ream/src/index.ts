@@ -4,11 +4,11 @@ import type { ViteDevServer, UserConfig as ViteConfig } from 'vite'
 import resolveFrom from 'resolve-from'
 import { loadConfig } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
-import { normalizePluginsArray } from './utils/normalize-plugins-array'
 import { Store, store } from './store'
 import { createServer } from 'http'
 import { remove, existsSync } from 'fs-extra'
 import { OWN_DIR } from './utils/constants'
+import { ReamPlugin } from './types'
 
 export interface Options {
   rootDir?: string
@@ -19,16 +19,11 @@ export interface Options {
   }
 }
 
-export type ReamPluginConfigItem =
-  | string
-  | [string]
-  | [string, { [k: string]: any }]
-
 export type ReamConfig = {
   env?: {
     [k: string]: string | boolean | number
   }
-  plugins?: Array<ReamPluginConfigItem>
+  plugins?: Array<ReamPlugin>
   imports?: string[]
   server?: {
     port?: number
@@ -105,10 +100,6 @@ export class Ream {
     return resolveFrom(pkgDir, target)
   }
 
-  get plugins() {
-    return normalizePluginsArray(this.config.plugins, this.rootDir)
-  }
-
   async prepare({
     shouldCleanDir,
     shouldPrepreFiles,
@@ -116,8 +107,6 @@ export class Ream {
     shouldCleanDir: boolean
     shouldPrepreFiles: boolean
   }) {
-    // Plugins are loaded in every situations
-    // TODO: some plugins should only be loaded at build time
     await loadPlugins(this)
 
     if (shouldCleanDir) {
