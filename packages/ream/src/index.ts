@@ -74,7 +74,6 @@ export class Ream {
       imports: projectConfig.imports || [],
       server: {
         ...projectConfig.server,
-        port: projectConfig.server?.port || 3000,
       },
     }
     process.env.PORT = String(this.config.server.port)
@@ -149,8 +148,9 @@ export class Ream {
   async serve() {
     const handler = await this.getRequestHandler()
     const server = createServer(handler)
-    server.listen(this.config.server.port)
-    console.log(`> http://localhost:${this.config.server.port}`)
+    const port = this.config.server.port || 3000
+    server.listen(port)
+    console.log(`> http://localhost:${port}`)
     return server
   }
 

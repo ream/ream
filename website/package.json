@@ -6,7 +6,7 @@
     "dev": "ream",
     "build": "ream build",
     "export": "ream export",
-    "start": "ream-server",
+    "start": "ream start",
     "test": "echo lol"
   },
   "devDependencies": {

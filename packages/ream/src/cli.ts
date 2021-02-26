@@ -6,9 +6,8 @@ cli
   .command('[dir]', 'Serve a directory in dev mode', {
     ignoreOptionDefaultValue: true,
   })
-  .option('--no-cache', 'Disable webpack caching')
   .option('--port <port>', 'Server port')
-  .action(async (rootDir, options) => {
+  .action(async (rootDir: string, options: { port?: number }) => {
     const { Ream } = await import('./')
     const app = new Ream({
       rootDir,
@@ -24,7 +23,7 @@ cli
   .command('build [dir]', 'Build a directory for production', {
     ignoreOptionDefaultValue: true,
   })
-  .action(async (rootDir, options) => {
+  .action(async (rootDir: string) => {
     const { Ream } = await import('./')
     const app = new Ream({
       rootDir,
@@ -35,7 +34,7 @@ cli
 
 cli
   .command('export [dir]', 'Export a hybrid site to a static site')
-  .action(async (rootDir) => {
+  .action(async (rootDir: string) => {
     const { Ream } = await import('./')
     const app = new Ream({
       rootDir,
@@ -47,16 +46,9 @@ cli
 cli
   .command('start [dir]', 'Start a production server')
   .option('--port <port>', 'Server port')
-  .action(async (rootDir, options) => {
-    const { Ream } = await import('./')
-    const app = new Ream({
-      rootDir,
-      dev: false,
-      server: {
-        port: options.port,
-      },
-    })
-    await app.serve()
+  .action(async (rootDir, options: { port?: number }) => {
+    const { start } = await import('@ream/server')
+    await start(rootDir, options)
   })
 
 cli.version(require('../package').version)

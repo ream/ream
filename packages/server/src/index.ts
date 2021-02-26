@@ -95,6 +95,25 @@ export const writeCacheFiles = async (files: Map<string, string>) => {
   )
 }
 
+export const start = async (
+  cwd: string = '.',
+  options: { port?: number } = {}
+) => {
+  const config = require(path.resolve(cwd, '.ream/meta/config.json'))
+
+  const port = `${options.port || config.port || 3000}`
+  if (!process.env.PORT) {
+    process.env.PORT = port
+  }
+
+  const { createServer } = await import('./')
+  const server = await createServer({
+    cwd,
+  })
+  server.listen(port)
+  console.log(`> http://localhost:${port}`)
+}
+
 export async function createServer(ctx: CreateServerContext = {}) {
   const dotReamDir = path.resolve(ctx.cwd || '.', '.ream')
 

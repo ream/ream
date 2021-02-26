@@ -189,6 +189,21 @@ export async function prepareFiles(api: Ream) {
 
   await writeRoutes()
 
+  if (!api.isDev) {
+    const writeConfig = async () => {
+      const config = {
+        port: api.config.server.port,
+      }
+      await outputFile(
+        api.resolveDotReam('meta/config.json'),
+        JSON.stringify(config),
+        'utf8'
+      )
+    }
+
+    await writeConfig()
+  }
+
   if (api.isDev) {
     const { watch } = await import('chokidar')
     watch(routesFilePattern, {
