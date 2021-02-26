@@ -46,7 +46,7 @@ export const createApp = ({ router, initialState }) => {
         Component = ErrorComponent
       }
 
-      return h(AppComponent, { Component, key: `${notFound} - ${!error}` })
+      return h(AppComponent, {}, () => [h(Component)])
     },
   })
 
