@@ -2,6 +2,7 @@ import path from 'path'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
+import type { Preload } from '@ream/app'
 import { Server } from './server'
 import { render, renderToHTML, getPreloadData } from './render'
 import { outputFile } from './fs'
@@ -33,6 +34,7 @@ export type ServerEntry = {
   ErrorComponent: any
   serverRoutes: RouteRecordRaw[]
   clientRoutes: RouteRecordRaw[]
+  getGlobalPreload: () => Promise<Preload | undefined>
 }
 
 type LoadServerEntry = () => Promise<ServerEntry> | ServerEntry
@@ -206,11 +208,16 @@ export async function createServer(ctx: CreateServerContext = {}) {
       router.push(req.url)
       await router.isReady()
       const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
-      const preloadResult = await getPreloadData([ErrorComponent], {
-        req,
-        res,
-        params: req.params,
-      })
+      const globalPreload = await serverEntry.getGlobalPreload()
+      const preloadResult = await getPreloadData(
+        globalPreload,
+        [ErrorComponent],
+        {
+          req,
+          res,
+          params: req.params,
+        }
+      )
       preloadResult.error = {
         statusCode: res.statusCode,
         stack: ctx.dev ? err.stack : undefined,

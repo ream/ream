@@ -153,14 +153,13 @@ export class Ream {
     return server
   }
 
-  async build(shouldExport?: boolean) {
+  async build(fullyExport?: boolean) {
     await this.prepare({ shouldCleanDir: true, shouldPrepreFiles: true })
     const { build } = await import('./build')
     await build(this)
-    if (shouldExport) {
-      const { exportSite } = await import('./export')
-      await exportSite(this.resolveDotReam())
-    }
+    // Export static pages
+    const { exportSite } = await import('./export')
+    await exportSite(this.resolveDotReam(), fullyExport)
   }
 }
 

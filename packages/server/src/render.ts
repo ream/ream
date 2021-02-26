@@ -3,6 +3,7 @@ import type { Router } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
 import createDebug from 'debug'
+import type { Preload } from '@ream/app'
 import {
   ReamServerRequest,
   ReamServerResponse,
@@ -98,6 +99,8 @@ export async function render({
     req.params = route.params
   }
 
+  const globalPreload = await serverEntry.getGlobalPreload()
+
   const components = matchedRoutes.map((route: any) => route.components.default)
   const exportDir = path.join(dotReamDir, 'client')
   const staticHTMLPath = join(exportDir, getOutputHTMLPath(route.path))
@@ -109,7 +112,9 @@ export async function render({
   const fullRawPath = route.matched.map((m) => m.path).join('/')
   const isExported = exportInfo?.staticPaths.includes(route.path)
   const shouldExport =
-    IS_PROD && components.every((component) => !component.$$preload)
+    IS_PROD &&
+    !globalPreload &&
+    components.every((component) => !component.$$preload)
 
   if (isPreloadRequest) {
     debug(`Rendering preload JSON`)
@@ -131,7 +136,7 @@ export async function render({
       if (shouldExport && !exportInfo?.fallbackPathsRaw.includes(fullRawPath)) {
         body = `{"data":{},"notFound": true}`
       } else {
-        const preloadResult = await getPreloadData(components, {
+        const preloadResult = await getPreloadData(globalPreload, components, {
           req,
           res,
           params: route.params,
@@ -167,7 +172,7 @@ export async function render({
     if (shouldExport && !exportInfo?.fallbackPathsRaw.includes(fullRawPath)) {
       preloadResult = { notFound: true, data: {} }
     } else {
-      preloadResult = await getPreloadData(components, {
+      preloadResult = await getPreloadData(globalPreload, components, {
         req,
         res,
         params: route.params,
@@ -271,27 +276,34 @@ type PreloadResult = {
 }
 
 export async function getPreloadData(
+  globalPreload: Preload | undefined,
   components: any[],
   options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
 ): Promise<PreloadResult> {
   const data = {}
   let hasPreload: boolean = false
-  let isStatic: boolean = false
+  let isStatic: boolean = !globalPreload
   let notFound: boolean | undefined
   let error: { statusCode: number; stack?: string } | undefined
+
+  const fns: any[] = globalPreload ? [globalPreload] : []
 
   for (const component of components) {
     const preload = component.$$staticPreload || component.$$preload
 
-    if (component.$$staticPreload) {
-      isStatic = true
+    if (component.$$preload) {
+      isStatic = false
     }
 
-    if (preload) {
-      hasPreload = true
+    fns.push(preload)
+  }
 
+  if (fns.length > 0) {
+    hasPreload = true
+
+    for (const fn of fns) {
       try {
-        const result = await preload({
+        const result = await fn({
           req: options.req,
           res: options.res,
           params: options.params,
@@ -314,6 +326,7 @@ export async function getPreloadData(
       }
     }
   }
+
   return {
     data,
     hasPreload,

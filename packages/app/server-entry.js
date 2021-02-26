@@ -6,6 +6,7 @@ import { createApp } from './create-app'
 import {
   clientRoutes,
   ErrorComponent,
+  AppComponent,
 } from '/.ream/templates/shared-exports.js'
 import { _document, serverRoutes } from '/.ream/templates/server-exports.js'
 
@@ -36,6 +37,11 @@ export default {
 
   renderHeadToString(app) {
     return renderHeadToString(app.config.globalProperties.$head)
+  },
+
+  async getGlobalPreload() {
+    const { $$preload } = await AppComponent.__asyncLoader()
+    return $$preload
   },
 
   _document,
