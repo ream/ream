@@ -3,7 +3,7 @@
 Ream allows you to build your API alongside regular Vue pages by having files `.js` or `.ts` files inside `pages/api` folder, and export a http request handler in the file like this:
 
 ```js
-// routes/api/hello.js
+// page/api/hello.js
 export default (req, res) => {
   res.end(`hello`)
 }
