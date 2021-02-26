@@ -2,13 +2,11 @@
 
 ## Project Generator
 
-**NOT YET AVAILABLE**, use manual setup for now.
-
 ```bash
-npm init ream-app my-app
+npx create-ream-app my-app
 ```
 
-After the installation is complete, follow the instructions to start the development server. Try editing `pages/index.vue` and see the result on your browser.
+When the installation is completed, follow the instructions to start the development server. Try editing `src/pages/index.vue` and see the result in your browser.
 
 ## Manual Setup
 

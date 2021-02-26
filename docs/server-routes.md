@@ -14,7 +14,7 @@ Now visit `/api/hello` and you'll see `hello`.
 The request handler receives the following parameters:
 
 - `req`: An instance of `http.IncomingMessage`,
-- `res`: An instance of `http.ServerResponse`, plus some helper functions you can see [here](#response-helpers)
+- `res`: An instance of `http.ServerResponse`, plus some helper functions you can see [below](#response-helpers)
 
 ## Response Helpers
 

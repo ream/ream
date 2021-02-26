@@ -51,3 +51,52 @@ Matched parameters will be sent as a route parameter (`slug` in the example) to 
 ```json
 { "slug": "a/b/c" }
 ```
+
+## Nested Routes
+
+Vue Router's [nested routes](https://next.router.vuejs.org/guide/essentials/nested-routes.html) feature is also supported.
+
+```
+/user/johnny/profile                         /user/johnny/posts
++-----------------------------+              +---------------------------+
+| user/[user].vue             |              | user/[user].vue           |
+| +-------------------------+ |              | +-----------------------+ |
+| | user/[user]/profile.vue | |  +-------->  | | user/[user]/posts.vue | |
+| |                         | |              | |                       | |
+| +-------------------------+ |              | +-----------------------+ |
++-----------------------------+              +---------------------------+
+```
+
+To create children pages, put them in a folder with the same name as the parent page, for example:
+
+```
+- user/[user].vue
+- user/[user]/profile.vue
+- user/[user]/posts.vue
+- user/[user]/index.vue
+```
+
+..is equivalent to following routes in vue-router:
+
+```ts
+;[
+  {
+    path: '/user/:user',
+    component: loadComponent('user/[user].vue'),
+    children: [
+      {
+        path: 'profile',
+        component: loadComponent('user/[user]/profile.vue'),
+      },
+      {
+        path: 'posts',
+        component: loadComponent('user/[user]/posts.vue'),
+      },
+      {
+        path: '',
+        component: loadComponent('user/[user]/index.vue'),
+      },
+    ],
+  },
+]
+```

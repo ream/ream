@@ -10,6 +10,11 @@ import {
 import { PromiseQueue } from '@egoist/promise-queue'
 import { flattenRoutes } from './utils/flatten-routes'
 
+function getHref(attrs: string) {
+  const match = /href\s*=\s*(?:"(.*?)"|'(.*?)'|([^\s>]*))/.exec(attrs)
+  return match && (match[1] || match[2] || match[3])
+}
+
 export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   const ssrManifest = require(path.join(
     dotReamDir,
@@ -102,6 +107,29 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
           fallbackPathsRaw: clientRoutes.map((r) => r.path),
         },
       })
+
+      // Crawl pages
+      if (fullyExport) {
+        for (const file of result.cacheFiles.keys()) {
+          if (file.endsWith('.html')) {
+            const html = result.cacheFiles.get(file)
+            if (html) {
+              // find all `<a>` tags in exported html files and export links that are not yet exported
+              let match: RegExpExecArray | null = null
+              const LINK_RE = /<a ([\s\S]+?)>/gm
+              while ((match = LINK_RE.exec(html))) {
+                const href = getHref(match[1])
+                if (href) {
+                  const url = new URL(href, 'http://self')
+                  if (url.host === 'self') {
+                    queue.add(`Exporting ${url.pathname}`, url.pathname)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
 
       await writeCacheFiles(result.cacheFiles)
     },

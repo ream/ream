@@ -44,7 +44,14 @@ export default defineComponent({
       title,
     })
 
-    return { preloadData }
+    const ContentComponent = computed(() =>
+      defineComponent({
+        name: 'ContentComponent',
+        template: `<div class="markdown-body">${preloadData.value.content}</div>`,
+      })
+    )
+
+    return { preloadData, ContentComponent }
   },
 })
 </script>
@@ -79,7 +86,7 @@ export default defineComponent({
       </div>
       <div class="max-w-3xl mx-auto p-5">
         <h2 class="text-5xl font-semibold mb-5">{{ preloadData.title }}</h2>
-        <div class="markdown-body" v-html="preloadData.content"></div>
+        <component :is="ContentComponent" />
       </div>
     </main>
   </div>

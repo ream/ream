@@ -29,6 +29,24 @@ export async function renderMarkdown(slug: string) {
     return heading.call(this, text, level, raw, slugger)
   }
 
+  const renderCode = renderer.code.bind(renderer)
+  renderer.code = function (code, info, escaped) {
+    return renderCode(code, info, escaped).replace('<pre>', '<pre v-pre>')
+  }
+
+  renderer.codespan = (text) => `<code v-pre>${text}</code>`
+
+  const renderLink = renderer.link.bind(renderer)
+  renderer.link = (href, title, text) => {
+    let res = renderLink(href, title, text)
+    if (!href || /^https?:/.test(href)) {
+      return res
+    }
+    return res
+      .replace('<a ', '<ream-link ')
+      .replace('href=', 'to=')
+      .replace('</a>', '</ream-link>')
+  }
   const html = marked(content, {
     renderer,
     highlight(input, lang) {

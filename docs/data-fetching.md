@@ -2,18 +2,24 @@
 
 ## Preload
 
-If you export an async function called `preload` from a page, Ream will render this page on each request using the data returned in the `preload` function.
+If you export an async function called `preload` from a page, Ream will render this page on each request using the data returned in the `preload` function. And then you can use the Vue composable `usePageData` to retrieve the data you just fetched:
 
 ```vue
-<script>
-import { usePageData } from '@ream/app'
+<script lang="ts">
+import { usePageData, Preload } from '@ream/app'
 import { db } from './path/to/db'
 
-export const preload = async (context) => {
-  const posts = await db.findPosts({ user: context.params.user })
+interface PageData {
+  user: {
+    name: string
+  }
+}
+
+export const preload: Preload<PageData> = async (context) => {
+  const user = await db.findUser({ user: context.params.user })
   return {
     data: {
-      posts,
+      user,
     },
   }
 }
@@ -21,7 +27,7 @@ export const preload = async (context) => {
 export default {
   setup() {
     // Get the data you fetched in `preload` function
-    const page = usePageData()
+    const page = usePageData<PageData>()
 
     return {
       page,
@@ -29,6 +35,10 @@ export default {
   },
 }
 </script>
+
+<template>
+  <div>{{ page.user.name }}</div>
+</template>
 ```
 
 ### How does `preload` work
@@ -43,8 +53,10 @@ For example, let's say you are building a static blog, and you want to fetch blo
 
 ```vue
 <!-- pages/posts/[id].vue -->
-<script>
-export const staticPreload = async (context) => {
+<script lang="ts">
+import { StaticPreload, usePageData } from '@ream/app'
+
+export const staticPreload: StaticPreload = async (context) => {
   const post = await fetchPostFromApi({ id: context.params.id })
   return {
     data: {
@@ -70,4 +82,29 @@ The signature `staticPreload` is almost the same as `preload`, both of them are 
 Notes:
 
 - You can **NOT** use `preload` and `staticPreload` in the same page.
-- Pages use neither `preload` nor `staticPreload` will always be rendered at build time.
+
+### Static Preload with Dynamic Routes
+
+Dynamic routes like `docs/[...slug].vue` doesn't work with `StaticPreload` by default because we don't know the exact values of `slug` at build time, so if you want to prerender those pages at build you need to export a `getStaticPaths` function:
+
+```ts
+import { StaticPreload, GetStaticPaths } from '@ream/app'
+
+export const staticPreload: StaticPreload = (ctx) => {
+  return {
+    data: getDataBySlug(ctx.params.slug),
+  }
+}
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [
+      { params: { slug: 'getting-started' } },
+      { params: { slug: 'installation' } },
+    ],
+    fallback: false,
+  }
+}
+```
+
+With the above code, Ream will prerender `/docs/getting-started` and `/docs/installation` for you at build time. If you don't plan to export your app as a static site, you can use the `fallback` property to tell Ream whether to render missing paths at request time, for instance `/docs/foo` will result in the 404 page here, but when `fallback` is set to true, Ream will run the `staticPreload` on each request for missing paths and render the actual page instead, in the background Ream will cache the HTML result and JSON result so subsequent requests will use the cache instead.

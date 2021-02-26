@@ -20,6 +20,24 @@ const reamAliasPlugin = (api: Ream): Plugin => {
   }
 }
 
+// TODO: see if it can be fixed over https://github.com/vitejs/vite/issues/2274
+const reamForceServerUpdatePlugin = (api: Ream): Plugin => {
+  return {
+    name: `ream:force-server-update`,
+
+    handleHotUpdate(ctx) {
+      const { moduleGraph } = api.viteDevServer!
+      for (const [key, value] of moduleGraph.fileToModulesMap.entries()) {
+        if (!key.includes('node_modules')) {
+          for (const mod of value) {
+            moduleGraph.invalidateModule(mod)
+          }
+        }
+      }
+    },
+  }
+}
+
 const moveManifestPlugin = (manifestDir: string): Plugin => {
   return {
     name: 'ream:move-manifest',
@@ -69,6 +87,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     root: api.rootDir,
     plugins: [
       reamAliasPlugin(api),
+      reamForceServerUpdatePlugin(api),
       vuePlugin({
         include: [/\.vue$/],
       }),
@@ -83,6 +102,9 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     resolve: {
       alias: {
         '@': api.resolveSrcDir(),
+        vue: api.config.vue?.runtimeTemplateCompiler
+          ? 'vue/dist/vue.esm-bundler.js'
+          : 'vue/dist/vue.runtime.esm-bundler.js',
       },
     },
     optimizeDeps: {
@@ -93,7 +115,12 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     // @ts-expect-error vite does not expose these experimental stuff in types yet
     ssr: {
       // https://vitejs.dev/config/#ssr-external
-      external: ['vue', 'vue-router'],
+      external: [
+        'vue',
+        'vue/dist/vue.esm-bundler.js',
+        'vue/dist/vue.runtime.esm-bundler.js',
+        'vue-router',
+      ],
       noExternal: ['@ream/app'],
     },
     server: {

@@ -11,6 +11,9 @@ const config: ReamConfig = {
   vite(config) {
     config.plugins!.push(require('vite-plugin-windicss').default())
   },
+  vue: {
+    runtimeTemplateCompiler: true,
+  },
 }
 
 export default config

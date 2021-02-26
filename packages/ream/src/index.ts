@@ -28,6 +28,9 @@ export type ReamConfig = {
   server?: {
     port?: number
   }
+  vue?: {
+    runtimeTemplateCompiler?: boolean
+  }
   vite?: (viteConfig: ViteConfig, opts: { dev: boolean; ssr?: boolean }) => void
 }
 
@@ -39,8 +42,6 @@ export class Ream {
   configPath?: string
   store: Store
   viteDevServer?: ViteDevServer
-  // Used by `export` command, addtional routes like server routes and *.preload.json
-  exportedServerRoutes?: Set<string>
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
     this.rootDir = resolve(options.rootDir || '.')
