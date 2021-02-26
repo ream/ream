@@ -2,7 +2,7 @@
 
 A super fast SSR framework for Vue.js.
 
-[![sponsor egoist](https://badgen.net/badge/SPONSOR/EGOIST/purple?icon=kofi&labelColor=black)](https://github.com/sponsors/egoist) [![npm version](https://badgen.net/npm/v/ream)](https://npm.im/ream) [![build status](https://badgen.net/github/status/ream/ream/main)](https://github.com/ream/ream/actions) [![npm downloads](https://badgen.net/npm/dm/ream)](https://npm.im/ream)
+[![sponsor egoist](https://badgen.net/badge/SPONSOR/EGOIST/purple?icon=kofi&labelColor=black)](https://github.com/sponsors/egoist) [![npm version](https://badgen.net/npm/v/ream/beta)](https://npm.im/ream) [![build status](https://badgen.net/github/status/ream/ream/main)](https://github.com/ream/ream/actions) [![npm downloads](https://badgen.net/npm/dm/ream)](https://npm.im/ream)
 
 ❤️ Please [**sponsor me**](https://github.com/sponsors/egoist) to support this project or prioritize a feature you want. I will work on this project for full-time once I have 150+ sponsors.
 
