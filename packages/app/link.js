@@ -1,13 +1,13 @@
 import { defineComponent } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink as VueRouterLink } from 'vue-router'
 import { getPreloadPath } from './runtime-utils'
 
 const prefetchedLinks = new Set()
 
-export const ReamLink = defineComponent({
-  ...RouterLink,
+export const RouterLink = defineComponent({
+  ...VueRouterLink,
 
-  name: 'ReamLink',
+  name: 'RouterLink',
 
   async mounted() {
     if (import.meta.env.DEV || prefetchedLinks.has(this.to)) return

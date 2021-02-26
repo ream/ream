@@ -20,10 +20,10 @@ useHead({
           <span class="text-blue-700">static</span> websites.
         </h2>
         <div class="my-10 flex space-x-3 justify-center">
-          <ream-link
+          <router-link
             to="/docs/getting-started"
             class="bg-blue-500 hover:bg-blue-700 text-white rounded-lg h-12 items-center inline-flex px-5"
-            >Documentation</ream-link
+            >Documentation</router-link
           >
           <a
             href="https://github.com/sponsors/egoist"

@@ -1,1 +1,1 @@
-export { RouterLink as ReamLink } from 'vue-router'
+export { RouterLink } from 'vue-router'

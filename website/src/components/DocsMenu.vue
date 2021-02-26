@@ -12,11 +12,11 @@ const routePath = useRoutePath()
         {{ item.text }}
       </div>
       <div v-for="child in item.children" :key="child.text">
-        <ream-link
+        <router-link
           class="menu-item-link"
           :class="{ active: routePath === child.link }"
           :to="child.link"
-          >{{ child.text }}</ream-link
+          >{{ child.text }}</router-link
         >
       </div>
     </div>

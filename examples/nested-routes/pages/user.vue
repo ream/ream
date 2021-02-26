@@ -3,10 +3,10 @@
     <h1>{{ title }}</h1>
     <ul>
       <li>
-        <ream-link to="/user/egoist">egoist</ream-link>
+        <router-link to="/user/egoist">egoist</router-link>
       </li>
       <li>
-        <ream-link to="/user/kevin">kevin</ream-link>
+        <router-link to="/user/kevin">kevin</router-link>
       </li>
     </ul>
     <router-view></router-view>

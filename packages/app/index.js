@@ -17,7 +17,7 @@ export { createSSRApp } from 'vue'
 
 export { useRoute, useRouter, RouterView as ReamView } from 'vue-router'
 
-export { ReamLink } from './link'
+export { RouterLink } from './link'
 
 /**
  * Get the route path without trailing slash

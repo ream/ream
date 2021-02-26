@@ -11,7 +11,7 @@ useHead({
     <h1>Home</h1>
     <ul>
       <li>
-        <ream-link to="/about">About</ream-link>
+        <router-link to="/about">About</router-link>
       </li>
     </ul>
   </div>

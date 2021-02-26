@@ -43,9 +43,9 @@ export async function renderMarkdown(slug: string) {
       return res
     }
     return res
-      .replace('<a ', '<ream-link ')
+      .replace('<a ', '<router-link ')
       .replace('href=', 'to=')
-      .replace('</a>', '</ream-link>')
+      .replace('</a>', '</router-link>')
   }
   const html = marked(content, {
     renderer,

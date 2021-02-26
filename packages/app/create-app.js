@@ -1,7 +1,7 @@
 import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
 import { createHead, useHead } from '@vueuse/head'
 import { RouterView } from 'vue-router'
-import { ReamLink, useRoutePath } from './'
+import { RouterLink, useRoutePath } from './'
 import {
   AppComponent,
   NotFoundComponent,
@@ -55,7 +55,9 @@ export const createApp = ({ router, initialState }) => {
   app.use(router)
   app.use(head)
 
-  app.component(ReamLink.name, ReamLink)
+  // Override Vue Router's RouterLink component
+  // Can't use app.component() cause Vue will complain
+  app._context.components[RouterLink.name] = RouterLink
 
   onCreatedApp({ app, router })
 
