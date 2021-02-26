@@ -295,7 +295,9 @@ export async function getPreloadData(
       isStatic = false
     }
 
-    fns.push(preload)
+    if (preload) {
+      fns.push(preload)
+    }
   }
 
   if (fns.length > 0) {
