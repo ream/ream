@@ -1,6 +1,6 @@
 {
   "mode": "pre",
-  "tag": "alpha",
+  "tag": "beta",
   "initialVersions": {
     "automatic-routing": "0.0.0",
     "data-fetching": "0.0.0",
@@ -10,7 +10,8 @@
     "ream": "5.0.0-alpha.4",
     "@ream/server": "5.0.0-alpha.4",
     "@ream/test-utils": "5.0.0-alpha.4",
-    "website": "5.0.0-alpha.3"
+    "website": "5.0.0-alpha.3",
+    "create-ream-app": "1.0.0-alpha.0"
   },
   "changesets": [
     "tasty-teachers-learn"
