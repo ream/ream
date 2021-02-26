@@ -26,6 +26,20 @@ async function main() {
           stream.rename('_package.json', 'package.json')
         })
         .dest(dir)
+
+      console.log(`
+  Success!
+
+  Now run following commands to start a dev server:
+
+  npm install
+  npm run dev
+
+  Needs more help?
+
+  - Check out README.md
+  - Check out the docs: https://ream.dev
+      `)
     }
   )
 

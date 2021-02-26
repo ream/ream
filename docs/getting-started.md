@@ -6,7 +6,7 @@
 npx create-ream-app my-app
 ```
 
-When the installation is completed, follow the instructions to start the development server. Try editing `src/pages/index.vue` and see the result in your browser.
+When the installation is completed, follow the instructions to start the development server. Try editing `pages/index.vue` and see the result in your browser.
 
 ## Manual Setup
 
