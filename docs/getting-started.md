@@ -13,7 +13,7 @@ When the installation is completed, follow the instructions to start the develop
 ### Install via npm
 
 ```bash
-npm install ream
+npm install ream@alpha
 ```
 
 ### Add npm scripts
