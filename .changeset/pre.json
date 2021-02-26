@@ -14,6 +14,7 @@
     "create-ream-app": "1.0.0-alpha.0"
   },
   "changesets": [
+    "silent-apes-drum",
     "tasty-teachers-learn"
   ]
 }

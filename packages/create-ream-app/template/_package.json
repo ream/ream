@@ -8,7 +8,7 @@
     "start": "ream start"
   },
   "dependencies": {
-    "ream": "alpha",
+    "ream": "beta",
     "vue": "next"
   }
 }
