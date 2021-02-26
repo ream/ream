@@ -19,6 +19,10 @@ export default [
         link: '/docs/data-fetching',
       },
       {
+        text: 'Custom App & Document',
+        link: '/docs/custom-app-and-document',
+      },
+      {
         text: 'Dynamic or Static',
         link: '/docs/dynamic-or-static',
       },

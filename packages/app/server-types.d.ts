@@ -64,3 +64,13 @@ export type GetStaticPaths = () =>
   | Promise<GetStaticPathsResult>
 
 export { ReamServerHandler, ReamServerRequest, ReamServerResponse }
+
+export type GetDocumentArgs = {
+  head(): string
+  main(): string
+  scripts(): string
+  htmlAttrs(): string
+  bodyAttrs(): string
+}
+
+export type GetDocument = (args: GetDocumentArgs) => string | Promise<string>

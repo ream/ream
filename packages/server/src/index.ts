@@ -2,7 +2,7 @@ import path from 'path'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
-import type { Preload } from '@ream/app'
+import type { GetDocument, Preload } from '@ream/app'
 import { Server } from './server'
 import { render, renderToHTML, getPreloadData } from './render'
 import { outputFile } from './fs'
@@ -15,20 +15,12 @@ export {
 
 export { Connect } from './connect'
 
-export type GetDocumentArgs = {
-  head(): string
-  main(): string
-  scripts(): string
-  htmlAttrs(): string
-  bodyAttrs(): string
-}
-
 export type ServerEntry = {
   render: any
   createClientRouter: () => Router
   createServerRouter: (routes: RouteRecordRaw[]) => Router
   _document: () => Promise<{
-    default: (args: GetDocumentArgs) => string | Promise<string>
+    default: GetDocument
   }>
   renderHeadToString: (app: any) => HeadResult
   ErrorComponent: any
