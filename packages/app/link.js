@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue'
 import { RouterLink as VueRouterLink } from 'vue-router'
-import { getPreloadPath } from './runtime-utils'
+import { getPreloadPath } from './lib/runtime-utils'
 
 const prefetchedLinks = new Set()
 
