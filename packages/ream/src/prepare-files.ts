@@ -5,6 +5,7 @@ import { store } from './store'
 import { Route } from './utils/route'
 import path from 'path'
 import { filesToRoutes } from './utils/load-routes'
+import { normalizePath } from './utils/normalize-path'
 
 const isAbsolutPath = (p: string) => /^\/|[a-zA-Z]:/.test(p)
 
@@ -29,7 +30,7 @@ export async function prepareFiles(api: Ream) {
       if (!isAbsolutPath(p)) {
         return p
       }
-      return path.relative(api.resolveDotReam('templates'), p)
+      return normalizePath(path.relative(api.resolveDotReam('templates'), p))
     }
 
     const stringifyClientRoutes = (routes: Route[]): string => {
