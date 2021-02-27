@@ -1,4 +1,5 @@
 import path from 'path'
+import { normalizePath } from '../utils/normalize-path'
 import { Route } from './route'
 
 export const filesToRoutes = (files: string[], dir: string) => {
@@ -18,7 +19,7 @@ export const filesToRoutes = (files: string[], dir: string) => {
       .replace(/\.[a-zA-Z0-9]+$/, '')
 
     const pathParts = slug.split('/')
-    const absolutePath = path.join(dir, file)
+    const absolutePath = normalizePath(path.join(dir, file))
 
     if (slug === '_error') {
       errorFile = absolutePath
