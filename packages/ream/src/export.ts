@@ -1,5 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
+import consola from 'consola'
+import chalk from 'chalk'
 import type { ServerEntry } from '@ream/server'
 import {
   render,
@@ -66,7 +68,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
         }
 
         if (paths.length === 0) {
-          console.warn(
+          consola.warn(
             `No static paths provided for ${route.path}, skipped exporting`
           )
         }
@@ -94,7 +96,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
   const queue = new PromiseQueue<[string]>(
     async (jobId, url) => {
-      console.log(jobId)
+      consola.info(chalk.dim(jobId))
       const result = await render({
         url,
         dotReamDir,
@@ -140,4 +142,11 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
     queue.add(`Exporting ${path}`, path)
   }
   await queue.run()
+
+  consola.success(
+    `Your app has been exported to ${path.relative(
+      process.cwd(),
+      path.join(dotReamDir, 'client')
+    )}`
+  )
 }

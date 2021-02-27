@@ -71,6 +71,7 @@ importers:
       '@vitejs/plugin-vue': 1.1.4_@vue+compiler-sfc@3.0.5
       '@vue/compiler-sfc': 3.0.5_vue@3.0.5
       cac: 6.6.1
+      chalk: 4.1.0
       chokidar: 3.4.2
       consola: 2.15.3
       debug: 4.3.1
@@ -103,6 +104,7 @@ importers:
       '@vitejs/plugin-vue': ^1.1.4
       '@vue/compiler-sfc': ^3.0.5
       cac: 6.6.1
+      chalk: ^4.1.0
       chokidar: 3.4.2
       consola: 2.15.3
       debug: ^4.3.1
@@ -1357,7 +1359,6 @@ packages:
   /ansi-styles/4.3.0:
     dependencies:
       color-convert: 2.0.1
-    dev: true
     engines:
       node: '>=8'
     resolution:
@@ -1774,7 +1775,6 @@ packages:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
-    dev: true
     engines:
       node: '>=10'
     resolution:
@@ -1881,7 +1881,6 @@ packages:
   /color-convert/2.0.1:
     dependencies:
       color-name: 1.1.4
-    dev: true
     engines:
       node: '>=7.0.0'
     resolution:
@@ -1890,7 +1889,6 @@ packages:
     resolution:
       integrity: sha1-p9BVi9icQveV3UIyj3QIMcpTvCU=
   /color-name/1.1.4:
-    dev: true
     resolution:
       integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
   /colorette/1.2.1:
@@ -2880,7 +2878,6 @@ packages:
     resolution:
       integrity: sha1-tdRU3CGZriJWmfNGfloH87lVuv0=
   /has-flag/4.0.0:
-    dev: true
     engines:
       node: '>=8'
     resolution:
@@ -5542,7 +5539,6 @@ packages:
   /supports-color/7.2.0:
     dependencies:
       has-flag: 4.0.0
-    dev: true
     engines:
       node: '>=8'
     resolution:
