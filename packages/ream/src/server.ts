@@ -3,7 +3,7 @@ import { createServer as createViteServer, ModuleNode } from 'vite'
 import type { Ream } from './'
 import { getViteConfig } from './vite/get-vite-config'
 
-const SERVER_ENTRY_PATH = require.resolve(`@ream/app/server-entry.js`)
+const ENTRY_SERVER_PATH = require.resolve(`@ream/app/entry-server.js`)
 
 const collectCssUrls = (mods: Set<ModuleNode>, styles: Map<string, string>) => {
   for (const mod of mods) {
@@ -27,13 +27,13 @@ export const createServer = async (api: Ream) => {
     cwd: api.rootDir,
     loadServerEntry: async () => {
       const serverEntry = await api.viteDevServer!.ssrLoadModule(
-        `/@fs/${SERVER_ENTRY_PATH}`
+        `/@fs/${ENTRY_SERVER_PATH}`
       )
       return serverEntry.default
     },
     getHtmlAssets: () => {
       const matchedMods = viteDevServer.moduleGraph.getModulesByFile(
-        SERVER_ENTRY_PATH
+        ENTRY_SERVER_PATH
       )
       const styles: Map<string, string> = new Map()
       if (matchedMods) {
@@ -45,7 +45,7 @@ export const createServer = async (api: Ream) => {
           .join('\n'),
         scriptTags: `<script type="module" src="/@vite/client"></script>
         <script type="module" src="/@fs/${require.resolve(
-          `@ream/app/client-entry.js`
+          `@ream/app/entry-client.js`
         )}"></script>
         `,
       }

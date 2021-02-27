@@ -122,7 +122,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
 
   const loadServerEntry: LoadServerEntry =
     ctx.loadServerEntry ||
-    (() => require(path.join(dotReamDir, 'server/server-entry.js')).default)
+    (() => require(path.join(dotReamDir, 'server/entry-server.js')).default)
 
   const getHtmlAssets: GetHtmlAssets =
     ctx.getHtmlAssets ||

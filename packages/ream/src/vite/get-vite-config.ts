@@ -80,7 +80,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const entry = api.isDev
     ? undefined
     : require.resolve(
-        `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
+        `@ream/app/${server ? 'entry-server.js' : 'entry-client.js'}`
       )
 
   const config: ViteConfig = {
