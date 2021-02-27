@@ -31,9 +31,40 @@ importers:
       tsc-watch: ^4.2.9
       typescript: ^4.1.3
   examples/automatic-routing:
-    specifiers: {}
+    dependencies:
+      '@ream/app': link:../../packages/app
+      ream: link:../../packages/ream
+    specifiers:
+      '@ream/app': workspace:*
+      ream: workspace:*
   examples/data-fetching:
-    specifiers: {}
+    dependencies:
+      '@ream/app': link:../../packages/app
+      ream: link:../../packages/ream
+    specifiers:
+      '@ream/app': workspace:*
+      ream: workspace:*
+  examples/get-static-paths:
+    dependencies:
+      '@ream/app': link:../../packages/app
+      ream: link:../../packages/ream
+    specifiers:
+      '@ream/app': workspace:*
+      ream: workspace:*
+  examples/nested-routes:
+    dependencies:
+      '@ream/app': link:../../packages/app
+      ream: link:../../packages/ream
+    specifiers:
+      '@ream/app': workspace:*
+      ream: workspace:*
+  examples/server-routes:
+    dependencies:
+      '@ream/app': link:../../packages/app
+      ream: link:../../packages/ream
+    specifiers:
+      '@ream/app': workspace:*
+      ream: workspace:*
   packages/app:
     dependencies:
       '@ream/fetch': link:../fetch

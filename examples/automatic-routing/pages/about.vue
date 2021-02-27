@@ -12,7 +12,7 @@ useHead({
     <h1>About</h1>
     <ul>
       <li>
-        <RouterLink to="/">Home</RouterLink>
+        <router-link to="/">Home</router-link>
       </li>
     </ul>
   </div>

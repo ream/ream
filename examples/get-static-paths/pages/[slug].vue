@@ -1,19 +1,20 @@
 <template>
-  <div>hello {{ name }}</div>
+  <div>hello {{ page.name }}</div>
 </template>
 
 <script lang="ts">
-import { StaticPreload, StaticPaths } from 'ream'
+import { defineComponent } from 'vue'
+import { StaticPreload, GetStaticPaths, usePageData } from '@ream/app'
 
 export const staticPreload: StaticPreload = ({ params }) => {
   return {
-    props: {
+    data: {
       name: params.slug,
     },
   }
 }
 
-export const staticPaths: StaticPaths = () => {
+export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [
       { params: { slug: 'kevin' } },
@@ -25,7 +26,10 @@ export const staticPaths: StaticPaths = () => {
   }
 }
 
-export default {
-  props: ['name'],
-}
+export default defineComponent({
+  setup() {
+    const page = usePageData()
+    return { page }
+  },
+})
 </script>

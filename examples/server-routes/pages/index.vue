@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue'
 import { usePageData } from '@ream/app'
 
 export const preload = async () => {
@@ -18,12 +19,12 @@ export const preload = async () => {
   }
 }
 
-export default {
+export default defineComponent({
   setup() {
     const page = usePageData()
     return {
       page,
     }
   },
-}
+})
 </script>

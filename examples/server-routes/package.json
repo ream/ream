@@ -1,7 +1,7 @@
 {
   "private": true,
   "version": "0.0.0",
-  "name": "example-data-fetching",
+  "name": "example-server-routes",
   "scripts": {
     "dev": "ream"
   },
