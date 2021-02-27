@@ -55,6 +55,11 @@ function renderPreloadLink(file: string): string {
   }
 }
 
+export type HtmlAssets = {
+  scriptTags: string
+  cssLinkTags: string
+}
+
 export async function render({
   url,
   req,
@@ -63,8 +68,7 @@ export async function render({
   ssrManifest,
   serverEntry,
   isPreloadRequest,
-  scripts,
-  styles,
+  assets,
   exportInfo,
 }: {
   url: string
@@ -74,8 +78,7 @@ export async function render({
   ssrManifest?: any
   serverEntry: ServerEntry
   isPreloadRequest?: boolean
-  scripts: string
-  styles: string
+  assets: HtmlAssets
   exportInfo?: ExportInfo
 }): Promise<{
   statusCode: number
@@ -192,8 +195,7 @@ export async function render({
       serverEntry,
       router,
       ssrManifest,
-      scripts,
-      styles,
+      assets,
     })
     if (shouldExport) {
       cacheFiles.set(staticHTMLPath, body)
@@ -220,15 +222,8 @@ export async function renderToHTML(options: {
   router: Router
   serverEntry: ServerEntry
   ssrManifest: any
-  scripts: string
-  styles: string
+  assets: { scriptTags: string; cssLinkTags: string }
 }) {
-  const scripts =
-    options.scripts ||
-    `<script type="module" src="/@vite/client"></script>
-  <script type="module" src="/@fs/${require.resolve(
-    `@ream/app/client-entry.js`
-  )}"></script>`
   const context: {
     url: string
     initialState: any
@@ -251,14 +246,15 @@ export async function renderToHTML(options: {
   const headHTML = options.serverEntry.renderHeadToString(app)
   const { default: getDocument } = await options.serverEntry._document()
   const html = await getDocument({
-    head: () => `${headHTML.headTags}${options.styles}${preloadLinks}`,
+    head: () =>
+      `${headHTML.headTags}${options.assets.cssLinkTags}${preloadLinks}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
     scripts: () => `
       <script>INITIAL_STATE=${serializeJavaScript(context.initialState, {
         isJSON: true,
       })}
       </script>
-      ${scripts}
+      ${options.assets.scriptTags}
       `,
     htmlAttrs: () => headHTML.htmlAttrs,
     bodyAttrs: () => headHTML.bodyAttrs,

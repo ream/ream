@@ -4,7 +4,7 @@ import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
 import type { GetDocument, Preload } from '@ream/app'
 import { Server } from './server'
-import { render, renderToHTML, getPreloadData } from './render'
+import { render, renderToHTML, getPreloadData, HtmlAssets } from './render'
 import { outputFile } from './fs'
 
 export {
@@ -38,6 +38,8 @@ export type ExportInfo = {
   fallbackPathsRaw: string[]
 }
 
+export type GetHtmlAssets = () => HtmlAssets
+
 type CreateServerContext = {
   /**
    * Development mode
@@ -52,6 +54,7 @@ type CreateServerContext = {
   cwd?: string
   devMiddleware?: any
   loadServerEntry?: LoadServerEntry
+  getHtmlAssets?: GetHtmlAssets
   ssrFixStacktrace?: (err: Error) => void
   loadExportInfo?: () => ExportInfo
 }
@@ -113,14 +116,24 @@ export async function createServer(ctx: CreateServerContext = {}) {
 
   let ssrManifest: any
   let serverEntry: ServerEntry
-  let scripts = ''
-  let styles = ''
+  let assets: HtmlAssets
   // A vue-router instance for matching server routes (aka API routes)
   let serverRouter: Router | undefined
 
   const loadServerEntry: LoadServerEntry =
     ctx.loadServerEntry ||
     (() => require(path.join(dotReamDir, 'server/server-entry.js')).default)
+
+  const getHtmlAssets: GetHtmlAssets =
+    ctx.getHtmlAssets ||
+    (() => {
+      ssrManifest = require(path.join(dotReamDir, 'manifest/ssr-manifest.json'))
+      const extractedAssets = extractClientManifest(dotReamDir)!
+      return {
+        scriptTags: extractedAssets.scripts,
+        cssLinkTags: extractedAssets.styles,
+      }
+    })
 
   const exportInfo = ctx.dev
     ? undefined
@@ -133,11 +146,6 @@ export async function createServer(ctx: CreateServerContext = {}) {
     ssrManifest = {}
   } else {
     ssrManifest = require(path.join(dotReamDir, 'manifest/ssr-manifest.json'))
-    const extractedAssets = extractClientManifest(dotReamDir)
-    if (extractedAssets) {
-      scripts = extractedAssets.scripts
-      styles = extractedAssets.styles
-    }
 
     const serveStaticFiles = serveStatic(path.join(dotReamDir, 'client'))
     server.use(serveStaticFiles as any)
@@ -146,6 +154,9 @@ export async function createServer(ctx: CreateServerContext = {}) {
   server.use(async (req, res, next) => {
     if (ctx.dev || !serverEntry) {
       serverEntry = await loadServerEntry()
+    }
+    if (ctx.dev || !assets) {
+      assets = getHtmlAssets()
     }
     next()
   })
@@ -190,8 +201,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
       serverEntry,
       isPreloadRequest,
       dotReamDir,
-      scripts,
-      styles,
+      assets,
       exportInfo,
     })
 
@@ -243,8 +253,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
         preloadResult,
         serverEntry,
         ssrManifest,
-        scripts,
-        styles,
+        assets,
       })
       res.setHeader('content-type', 'text-html')
       res.end(html)

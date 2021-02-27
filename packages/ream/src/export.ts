@@ -34,6 +34,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
     scripts: '',
     styles: '',
   }
+  const assets = { cssLinkTags: styles, scriptTags: scripts }
 
   const clientRoutes = await flattenRoutes(serverEntry.clientRoutes)
 
@@ -99,8 +100,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
         dotReamDir,
         ssrManifest,
         serverEntry,
-        scripts,
-        styles,
+        assets,
         exportInfo: {
           staticPaths: [],
           // Skip fallback check, force all static paths to render
