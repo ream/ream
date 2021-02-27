@@ -15,7 +15,7 @@ export { useHead, createHead } from '@vueuse/head'
 
 export { createSSRApp } from 'vue'
 
-export { useRoute, useRouter, RouterView as ReamView } from 'vue-router'
+export { useRoute, useRouter, RouterView } from 'vue-router'
 
 export { RouterLink } from './link'
 

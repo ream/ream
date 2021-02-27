@@ -100,3 +100,11 @@ To create children pages, put them in a folder with the same name as the parent 
   },
 ]
 ```
+
+## Access the Router
+
+```ts
+import { useRoute, useRouter, useRoutePath } from '@ream/app'
+```
+
+[`useRoute`](https://next.router.vuejs.org/api/#useroute) and [`useRouter`](https://next.router.vuejs.org/api/#userouter) have the same API as in Vue Router, `useRoutePath` is a variation of `useRoute().path` which ensures the route path doesn't end with a slash, which is a common problem of static web hosting services.
