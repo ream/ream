@@ -24,7 +24,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   ))
   const serverEntry: ServerEntry = require(path.join(
     dotReamDir,
-    'server/entry-server.js'
+    'server/server-entry.js'
   )).default
 
   const globalPreload = await serverEntry.getGlobalPreload()
