@@ -11,7 +11,16 @@
     "@ream/server": "5.0.0-alpha.4",
     "@ream/test-utils": "5.0.0-alpha.4",
     "website": "5.0.0-alpha.3",
-    "create-ream-app": "1.0.0-alpha.0"
+    "create-ream-app": "1.0.0-alpha.0",
+    "example-automatic-routing": "0.0.0",
+    "example-data-fetching": "0.0.0",
+    "example-get-static-paths": "0.0.0",
+    "example-nested-routes": "0.0.0",
+    "example-server-routes": "0.0.0"
   },
-  "changesets": ["silent-apes-drum", "tasty-teachers-learn"]
+  "changesets": [
+    "early-mirrors-decide",
+    "silent-apes-drum",
+    "tasty-teachers-learn"
+  ]
 }
