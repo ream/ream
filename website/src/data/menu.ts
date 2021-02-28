@@ -7,6 +7,10 @@ export default [
         link: '/docs/getting-started',
       },
       {
+        text: 'Folder Structure',
+        link: '/docs/folder-structure',
+      },
+      {
         text: 'Routing',
         link: '/docs/routing',
       },
@@ -21,6 +25,10 @@ export default [
       {
         text: 'Custom App & Document',
         link: '/docs/custom-app-and-document',
+      },
+      {
+        text: 'App Hooks',
+        link: '/docs/app-hooks',
       },
       {
         text: 'Dynamic or Static',
