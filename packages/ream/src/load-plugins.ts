@@ -1,5 +1,4 @@
 import { Ream } from './'
-import { store } from './store'
 
 export async function loadPlugins(api: Ream) {
   const plugins = api.config.plugins
@@ -8,7 +7,7 @@ export async function loadPlugins(api: Ream) {
     const { name, apply } = plugin
     if (apply) {
       try {
-        apply(store)
+        apply(api.pluginContext)
       } catch (error) {
         error.message = `Failed to load plugin "${name}", ${error.message}`
         throw error

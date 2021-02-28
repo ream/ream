@@ -1,27 +1,81 @@
 import glob from 'fast-glob'
-import { outputFile, pathExists } from 'fs-extra'
+import { outputFile, pathExists, readFile } from 'fs-extra'
 import { Ream } from './'
-import { store } from './store'
 import { Route } from './utils/route'
 import path from 'path'
 import { filesToRoutes } from './utils/load-routes'
 import { normalizePath } from './utils/normalize-path'
+import { resolveFile } from './utils/resolve-file'
 
 const isAbsolutPath = (p: string) => /^\/|[a-zA-Z]:/.test(p)
 
+const writeFileIfChanged = async (filepath: string, content: string) => {
+  if (await pathExists(filepath)) {
+    const prev = await readFile(filepath, 'utf8')
+    if (prev === content) return
+  }
+
+  await outputFile(filepath, content, 'utf8')
+}
+
+const writeEnhanceApp = async (api: Ream, projectEnhanceAppFiles: string[]) => {
+  const { pluginsFiles } = api.pluginContext.state
+  const enhanceAppFiles = [...pluginsFiles['enhance-app']]
+
+  const projectEnhanceAppFile = await resolveFile(projectEnhanceAppFiles)
+
+  if (projectEnhanceAppFile) {
+    enhanceAppFiles.push(projectEnhanceAppFile)
+  }
+
+  await writeFileIfChanged(
+    api.resolveDotReam('templates/enhance-app.js'),
+    `
+    ${enhanceAppFiles
+      .map((file, index) => {
+        return `import * as enhanceApp_${index} from "${file}"`
+      })
+      .join('\n')}
+
+  var files = [
+    ${enhanceAppFiles.map((_, i) => `enhanceApp_${i}`).join(',')}
+  ]
+
+  var exec = function(name, context) {
+    for (var i = 0; i < files.length; i++) {
+      var mod = files[i]
+      if (mod[name]) {
+        mod[name](context)
+      }
+    }
+  }
+
+  export function onCreatedApp(context) {
+    exec('onCreatedApp', context)
+  }
+  `
+  )
+}
+
 export async function prepareFiles(api: Ream) {
   const pagesDir = api.resolveSrcDir('pages')
-  const routesFilePattern = '**/*.{vue,ts,tsx,js,jsx}'
+  const routesFileGlob = '**/*.{vue,ts,tsx,js,jsx}'
+  const routesFileRegexp = /\.(vue|ts|tsx|js|jsx)$/
 
   if (!(await pathExists(pagesDir))) {
     throw new Error(`${pagesDir} doesn't exist`)
   }
 
-  const files = await glob(routesFilePattern, {
+  const files = await glob(routesFileGlob, {
     cwd: pagesDir,
     onlyFiles: true,
     ignore: ['node_modules', 'dist'],
   })
+
+  const projectEnhanceAppFiles = [
+    api.resolveSrcDir('enhance-app.js'),
+    api.resolveSrcDir('enhance-app.ts'),
+  ]
 
   const writeRoutes = async () => {
     const routesInfo = filesToRoutes(files, pagesDir)
@@ -129,10 +183,9 @@ export async function prepareFiles(api: Ream) {
     }
     `
 
-    await outputFile(
+    await writeFileIfChanged(
       api.resolveDotReam('templates/shared-exports.js'),
-      sharedExportsContent,
-      'utf8'
+      sharedExportsContent
     )
 
     const serverExportsContent = `
@@ -141,64 +194,37 @@ export async function prepareFiles(api: Ream) {
    export const _document = () => import("${routesInfo.documentFile}")
     `
 
-    await outputFile(
+    await writeFileIfChanged(
       api.resolveDotReam('templates/server-exports.js'),
-      serverExportsContent,
-      'utf8'
+      serverExportsContent
     )
+  }
 
-    await outputFile(
+  const writeGlobalImports = async () => {
+    await writeFileIfChanged(
       api.resolveDotReam('templates/global-imports.js'),
       `
       ${api.config.imports
         .map((file) => `import ${JSON.stringify(file)}`)
         .join('\n')}
-      `,
-      'utf8'
-    )
-
-    const enhanceAppFiles = [...store.state.pluginsFiles['enhance-app']]
-    await outputFile(
-      api.resolveDotReam('templates/enhance-app.js'),
       `
-      ${enhanceAppFiles
-        .map((file, index) => {
-          return `import * as enhanceApp_${index} from "${file}"`
-        })
-        .join('\n')}
-
-    var files = [
-      ${enhanceAppFiles.map((_, i) => `enhanceApp_${i}`).join(',')}
-    ]
-
-    var exec = function(name, context) {
-      for (var i = 0; i < files.length; i++) {
-        var mod = files[i]
-        if (mod[name]) {
-          mod[name](context)
-        }
-      }
-    }
-
-    export function onCreatedApp(context) {
-      exec('onCreatedApp', context)
-    }
-    `,
-      'utf8'
     )
   }
 
-  await writeRoutes()
+  await Promise.all([
+    writeRoutes(),
+    writeEnhanceApp(api, projectEnhanceAppFiles),
+    writeGlobalImports(),
+  ])
 
   if (!api.isDev) {
     const writeConfig = async () => {
       const config = {
         port: api.config.server.port,
       }
-      await outputFile(
+      await writeFileIfChanged(
         api.resolveDotReam('meta/config.json'),
-        JSON.stringify(config),
-        'utf8'
+        JSON.stringify(config)
       )
     }
 
@@ -206,18 +232,23 @@ export async function prepareFiles(api: Ream) {
   }
 
   if (api.isDev) {
-    const { watch } = await import('chokidar')
-    watch(routesFilePattern, {
-      cwd: pagesDir,
-      ignoreInitial: true,
+    api.pluginContext.onFileChange(async (type, file) => {
+      // Update routes
+      if (file.startsWith(pagesDir) && routesFileRegexp.test(file)) {
+        const relativePath = path.relative(pagesDir, file)
+        if (type === 'add') {
+          files.push(relativePath)
+          await writeRoutes()
+        } else if (type === 'unlink') {
+          files.splice(files.indexOf(relativePath), 1)
+          await writeRoutes()
+        }
+      }
+
+      // Update enhanceApp
+      if (projectEnhanceAppFiles.includes(file)) {
+        await writeEnhanceApp(api, projectEnhanceAppFiles)
+      }
     })
-      .on('add', async (file) => {
-        files.push(file)
-        await writeRoutes()
-      })
-      .on('unlink', async (file) => {
-        files.splice(files.indexOf(file), 1)
-        await writeRoutes()
-      })
   }
 }

@@ -4,7 +4,7 @@ import type { ViteDevServer, UserConfig as ViteConfig } from 'vite'
 import resolveFrom from 'resolve-from'
 import { loadConfig } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
-import { Store, store } from './store'
+import { PluginContext } from './plugin-context'
 import { createServer } from 'http'
 import { remove, existsSync } from 'fs-extra'
 import { OWN_DIR } from './utils/constants'
@@ -40,7 +40,7 @@ export class Ream {
   isDev: boolean
   config: SetRequired<ReamConfig, 'env' | 'plugins' | 'imports' | 'server'>
   configPath?: string
-  store: Store
+  pluginContext: PluginContext
   viteDevServer?: ViteDevServer
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
@@ -55,7 +55,7 @@ export class Ream {
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
     }
-    this.store = store
+    this.pluginContext = new PluginContext(this)
 
     const { data: projectConfig = {}, path: configPath } = loadConfig(
       this.rootDir

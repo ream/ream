@@ -1,6 +1,6 @@
-import { Store } from './store'
+import { PluginContext } from './plugin-context'
 
 export type ReamPlugin = {
   name: string
-  apply?: (api: Store) => void
+  apply?: (ctx: PluginContext) => void
 }

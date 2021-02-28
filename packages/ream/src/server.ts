@@ -23,6 +23,10 @@ export const createServer = async (api: Ream) => {
   const viteDevServer = await createViteServer(viteConfig)
   api.viteDevServer = viteDevServer
 
+  for (const callback of api.pluginContext.state.hookCallbacks.onFileChange) {
+    viteDevServer.watcher.on('all', callback)
+  }
+
   const server = await createReamServer({
     cwd: api.rootDir,
     loadServerEntry: async () => {
