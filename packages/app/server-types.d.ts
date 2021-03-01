@@ -23,6 +23,7 @@ export type PreloadResult<TData> =
     }
   | { notFound: true }
   | { error: { statusCode: number; stack?: string } }
+  | { redirect: string | { url: string; permanent?: boolean } }
 
 type PreloadFactory<ContextType = any, ResultType = any> = (
   ctx: ContextType

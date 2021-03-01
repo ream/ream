@@ -5,8 +5,7 @@ import serveStatic from 'serve-static'
 import type { GetDocument, Preload } from '@ream/app'
 import { Server } from './server'
 import { render, renderToHTML, getPreloadData, HtmlAssets } from './render'
-import { outputFile } from './fs'
-
+import { ExportCache, getExportOutputPath } from './export-cache'
 export {
   ReamServerHandler,
   ReamServerRequest,
@@ -59,7 +58,13 @@ type CreateServerContext = {
   loadExportInfo?: () => ExportInfo
 }
 
-export { render, renderToHTML, getPreloadData }
+export {
+  render,
+  renderToHTML,
+  getPreloadData,
+  ExportCache,
+  getExportOutputPath,
+}
 
 export const extractClientManifest = (dotReamDir: string) => {
   const clientManifest = require(path.join(
@@ -81,15 +86,6 @@ export const extractClientManifest = (dotReamDir: string) => {
   }
 }
 
-export const writeCacheFiles = async (files: Map<string, string>) => {
-  await Promise.all(
-    [...files.keys()].map(async (file) => {
-      const content = files.get(file)
-      await outputFile(file, content!, 'utf8')
-    })
-  )
-}
-
 export const start = async (
   cwd: string = '.',
   options: { port?: number } = {}
@@ -100,6 +96,8 @@ export const start = async (
   if (!process.env.PORT) {
     process.env.PORT = port
   }
+
+  process.env.NODE_ENV = 'production'
 
   const { createServer } = await import('./')
   const server = await createServer({
@@ -138,6 +136,10 @@ export async function createServer(ctx: CreateServerContext = {}) {
   const exportInfo = ctx.dev
     ? undefined
     : (require(path.join(dotReamDir, 'meta/export-info.json')) as ExportInfo)
+  const exportCache = new ExportCache({
+    exportDir: path.join(dotReamDir, 'client'),
+    flushToDisk: true,
+  })
 
   if (ctx.dev) {
     if (ctx.devMiddleware) {
@@ -203,17 +205,22 @@ export async function createServer(ctx: CreateServerContext = {}) {
       dotReamDir,
       assets,
       exportInfo,
+      exportCache,
     })
 
-    res.statusCode = result.statusCode
+    if (result.redirect) {
+      res.writeHead(result.redirect.permanent ? 301 : 302, {
+        Location: result.redirect.url,
+      })
+      res.end()
+    } else {
+      res.statusCode = result.statusCode
 
-    for (const key in result.headers) {
-      res.setHeader(key, result.headers[key])
+      for (const key in result.headers) {
+        res.setHeader(key, result.headers[key])
+      }
+      res.end(result.body)
     }
-    res.send(result.body)
-
-    // Cache files
-    writeCacheFiles(result.cacheFiles).catch(console.error)
   })
 
   server.onError(async (err, req, res, next) => {

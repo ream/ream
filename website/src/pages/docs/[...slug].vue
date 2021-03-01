@@ -9,6 +9,7 @@ import Header from '@/components/Header.vue'
 import DocsMenu from '@/components/DocsMenu.vue'
 
 export const staticPreload: StaticPreload = async ({ params }) => {
+  console.log(`Rendering`)
   const result = await renderMarkdown(params.slug)
   if (!result) {
     return { notFound: true }

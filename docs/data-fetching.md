@@ -41,6 +41,13 @@ export default {
 </template>
 ```
 
+The return value of `preload` is of four types:
+
+- `{ data: object }`: `data` is an object with the data that will be received by the page component.
+- `{ notFound: true }`: Let Ream render the 404 page and set status code to 404.
+- `{ redirect: string | { url: string, permanent?: boolean } }`: To allow redirecting to any URL.
+- `{ error: { statusCode: number, stack?: string } }`: Let Ream render the error page.
+
 ### How does `preload` work
 
 On the server-side, Ream executes `preload` before rendering the page, on the client-side, Ream will send a request to the server to get the result of `preload`, the function is entirely processed on the server-side. We use a Babel plugin to eliminate `preload` function from the client bundle so the code it depends on as well as itself will never be exposed on the client-side, that's why you can even query a database directly in the `preload` function.

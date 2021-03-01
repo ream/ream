@@ -6,8 +6,8 @@ import type { ServerEntry } from '@ream/server'
 import {
   render,
   extractClientManifest,
-  writeCacheFiles,
   ExportInfo,
+  ExportCache,
 } from '@ream/server'
 import { PromiseQueue } from '@egoist/promise-queue'
 import { flattenRoutes } from './utils/flatten-routes'
@@ -18,6 +18,7 @@ function getHref(attrs: string) {
 }
 
 export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
+  const exportDir = path.join(dotReamDir, 'client')
   const ssrManifest = require(path.join(
     dotReamDir,
     'manifest/ssr-manifest.json'
@@ -97,12 +98,18 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   const queue = new PromiseQueue<[string]>(
     async (jobId, url) => {
       consola.info(chalk.dim(jobId))
-      const result = await render({
+      const exportCache = new ExportCache({
+        exportDir: exportDir,
+        flushToDisk: true,
+      })
+
+      await render({
         url,
         dotReamDir,
         ssrManifest,
         serverEntry,
         assets,
+        exportCache,
         exportInfo: {
           staticPaths: [],
           // Skip fallback check, force all static paths to render
@@ -112,28 +119,25 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
       // Crawl pages
       if (fullyExport) {
-        for (const file of result.cacheFiles.keys()) {
-          if (file.endsWith('.html')) {
-            const html = result.cacheFiles.get(file)
-            if (html) {
-              // find all `<a>` tags in exported html files and export links that are not yet exported
-              let match: RegExpExecArray | null = null
-              const LINK_RE = /<a ([\s\S]+?)>/gm
-              while ((match = LINK_RE.exec(html))) {
-                const href = getHref(match[1])
-                if (href) {
-                  const url = new URL(href, 'http://self')
-                  if (url.host === 'self') {
-                    queue.add(`Exporting ${url.pathname}`, url.pathname)
-                  }
+        for (const routePath of exportCache.cache.keys()) {
+          const item = exportCache.cache.items[routePath]!
+          const html = item.value.html
+          if (html) {
+            // find all `<a>` tags in exported html files and export links that are not yet exported
+            let match: RegExpExecArray | null = null
+            const LINK_RE = /<a ([\s\S]+?)>/gm
+            while ((match = LINK_RE.exec(html))) {
+              const href = getHref(match[1])
+              if (href) {
+                const url = new URL(href, 'http://self')
+                if (url.host === 'self') {
+                  queue.add(`Exporting ${url.pathname}`, url.pathname)
                 }
               }
             }
           }
         }
       }
-
-      await writeCacheFiles(result.cacheFiles)
     },
     { maxConcurrent: 100 }
   )
