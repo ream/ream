@@ -5,7 +5,7 @@ const cli = cac(`ream-server`)
 
 cli
   .command('[cwd]', 'Start production server')
-  .option('--host <host>', 'Server host (default: 0.0.0.0)')
+  .option('--host <host>', 'Server host (default: localhost)')
   .option('--port <port>', 'Server port (default: 3000)')
   .action(
     async (cwd: string = '.', options: { host?: string; port?: number }) => {

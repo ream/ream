@@ -93,7 +93,7 @@ export const start = async (
   cwd: string = '.',
   options: { host?: string; port?: number; context: ServerContext }
 ) => {
-  const host = options.host || '0.0.0.0'
+  const host = options.host || 'localhost'
   const port = `${options.port || 3000}`
 
   if (!process.env.PORT) {
@@ -108,7 +108,7 @@ export const start = async (
   })
   // @ts-ignore
   server.listen(port, host)
-  console.log(`> http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`)
+  console.log(`> http://${host}:${port}`)
 }
 
 export function createServer(options: CreateServerOptions) {

@@ -58,7 +58,7 @@ export class Ream {
     }
     this.pluginContext = new PluginContext(this)
     this.serverOptions = {
-      host: options.host || '0.0.0.0',
+      host: options.host || 'localhost',
       port: options.port || 3000,
     }
 

@@ -7,7 +7,7 @@ cli
   .command('[dir]', 'Serve a directory in dev mode', {
     ignoreOptionDefaultValue: true,
   })
-  .option('--host <host>', 'Server host (default: 0.0.0.0)')
+  .option('--host <host>', 'Server host (default: localhost)')
   .option('--port <port>', 'Server port (default: 3000)')
   .action(
     async (rootDir: string, options: { host?: string; port?: number }) => {
@@ -48,7 +48,7 @@ cli
 
 cli
   .command('start [dir]', 'Start a production server')
-  .option('--host <host>', 'Server host (default: 0.0.0.0)')
+  .option('--host <host>', 'Server host (default: localhost)')
   .option('--port <port>', 'Server port (default: 3000)')
   .action(async (rootDir = '.', options: { host?: string; port?: number }) => {
     const { start } = await import('@ream/server')
