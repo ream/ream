@@ -26,8 +26,6 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   // Adding a global `preload` function in `_app.vue` will disable automatic static generation
   if (globalPreload && !fullyExport) return
 
-  const assets = productionGetHtmlAssets(serverContext)
-
   const clientRoutes = await flattenRoutes(
     serverContext.serverEntry.clientRoutes
   )
@@ -98,7 +96,8 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
         url,
         ssrManifest: serverContext.ssrManifest,
         serverEntry: serverContext.serverEntry,
-        assets,
+        clientManifest: serverContext.clientManifest,
+        getHtmlAssets: productionGetHtmlAssets,
         exportCache,
         exportInfo: {
           staticPaths: [],

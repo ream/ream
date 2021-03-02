@@ -65,7 +65,8 @@ export async function render({
   ssrManifest,
   serverEntry,
   isPreloadRequest,
-  assets,
+  getHtmlAssets,
+  clientManifest,
   exportInfo,
   exportCache,
 }: {
@@ -75,7 +76,8 @@ export async function render({
   ssrManifest?: any
   serverEntry: ServerEntry
   isPreloadRequest?: boolean
-  assets: HtmlAssets
+  getHtmlAssets: GetHtmlAssets
+  clientManifest?: any
   exportInfo?: ExportInfo
   exportCache: ExportCache
 }): Promise<{
@@ -171,7 +173,8 @@ export async function render({
         serverEntry,
         router,
         ssrManifest,
-        assets,
+        clientManifest,
+        getHtmlAssets,
       })
 
       if (shouldExport) {
@@ -186,6 +189,8 @@ export async function render({
   return { headers, body, statusCode, redirect }
 }
 
+export type GetHtmlAssets = (clientManifest?: any) => HtmlAssets
+
 export async function renderToHTML(options: {
   params: any
   url: string
@@ -198,7 +203,8 @@ export async function renderToHTML(options: {
   router: Router
   serverEntry: ServerEntry
   ssrManifest?: any
-  assets: { scriptTags: string; cssLinkTags: string }
+  clientManifest?: any
+  getHtmlAssets: GetHtmlAssets
 }) {
   const context: {
     url: string
@@ -221,16 +227,16 @@ export async function renderToHTML(options: {
     : ''
   const headHTML = options.serverEntry.renderHeadToString(app)
   const { default: getDocument } = await options.serverEntry._document()
+  const assets = options.getHtmlAssets(options.clientManifest)
   const html = await getDocument({
-    head: () =>
-      `${headHTML.headTags}${options.assets.cssLinkTags}${preloadLinks}`,
+    head: () => `${headHTML.headTags}${assets.cssLinkTags}${preloadLinks}`,
     main: () => `<div id="_ream">${appHTML}</div>`,
     scripts: () => `
       <script>INITIAL_STATE=${serializeJavaScript(context.initialState, {
         isJSON: true,
       })}
       </script>
-      ${options.assets.scriptTags}
+      ${assets.scriptTags}
       `,
     htmlAttrs: () => headHTML.htmlAttrs,
     bodyAttrs: () => headHTML.bodyAttrs,

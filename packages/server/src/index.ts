@@ -4,7 +4,7 @@ import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
 import type { GetDocument, Preload } from '@ream/app'
 import { Server } from './server'
-import { render, renderToHTML, getPreloadData, HtmlAssets } from './render'
+import { render, renderToHTML, getPreloadData, GetHtmlAssets } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
 export {
   ReamServerHandler,
@@ -34,8 +34,6 @@ export type ExportInfo = {
   /** The raw paths that should fallback to render on demand */
   fallbackPathsRaw: string[]
 }
-
-export type GetHtmlAssets = (context: ServerContext) => HtmlAssets
 
 type ServerContext = {
   serverEntry: ServerEntry
@@ -71,10 +69,10 @@ export {
   getExportOutputPath,
 }
 
-export const productionGetHtmlAssets: GetHtmlAssets = (
-  context: ServerContext
-) => {
-  const clientManifest = context.clientManifest
+export const productionGetHtmlAssets: GetHtmlAssets = (clientManifest) => {
+  if (!clientManifest) {
+    throw new Error(`Expect clientManifest`)
+  }
   for (const key of Object.keys(clientManifest)) {
     const value: any = clientManifest[key]
     if (value.isEntry) {
@@ -118,7 +116,6 @@ export function createServer(options: CreateServerOptions) {
   const getHtmlAssets = options.getHtmlAssets || productionGetHtmlAssets
   const server = new Server()
 
-  let assets: HtmlAssets
   // A vue-router instance for matching server routes (aka API routes)
   let serverRouter: Router | undefined
   let context: ServerContext
@@ -147,7 +144,6 @@ export function createServer(options: CreateServerOptions) {
           : options.context
       exportInfo = context.getExportInfo && context.getExportInfo()
     }
-    assets = getHtmlAssets(context)
     next()
   })
 
@@ -192,7 +188,8 @@ export function createServer(options: CreateServerOptions) {
       isPreloadRequest,
       ssrManifest: context.ssrManifest,
       serverEntry: context.serverEntry,
-      assets,
+      clientManifest: context.clientManifest,
+      getHtmlAssets,
       exportInfo,
       exportCache,
     })
@@ -249,7 +246,8 @@ export function createServer(options: CreateServerOptions) {
         preloadResult,
         serverEntry: context.serverEntry,
         ssrManifest: context.ssrManifest,
-        assets,
+        clientManifest: context.clientManifest,
+        getHtmlAssets,
       })
       res.setHeader('content-type', 'text-html')
       res.end(html)
