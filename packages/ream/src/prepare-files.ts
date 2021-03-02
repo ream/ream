@@ -218,17 +218,20 @@ export async function prepareFiles(api: Ream) {
   ])
 
   if (!api.isDev) {
-    const writeConfig = async () => {
-      const config = {
-        port: api.config.server.port,
-      }
+    const writeServerContext = async () => {
       await writeFileIfChanged(
-        api.resolveDotReam('meta/config.json'),
-        JSON.stringify(config)
+        api.resolveDotReam('meta/server-context.js'),
+        `module.exports = {
+          ssrManifest: require('../manifest/ssr-manifest'),
+          clientManifest: require('../manifest/client-manifest'),
+          serverEntry: require('../server/server-entry.js').default,
+          // Export info is only available after exporting
+          // So we lazy load it here
+          getExportInfo: () => require('../meta/export-info')
+        }`
       )
     }
-
-    await writeConfig()
+    await writeServerContext()
   }
 
   if (api.isDev) {

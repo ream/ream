@@ -1,4 +1,5 @@
 import { cac } from 'cac'
+import path from 'path'
 
 const cli = cac()
 
@@ -6,18 +7,20 @@ cli
   .command('[dir]', 'Serve a directory in dev mode', {
     ignoreOptionDefaultValue: true,
   })
-  .option('--port <port>', 'Server port')
-  .action(async (rootDir: string, options: { port?: number }) => {
-    const { Ream } = await import('./')
-    const app = new Ream({
-      rootDir,
-      dev: true,
-      server: {
+  .option('--host <host>', 'Server host (default: 0.0.0.0)')
+  .option('--port <port>', 'Server port (default: 3000)')
+  .action(
+    async (rootDir: string, options: { host?: string; port?: number }) => {
+      const { Ream } = await import('./')
+      const app = new Ream({
+        rootDir,
+        dev: true,
+        host: options.host,
         port: options.port,
-      },
-    })
-    await app.serve().catch(handleError)
-  })
+      })
+      await app.serve().catch(handleError)
+    }
+  )
 
 cli
   .command('build [dir]', 'Build a directory for production', {
@@ -45,10 +48,16 @@ cli
 
 cli
   .command('start [dir]', 'Start a production server')
-  .option('--port <port>', 'Server port')
-  .action(async (rootDir, options: { port?: number }) => {
+  .option('--host <host>', 'Server host (default: 0.0.0.0)')
+  .option('--port <port>', 'Server port (default: 3000)')
+  .action(async (rootDir = '.', options: { host?: string; port?: number }) => {
     const { start } = await import('@ream/server')
-    await start(rootDir, options)
+    const context = require(path.resolve(rootDir, '.ream/meta/server-context'))
+    await start(rootDir, {
+      host: options.host,
+      port: options.port,
+      context,
+    })
   })
 
 cli.version(require('../package').version)

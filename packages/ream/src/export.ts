@@ -2,10 +2,9 @@ import path from 'path'
 import fs from 'fs-extra'
 import consola from 'consola'
 import chalk from 'chalk'
-import type { ServerEntry } from '@ream/server'
 import {
   render,
-  extractClientManifest,
+  productionGetHtmlAssets,
   ExportInfo,
   ExportCache,
 } from '@ream/server'
@@ -19,27 +18,19 @@ function getHref(attrs: string) {
 
 export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   const exportDir = path.join(dotReamDir, 'client')
-  const ssrManifest = require(path.join(
-    dotReamDir,
-    'manifest/ssr-manifest.json'
-  ))
-  const serverEntry: ServerEntry = require(path.join(
-    dotReamDir,
-    'server/server-entry.js'
-  )).default
 
-  const globalPreload = await serverEntry.getGlobalPreload()
+  const serverContext = require(path.join(dotReamDir, 'meta/server-context'))
+
+  const globalPreload = await serverContext.serverEntry.getGlobalPreload()
 
   // Adding a global `preload` function in `_app.vue` will disable automatic static generation
   if (globalPreload && !fullyExport) return
 
-  const { scripts, styles } = extractClientManifest(dotReamDir) || {
-    scripts: '',
-    styles: '',
-  }
-  const assets = { cssLinkTags: styles, scriptTags: scripts }
+  const assets = productionGetHtmlAssets(serverContext)
 
-  const clientRoutes = await flattenRoutes(serverEntry.clientRoutes)
+  const clientRoutes = await flattenRoutes(
+    serverContext.serverEntry.clientRoutes
+  )
 
   const staticPaths: string[] = []
   const exportInfo: ExportInfo = { staticPaths, fallbackPathsRaw: [] }
@@ -105,9 +96,8 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
       await render({
         url,
-        dotReamDir,
-        ssrManifest,
-        serverEntry,
+        ssrManifest: serverContext.ssrManifest,
+        serverEntry: serverContext.serverEntry,
         assets,
         exportCache,
         exportInfo: {

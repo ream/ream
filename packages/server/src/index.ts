@@ -28,8 +28,6 @@ export type ServerEntry = {
   getGlobalPreload: () => Promise<Preload | undefined>
 }
 
-type LoadServerEntry = () => Promise<ServerEntry> | ServerEntry
-
 export type ExportInfo = {
   /** The paths that have been exported at build time */
   staticPaths: string[]
@@ -37,9 +35,16 @@ export type ExportInfo = {
   fallbackPathsRaw: string[]
 }
 
-export type GetHtmlAssets = () => HtmlAssets
+export type GetHtmlAssets = (context: ServerContext) => HtmlAssets
 
-type CreateServerContext = {
+type ServerContext = {
+  serverEntry: ServerEntry
+  getExportInfo?: () => ExportInfo
+  ssrManifest?: any
+  clientManifest?: any
+}
+
+type CreateServerOptions = {
   /**
    * Development mode
    * @default {false}
@@ -47,15 +52,15 @@ type CreateServerContext = {
   dev?: boolean
   /**
    * Path to your project
-   * i.e. the directory where we create the .ream folder
-   * @default {`.ream`}
    */
   cwd?: string
   devMiddleware?: any
-  loadServerEntry?: LoadServerEntry
   getHtmlAssets?: GetHtmlAssets
   ssrFixStacktrace?: (err: Error) => void
-  loadExportInfo?: () => ExportInfo
+  context:
+    | ServerContext
+    | (() => ServerContext)
+    | (() => Promise<ServerContext>)
 }
 
 export {
@@ -66,17 +71,16 @@ export {
   getExportOutputPath,
 }
 
-export const extractClientManifest = (dotReamDir: string) => {
-  const clientManifest = require(path.join(
-    dotReamDir,
-    'manifest/client-manifest.json'
-  ))
+export const productionGetHtmlAssets: GetHtmlAssets = (
+  context: ServerContext
+) => {
+  const clientManifest = context.clientManifest
   for (const key of Object.keys(clientManifest)) {
     const value: any = clientManifest[key]
     if (value.isEntry) {
       return {
-        scripts: `<script type="module" src="/${value.file}"></script>`,
-        styles: value.css
+        scriptTags: `<script type="module" src="/${value.file}"></script>`,
+        cssLinkTags: value.css
           ? value.css.map(
               (name: string) => `<link rel="stylesheet" href="/${name}">`
             )
@@ -84,82 +88,66 @@ export const extractClientManifest = (dotReamDir: string) => {
       }
     }
   }
+  return { scriptTags: ``, cssLinkTags: `` }
 }
 
 export const start = async (
   cwd: string = '.',
-  options: { port?: number } = {}
+  options: { host?: string; port?: number; context: ServerContext }
 ) => {
-  const config = require(path.resolve(cwd, '.ream/meta/config.json'))
+  const host = options.host || '0.0.0.0'
+  const port = `${options.port || 3000}`
 
-  const port = `${options.port || config.port || 3000}`
   if (!process.env.PORT) {
     process.env.PORT = port
   }
 
   process.env.NODE_ENV = 'production'
 
-  const { createServer } = await import('./')
-  const server = await createServer({
+  const server = createServer({
     cwd,
+    context: options.context,
   })
-  server.listen(port)
-  console.log(`> http://localhost:${port}`)
+  // @ts-ignore
+  server.listen(port, host)
+  console.log(`> http://${host === '0.0.0.0' ? 'localhost' : host}:${port}`)
 }
 
-export async function createServer(ctx: CreateServerContext = {}) {
-  const dotReamDir = path.resolve(ctx.cwd || '.', '.ream')
-
+export function createServer(options: CreateServerOptions) {
+  const dotReamDir = path.resolve(options.cwd || '.', '.ream')
+  const getHtmlAssets = options.getHtmlAssets || productionGetHtmlAssets
   const server = new Server()
 
-  let ssrManifest: any
-  let serverEntry: ServerEntry
   let assets: HtmlAssets
   // A vue-router instance for matching server routes (aka API routes)
   let serverRouter: Router | undefined
+  let context: ServerContext
+  let exportInfo: ExportInfo | undefined
 
-  const loadServerEntry: LoadServerEntry =
-    ctx.loadServerEntry ||
-    (() => require(path.join(dotReamDir, 'server/server-entry.js')).default)
-
-  const getHtmlAssets: GetHtmlAssets =
-    ctx.getHtmlAssets ||
-    (() => {
-      ssrManifest = require(path.join(dotReamDir, 'manifest/ssr-manifest.json'))
-      const extractedAssets = extractClientManifest(dotReamDir)!
-      return {
-        scriptTags: extractedAssets.scripts,
-        cssLinkTags: extractedAssets.styles,
-      }
-    })
-
-  const exportInfo = ctx.dev
-    ? undefined
-    : (require(path.join(dotReamDir, 'meta/export-info.json')) as ExportInfo)
   const exportCache = new ExportCache({
     exportDir: path.join(dotReamDir, 'client'),
     flushToDisk: true,
   })
 
-  if (ctx.dev) {
-    if (ctx.devMiddleware) {
-      server.use(ctx.devMiddleware)
-    }
-    ssrManifest = {}
-  } else {
-    ssrManifest = require(path.join(dotReamDir, 'manifest/ssr-manifest.json'))
+  if (options.devMiddleware) {
+    server.use(options.devMiddleware)
+  }
 
+  // Server static assets in production mode
+  if (!options.dev) {
     const serveStaticFiles = serveStatic(path.join(dotReamDir, 'client'))
     server.use(serveStaticFiles as any)
   }
 
   server.use(async (req, res, next) => {
-    if (ctx.dev || !serverEntry) {
-      serverEntry = await loadServerEntry()
+    if (options.dev || !context) {
+      context =
+        typeof options.context === 'function'
+          ? await options.context()
+          : options.context
+      exportInfo = context.getExportInfo && context.getExportInfo()
     }
-    if (ctx.dev || !assets) {
-      assets = getHtmlAssets()
-    }
+    assets = getHtmlAssets(context)
     next()
   })
 
@@ -168,8 +156,10 @@ export async function createServer(ctx: CreateServerContext = {}) {
       return next()
     }
 
-    if (!serverRouter || ctx.dev) {
-      serverRouter = serverEntry.createServerRouter(serverEntry.serverRoutes)
+    if (!serverRouter || options.dev) {
+      serverRouter = context.serverEntry.createServerRouter(
+        context.serverEntry.serverRoutes
+      )
     }
 
     serverRouter!.push(req.url)
@@ -199,10 +189,9 @@ export async function createServer(ctx: CreateServerContext = {}) {
       url: req.url,
       req,
       res,
-      ssrManifest,
-      serverEntry,
       isPreloadRequest,
-      dotReamDir,
+      ssrManifest: context.ssrManifest,
+      serverEntry: context.serverEntry,
       assets,
       exportInfo,
       exportCache,
@@ -224,19 +213,19 @@ export async function createServer(ctx: CreateServerContext = {}) {
   })
 
   server.onError(async (err, req, res, next) => {
-    if (ctx.ssrFixStacktrace) {
-      ctx.ssrFixStacktrace(err)
+    if (options.ssrFixStacktrace) {
+      options.ssrFixStacktrace(err)
     }
     console.error('server error', err.stack)
 
     try {
       res.statusCode =
         !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
-      const router = serverEntry.createClientRouter()
+      const router = context.serverEntry.createClientRouter()
       router.push(req.url)
       await router.isReady()
-      const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
-      const globalPreload = await serverEntry.getGlobalPreload()
+      const ErrorComponent = await context.serverEntry.ErrorComponent.__asyncLoader()
+      const globalPreload = await context.serverEntry.getGlobalPreload()
       const preloadResult = await getPreloadData(
         globalPreload,
         [ErrorComponent],
@@ -248,7 +237,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
       )
       preloadResult.error = {
         statusCode: res.statusCode,
-        stack: ctx.dev ? err.stack : undefined,
+        stack: options.dev ? err.stack : undefined,
       }
       const html = await renderToHTML({
         params: req.params,
@@ -258,8 +247,8 @@ export async function createServer(ctx: CreateServerContext = {}) {
         res,
         router,
         preloadResult,
-        serverEntry,
-        ssrManifest,
+        serverEntry: context.serverEntry,
+        ssrManifest: context.ssrManifest,
         assets,
       })
       res.setHeader('content-type', 'text-html')
@@ -267,7 +256,7 @@ export async function createServer(ctx: CreateServerContext = {}) {
     } catch (error) {
       res.statusCode = 500
       res.send(
-        ctx.dev
+        options.dev
           ? `<h1>Error occurs while rendering error page:</h1><pre>${error.stack}</pre>`
           : 'server error'
       )

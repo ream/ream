@@ -1,9 +1,3 @@
-import {
-  ReamServerHandler,
-  ReamServerRequest,
-  ReamServerResponse,
-} from '@ream/server'
-
 interface IParams {
   [k: string]: string
 }

@@ -14,9 +14,8 @@ export interface Options {
   rootDir?: string
   srcDir?: string
   dev?: boolean
-  server?: {
-    port?: number | string
-  }
+  host?: string
+  port?: number
 }
 
 export type ReamConfig = {
@@ -25,7 +24,8 @@ export type ReamConfig = {
   }
   plugins?: Array<ReamPlugin>
   imports?: string[]
-  server?: {
+  hmr?: {
+    host?: string
     port?: number
   }
   vue?: {
@@ -38,10 +38,11 @@ export class Ream {
   rootDir: string
   srcDir: string
   isDev: boolean
-  config: SetRequired<ReamConfig, 'env' | 'plugins' | 'imports' | 'server'>
+  config: SetRequired<ReamConfig, 'env' | 'plugins' | 'imports'>
   configPath?: string
   pluginContext: PluginContext
   viteDevServer?: ViteDevServer
+  serverOptions: { host: string; port: number }
 
   constructor(options: Options = {}, configOverride: ReamConfig = {}) {
     this.rootDir = resolve(options.rootDir || '.')
@@ -56,6 +57,12 @@ export class Ream {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
     }
     this.pluginContext = new PluginContext(this)
+    this.serverOptions = {
+      host: options.host || '0.0.0.0',
+      port: options.port || 3000,
+    }
+
+    process.env.PORT = `${this.serverOptions.port}`
 
     const { data: projectConfig = {}, path: configPath } = loadConfig(
       this.rootDir
@@ -72,11 +79,7 @@ export class Ream {
         ...(projectConfig.plugins || []),
       ],
       imports: projectConfig.imports || [],
-      server: {
-        ...projectConfig.server,
-      },
     }
-    process.env.PORT = String(this.config.server.port)
   }
 
   resolveRootDir(...args: string[]) {
@@ -148,7 +151,7 @@ export class Ream {
   async serve() {
     const handler = await this.getRequestHandler()
     const server = createServer(handler)
-    const port = this.config.server.port || 3000
+    const port = this.serverOptions.port || 3000
     server.listen(port)
     console.log(`> http://localhost:${port}`)
     return server

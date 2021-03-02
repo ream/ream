@@ -20,8 +20,11 @@ export type ServerRouteLoader = {
   load: () => Promise<{ default: ReamServerHandler }>
 }
 
-function renderPreloadLinks(modules: Set<string>, manifest: any): string {
+function renderPreloadLinks(modules: Set<string>, manifest?: any): string {
   let links = ''
+  if (!manifest) {
+    return links
+  }
   const seen = new Set()
   modules.forEach((id) => {
     const files: string[] | undefined = manifest[id]
@@ -59,7 +62,6 @@ export async function render({
   url,
   req,
   res,
-  dotReamDir,
   ssrManifest,
   serverEntry,
   isPreloadRequest,
@@ -70,7 +72,6 @@ export async function render({
   url: string
   req?: ReamServerRequest
   res?: ReamServerResponse
-  dotReamDir: string
   ssrManifest?: any
   serverEntry: ServerEntry
   isPreloadRequest?: boolean
@@ -196,7 +197,7 @@ export async function renderToHTML(options: {
   }
   router: Router
   serverEntry: ServerEntry
-  ssrManifest: any
+  ssrManifest?: any
   assets: { scriptTags: string; cssLinkTags: string }
 }) {
   const context: {

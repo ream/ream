@@ -27,13 +27,15 @@ export const createServer = async (api: Ream) => {
     viteDevServer.watcher.on('all', callback)
   }
 
-  const server = await createReamServer({
+  const server = createReamServer({
     cwd: api.rootDir,
-    loadServerEntry: async () => {
+    context: async () => {
       const serverEntry = await api.viteDevServer!.ssrLoadModule(
         `/@fs/${SERVER_ENTRY_PATH}`
       )
-      return serverEntry.default
+      return {
+        serverEntry: serverEntry.default,
+      }
     },
     getHtmlAssets: () => {
       const matchedMods = viteDevServer.moduleGraph.getModulesByFile(
