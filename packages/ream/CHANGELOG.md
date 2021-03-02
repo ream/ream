@@ -1,5 +1,10 @@
 # ream
 
+## 5.0.0-beta.3
+
+- Do not export pages when the statusCode is 404
+- Make server host default to `localhost` instead of `0.0.0.0`
+
 ## 5.0.0-beta.2
 
 - Basic serverless support

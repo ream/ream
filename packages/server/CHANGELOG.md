@@ -1,5 +1,9 @@
 # @ream/server
 
+## 5.0.0-beta.3
+
+See the changelog of `ream@5.0.0-beta.3`
+
 ## 5.0.0-beta.2
 
 See the changelog of `ream@5.0.0-beta.2`
