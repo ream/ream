@@ -147,10 +147,12 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   }
   await queue.run()
 
-  consola.success(
-    `Your app has been exported to ${path.relative(
-      process.cwd(),
-      path.join(dotReamDir, 'client')
-    )}`
-  )
+  if (fullyExport) {
+    consola.success(
+      `Your app has been exported to ${path.relative(
+        process.cwd(),
+        path.join(dotReamDir, 'client')
+      )}`
+    )
+  }
 }
