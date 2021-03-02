@@ -1,5 +1,9 @@
 # @ream/app
 
+## 5.0.0-beta.2
+
+Version bump only.
+
 ## 5.0.0-beta.1
 
 Version bump only.

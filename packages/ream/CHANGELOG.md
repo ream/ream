@@ -1,5 +1,12 @@
 # ream
 
+## 5.0.0-beta.2
+
+- Basic serverless support
+- Extract CSS from lazy-loaded components in development mode
+- Support `redirect` in `preload`
+- Support project-level `enhance-app.js`
+
 ## 5.0.0-beta.1
 
 ### Features
