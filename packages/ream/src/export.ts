@@ -17,7 +17,7 @@ function getHref(attrs: string) {
 }
 
 export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
-  const exportDir = path.join(dotReamDir, 'client')
+  const exportDir = path.join(dotReamDir, fullyExport ? 'client' : 'export')
 
   const serverContext = require(path.join(dotReamDir, 'meta/server-context'))
 
@@ -90,6 +90,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
       const exportCache = new ExportCache({
         exportDir: exportDir,
         flushToDisk: true,
+        writeOnly: true,
       })
 
       await render({

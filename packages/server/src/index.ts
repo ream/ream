@@ -122,7 +122,7 @@ export function createServer(options: CreateServerOptions) {
   let exportInfo: ExportInfo | undefined
 
   const exportCache = new ExportCache({
-    exportDir: path.join(dotReamDir, 'client'),
+    exportDir: path.join(dotReamDir, 'export'),
     flushToDisk: true,
   })
 

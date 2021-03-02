@@ -9,7 +9,16 @@ type PageCache = {
   preloadResult: PreloadResult
 }
 
-type Options = { exportDir: string; flushToDisk: boolean }
+type Options = {
+  exportDir: string
+  flushToDisk: boolean
+  /**
+   * Make `.get` always return `undefined`
+   * a.k.a use as a write only storage
+   * Mainly used for `ream export`
+   */
+  writeOnly?: boolean
+}
 
 export const getExportOutputPath = (
   pathname: string,
@@ -46,7 +55,13 @@ export class ExportCache {
     return getExportOutputPath(pathname, type, this.options.exportDir)
   }
 
+  get writeOnly() {
+    return this.options.writeOnly
+  }
+
   async get(pathname: string) {
+    if (this.options.writeOnly) return
+
     let data = this.cache.get(pathname)
 
     if (!data && this.options.flushToDisk) {

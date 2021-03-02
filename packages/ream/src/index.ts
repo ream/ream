@@ -115,9 +115,11 @@ export class Ream {
     if (shouldCleanDir) {
       // Remove everything but cache
       await Promise.all(
-        ['templates', 'manifest', 'server', 'client', 'export'].map((name) => {
-          return remove(this.resolveDotReam(name))
-        })
+        ['templates', 'manifest', 'server', 'client', 'export', 'meta'].map(
+          (name) => {
+            return remove(this.resolveDotReam(name))
+          }
+        )
       )
     }
 

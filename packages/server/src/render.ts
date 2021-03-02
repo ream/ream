@@ -95,6 +95,8 @@ export async function render({
   let redirect: PreloadRedirect | undefined
   const headers: { [k: string]: string } = {}
 
+  const isProd = process.env.NODE_ENV === 'production'
+
   if (matchedRoutes[0].name === '404') {
     statusCode = 404
   }
@@ -111,7 +113,8 @@ export async function render({
   // Export the page (HTML or preload JSON file) after the request
   const fullRawPath = route.matched.map((m) => m.path).join('/')
   const shouldExport =
-    process.env.NODE_ENV === 'production' &&
+    isProd &&
+    (statusCode !== 404 || route.path === '/404.html') &&
     !globalPreload &&
     components.every((component) => !component.$$preload)
 
@@ -155,38 +158,52 @@ export async function render({
       preloadResult.notFound = true
     }
     if (isPreloadRequest) {
-      // Render .preload.json on the fly
-      body = serializeJavascript(preloadResult, { isJSON: true })
+      if (isProd && preloadResult.notFound && !exportCache.writeOnly) {
+        const exported404 = await getExported404Page(exportCache)
+        body = serializeJavascript(exported404!.preloadResult, { isJSON: true })
+      } else {
+        // Render .preload.json on the fly
+        body = serializeJavascript(preloadResult, { isJSON: true })
 
-      if (shouldExport) {
-        exportCache.set(route.path, { preloadResult })
+        if (shouldExport) {
+          exportCache.set(route.path, { preloadResult })
+        }
       }
     } else {
-      // Render HTML on the fly
-      body = await renderToHTML({
-        params: route.params,
-        url,
-        path: route.path,
-        req,
-        res,
-        preloadResult,
-        serverEntry,
-        router,
-        ssrManifest,
-        clientManifest,
-        getHtmlAssets,
-      })
-
-      if (shouldExport) {
-        exportCache.set(route.path, {
+      if (isProd && preloadResult.notFound && !exportCache.writeOnly) {
+        const exported404 = await getExported404Page(exportCache)
+        body = exported404!.html!
+      } else {
+        // Render HTML on the fly
+        body = await renderToHTML({
+          params: route.params,
+          url,
+          path: route.path,
+          req,
+          res,
           preloadResult,
-          html: body,
+          serverEntry,
+          router,
+          ssrManifest,
+          clientManifest,
+          getHtmlAssets,
         })
+
+        if (shouldExport) {
+          exportCache.set(route.path, {
+            preloadResult,
+            html: body,
+          })
+        }
       }
     }
   }
 
   return { headers, body, statusCode, redirect }
+}
+
+const getExported404Page = (exportCache: ExportCache) => {
+  return exportCache.get('/404.html')
 }
 
 export type GetHtmlAssets = (clientManifest?: any) => HtmlAssets
