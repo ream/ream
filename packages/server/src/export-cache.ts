@@ -13,15 +13,24 @@ type Options = { exportDir: string; flushToDisk: boolean }
 
 export const getExportOutputPath = (
   pathname: string,
-  ext: '.html' | '.preload.json',
+  type: 'html' | 'json',
   exportDir: string
 ) => {
-  return path.join(
-    exportDir,
-    `${pathname === '/' ? '/index' : pathname}${
-      pathname.endsWith(ext) ? '' : ext
-    }`
-  )
+  let filename: string
+  // Remove trailing slash
+  pathname = pathname.replace(/\/$/, '') || 'index'
+
+  if (type === 'json') {
+    filename = `${pathname}.preload.json`
+  } else {
+    if (pathname.endsWith('.html')) {
+      filename = pathname
+    } else {
+      filename = pathname === 'index' ? 'index.html' : `${pathname}/index.html`
+    }
+  }
+
+  return path.join(exportDir, filename)
 }
 
 export class ExportCache {
@@ -33,16 +42,16 @@ export class ExportCache {
     this.options = options
   }
 
-  getOutputPath(pathname: string, ext: '.html' | '.preload.json') {
-    return getExportOutputPath(pathname, ext, this.options.exportDir)
+  getOutputPath(pathname: string, type: 'html' | 'json') {
+    return getExportOutputPath(pathname, type, this.options.exportDir)
   }
 
   async get(pathname: string) {
     let data = this.cache.get(pathname)
 
     if (!data && this.options.flushToDisk) {
-      const htmlPath = this.getOutputPath(pathname, '.html')
-      const jsonPath = this.getOutputPath(pathname, '.preload.json')
+      const htmlPath = this.getOutputPath(pathname, 'html')
+      const jsonPath = this.getOutputPath(pathname, 'json')
       try {
         const [html, preloadResult] = await Promise.all([
           readFile(htmlPath, 'utf8'),
@@ -63,8 +72,8 @@ export class ExportCache {
   ) {
     this.cache.set(pathname, { html, preloadResult })
     if (this.options.flushToDisk) {
-      const htmlPath = this.getOutputPath(pathname, '.html')
-      const jsonPath = this.getOutputPath(pathname, '.preload.json')
+      const htmlPath = this.getOutputPath(pathname, 'html')
+      const jsonPath = this.getOutputPath(pathname, 'json')
       const json = serializeJavascript(preloadResult, { isJSON: true })
       await Promise.all([
         html ? outputFile(htmlPath, html, 'utf8') : null,
