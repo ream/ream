@@ -1,5 +1,9 @@
 # create-ream-app
 
+## 1.0.0-beta.1
+
+- Use `ream@latest` instead of `ream@beta`
+
 ## 1.0.0-beta.0
 
 ### Patch Changes
