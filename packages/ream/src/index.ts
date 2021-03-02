@@ -153,9 +153,9 @@ export class Ream {
   async serve() {
     const handler = await this.getRequestHandler()
     const server = createServer(handler)
-    const port = this.serverOptions.port || 3000
-    server.listen(port)
-    console.log(`> http://localhost:${port}`)
+    const { host, port } = this.serverOptions
+    server.listen(port, host)
+    console.log(`> http://${host}:${port}`)
     return server
   }
 
