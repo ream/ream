@@ -3,7 +3,7 @@
 ## Project Generator
 
 ```bash
-npx create-ream-app@beta my-app
+npx create-ream-app my-app
 ```
 
 When the installation is completed, follow the instructions to start the development server. Try editing `pages/index.vue` and see the result in your browser.
@@ -13,7 +13,7 @@ When the installation is completed, follow the instructions to start the develop
 ### Install via npm
 
 ```bash
-npm install ream@beta
+npm install ream
 ```
 
 ### Add npm scripts

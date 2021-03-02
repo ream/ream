@@ -9,7 +9,6 @@
     "dev": "node -r esbuild-register scripts/dev.ts"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.14.1",
     "@ream/test-utils": "workspace:*",
     "@sucrase/jest-plugin": "^2.0.0",
     "@types/jest": "^26.0.20",
