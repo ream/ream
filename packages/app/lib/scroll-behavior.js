@@ -1,13 +1,22 @@
 export const scrollBehavior = (to, from, savedPosition) => {
-  if (to.hash) {
-    return {
-      el: to.hash,
+  return new Promise((resolve) => {
+    const handleScroll = () => {
+      _ream.event.off('trigger-scroll', handleScroll)
+
+      if (to.hash) {
+        return resolve({
+          el: to.hash,
+        })
+      }
+
+      if (savedPosition) {
+        return resolve(savedPosition)
+      }
+
+      resolve({
+        top: 0,
+      })
     }
-  }
-
-  if (savedPosition) {
-    return savedPosition
-  }
-
-  return { top: 0 }
+    _ream.event.on('trigger-scroll', handleScroll)
+  })
 }
