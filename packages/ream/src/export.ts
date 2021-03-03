@@ -19,7 +19,10 @@ function getHref(attrs: string) {
 export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   const exportDir = path.join(dotReamDir, fullyExport ? 'client' : 'export')
 
-  const serverContext = require(path.join(dotReamDir, 'meta/server-context'))
+  const { serverContext } = require(path.join(
+    dotReamDir,
+    'meta/server-context'
+  ))
 
   const globalPreload = await serverContext.serverEntry.getGlobalPreload()
 

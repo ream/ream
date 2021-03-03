@@ -221,14 +221,23 @@ export async function prepareFiles(api: Ream) {
     const writeServerContext = async () => {
       await writeFileIfChanged(
         api.resolveDotReam('meta/server-context.js'),
-        `module.exports = {
+        `const serverContext = {
           ssrManifest: require('../manifest/ssr-manifest'),
           clientManifest: require('../manifest/client-manifest'),
           serverEntry: require('../server/server-entry.js').default,
           // Export info is only available after exporting
           // So we lazy load it here
           getExportInfo: () => require('../meta/export-info')
-        }`
+        }
+        
+        module.exports = {
+          serverContext,
+          get handler() {
+            const { createServer } = require('@ream/server')
+            return createServer({ context: serverContext })
+          }
+        }
+        `
       )
     }
     await writeServerContext()

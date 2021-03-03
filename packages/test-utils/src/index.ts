@@ -40,7 +40,8 @@ export async function buildAndLaunch({
     server = createServer(
       await createReamServer({
         cwd: appDir,
-        context: require(path.join(appDir, '.ream/meta/server-context')),
+        context: require(path.join(appDir, '.ream/meta/server-context'))
+          .serverContext,
       })
     )
   }

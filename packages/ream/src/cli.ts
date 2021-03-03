@@ -26,13 +26,14 @@ cli
   .command('build [dir]', 'Build a directory for production', {
     ignoreOptionDefaultValue: true,
   })
-  .action(async (rootDir: string) => {
+  .option('--standalone', 'Bundle external dependencies in server code')
+  .action(async (rootDir: string, flags: { standalone?: boolean }) => {
     const { Ream } = await import('./')
     const app = new Ream({
       rootDir,
       dev: false,
     })
-    await app.build().catch(handleError)
+    await app.build({ standalone: flags.standalone }).catch(handleError)
   })
 
 cli
@@ -43,7 +44,7 @@ cli
       rootDir,
       dev: false,
     })
-    await app.build(true).catch(handleError)
+    await app.build({ fullyExport: true }).catch(handleError)
   })
 
 cli
@@ -52,11 +53,14 @@ cli
   .option('--port <port>', 'Server port (default: 3000)')
   .action(async (rootDir = '.', options: { host?: string; port?: number }) => {
     const { start } = await import('@ream/server')
-    const context = require(path.resolve(rootDir, '.ream/meta/server-context'))
+    const { serverContext } = require(path.resolve(
+      rootDir,
+      '.ream/meta/server-context'
+    ))
     await start(rootDir, {
       host: options.host,
       port: options.port,
-      context,
+      context: serverContext,
     })
   })
 

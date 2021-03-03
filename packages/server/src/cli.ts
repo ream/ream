@@ -10,11 +10,14 @@ cli
   .action(
     async (cwd: string = '.', options: { host?: string; port?: number }) => {
       const { start } = await import('./')
-      const context = require(path.resolve(cwd, '.ream/meta/server-context'))
+      const { serverContext } = require(path.resolve(
+        cwd,
+        '.ream/meta/server-context'
+      ))
       await start(cwd, {
         host: options.host,
         port: options.port,
-        context,
+        context: serverContext,
       })
     }
   )

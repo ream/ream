@@ -6,9 +6,9 @@
 
 ```ts
 import { createServer } from '@ream/server'
-import context from './.ream/meta/server-context'
+import { serverContext } from './.ream/meta/server-context'
 
-const { handler } = createServer({ context })
+const handler = createServer({ context: serverContext })
 
 export default handler
 ```
