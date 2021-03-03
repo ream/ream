@@ -53,16 +53,26 @@ export const createApp = ({ router, initialState }) => {
         Component = ErrorComponent
       } else {
         Component = h(RouterView, null, (props) => {
-          return h(
-            Transition,
-            {
-              name: props.route.meta.transitionName || 'page',
-              mode: props.route.meta.transitionMode || 'out-in',
-              onBeforeEnter() {
-                _ream.event.emit('trigger-scroll')
-              },
+          const { meta } = props.route
+          const transition =
+            meta.transition === false
+              ? { name: undefined }
+              : typeof meta.transition === 'string'
+              ? { name: meta.transition }
+              : meta.transition || {}
+          const transitionProps = {
+            name: 'page',
+            mode: 'out-in',
+            ...transition,
+            onBeforeEnter() {
+              _ream.event.emit('trigger-scroll')
+              if (transition.onBeforeEnter) {
+                transition.onBeforeEnter()
+              }
             },
-            () => h(props.Component, { key: props.route.path })
+          }
+          return h(Transition, transitionProps, () =>
+            h(props.Component, { key: props.route.path })
           )
         })
       }

@@ -166,6 +166,7 @@ export async function prepareFiles(api: Ream) {
         $$preload: page.preload,
         $$staticPreload: page.staticPreload,
         $$getStaticPaths: page.getStaticPaths,
+        $$transition: page.transition,
         setup: function () {
           return function() {
             var Component = page.default

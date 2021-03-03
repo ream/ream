@@ -37,7 +37,6 @@ export default defineComponent({
 
   setup() {
     const preloadData = usePageData()
-
     const title = computed(() => {
       return `${preloadData.value.title} - Ream Documentation`
     })
