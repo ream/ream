@@ -1,7 +1,8 @@
-import { resolve, join, dirname } from 'path'
+import { resolve, join, dirname, relative } from 'path'
 import type { SetRequired } from 'type-fest'
 import type { ViteDevServer, UserConfig as ViteConfig } from 'vite'
 import resolveFrom from 'resolve-from'
+import consola from 'consola'
 import { loadConfig } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
 import { PluginContext } from './plugin-context'
@@ -67,6 +68,9 @@ export class Ream {
     const { data: projectConfig = {}, path: configPath } = loadConfig(
       this.rootDir
     )
+    if (configPath) {
+      consola.info(`Using config file: ${relative(process.cwd(), configPath)}`)
+    }
     this.configPath = configPath
     this.config = {
       ...projectConfig,
@@ -125,7 +129,7 @@ export class Ream {
 
     // Preparing for webpack build process
     if (shouldPrepreFiles) {
-      console.log('Preparing Ream files')
+      consola.info('Preparing Ream files')
       const { prepareFiles } = await import('./prepare-files')
       await prepareFiles(this)
     }

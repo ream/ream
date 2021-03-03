@@ -6,17 +6,23 @@ import { transformSync } from 'esbuild'
 
 const joycon = new JoyCon()
 
+const transpileAndRequire = (code: string, filepath: string, isTS: boolean) => {
+  const result = transformSync(code, {
+    sourcefile: filepath,
+    loader: isTS ? 'ts' : 'js',
+    target: 'es2019',
+    format: 'cjs',
+  })
+
+  const m = requireFromString(result.code, filepath)
+  return m.default || m
+}
+
 joycon.addLoader({
-  test: /\.ts$/,
+  test: /\.[jt]s$/,
   loadSync(filepath) {
     const code = fs.readFileSync(filepath, 'utf8')
-    const result = transformSync(code, {
-      loader: 'ts',
-      target: 'es2019',
-      format: 'cjs',
-    })
-    const m = requireFromString(result.code, filepath)
-    return m.default || m
+    return transpileAndRequire(code, filepath, filepath.endsWith('.ts'))
   },
 })
 
