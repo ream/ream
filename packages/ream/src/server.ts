@@ -30,7 +30,10 @@ export const createServer = async (api: Ream) => {
   const server = createReamServer({
     cwd: api.rootDir,
     context: async () => {
-      const serverEntry = await api.viteDevServer!.ssrLoadModule(
+      // waiting to vite to finish reloading devDependencies
+      // @ts-expect-error
+      await viteDevServer._pendingReload
+      const serverEntry = await viteDevServer.ssrLoadModule(
         `/@fs/${SERVER_ENTRY_PATH}`
       )
       return {
