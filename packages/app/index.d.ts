@@ -14,3 +14,5 @@ export * from './server-types'
 export * from './link'
 
 export const useRoutePath: () => ComputedRef<string>
+
+export { ClientOnly, defineClientOnlyComponent } from './components/ClientOnly'

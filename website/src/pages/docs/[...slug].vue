@@ -87,7 +87,7 @@ export default defineComponent({
         </div>
       </div>
       <div class="max-w-3xl mx-auto p-5">
-        <h2 class="text-5xl font-semibold mb-5">{{ preloadData.title }}</h2>
+        <h2 class="text-5xl font-semibold mb-5" v-html="preloadData.title"></h2>
         <component :is="ContentComponent" />
       </div>
     </main>

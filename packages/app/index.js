@@ -19,6 +19,8 @@ export { useRoute, useRouter, RouterView } from 'vue-router'
 
 export { RouterLink } from './link'
 
+export { ClientOnly, defineClientOnlyComponent } from './components/ClientOnly'
+
 /**
  * Get the route path without trailing slash
  */

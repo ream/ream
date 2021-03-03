@@ -40,4 +40,11 @@ export default [
       },
     ],
   },
+  {
+    text: 'References',
+    children: [
+      { text: '@ream/app', link: '/docs/references/app' },
+      { text: '@ream/server', link: '/docs/references/server' },
+    ],
+  },
 ]

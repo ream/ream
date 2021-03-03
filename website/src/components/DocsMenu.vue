@@ -7,7 +7,7 @@ const routePath = useRoutePath()
 
 <template>
   <div class="sticky docs-menu">
-    <div v-for="item in menu" :key="item.text">
+    <div v-for="item in menu" :key="item.text" class="mb-8">
       <div class="text-sm text-gray-500 uppercase mb-3 tracking-wide">
         {{ item.text }}
       </div>

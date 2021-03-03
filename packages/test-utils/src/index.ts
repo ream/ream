@@ -8,10 +8,18 @@ import { createServer as createReamServer } from '@ream/server'
 import getPort from 'get-port'
 import { chromium } from 'playwright-chromium'
 import serveStatic from 'serve-static'
+import fetch from 'node-fetch'
 
 export type ProductionApp = {
   teardown: () => Promise<void>
-  visit: (path: string) => Promise<{ statusCode?: number; content?: string }>
+  visit: (
+    path: string,
+    options?: {
+      waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | number
+      waitForSelector?: string
+    }
+  ) => Promise<{ statusCode: number; content: string }>
+  fetch: (path: string) => Promise<{ statusCode: number; content: string }>
 }
 
 const REAM_BIN = require.resolve('ream/cli.js')
@@ -57,12 +65,28 @@ export async function buildAndLaunch({
       server?.close()
       await browser.close()
     },
-    async visit(path: string) {
+    async visit(path, { waitUntil, waitForSelector } = {}) {
       const page = await browser.newPage()
-      const response = await page.goto(`http://localhost:${port}${path}`)
+      const response = await page.goto(`http://localhost:${port}${path}`, {
+        waitUntil: typeof waitUntil === 'number' ? undefined : waitUntil,
+      })
+      if (typeof waitUntil === 'number') {
+        await page.waitForTimeout(waitUntil)
+      }
+      if (waitForSelector) {
+        await page.waitForSelector(waitForSelector)
+      }
       return {
-        statusCode: response?.status(),
-        content: await response?.text(),
+        statusCode: response!.status(),
+        content: await page.content(),
+      }
+    },
+    async fetch(path) {
+      const res = await fetch(`http://localhost:${port}${path}`)
+      const content = await res.text()
+      return {
+        statusCode: res.status,
+        content,
       }
     },
   }

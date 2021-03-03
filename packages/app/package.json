@@ -8,7 +8,8 @@
     "*.js",
     "*.d.ts",
     "pages",
-    "lib"
+    "lib",
+    "components"
   ],
   "dependencies": {
     "@ream/fetch": "workspace:*",

@@ -19,13 +19,13 @@ describe(`export static site`, () => {
   })
 
   it(`should export page`, async () => {
-    const { statusCode, content } = await app.visit('/static-preload')
+    const { statusCode, content } = await app.fetch('/static-preload')
     expect(statusCode).toBe(200)
     expect(content).toContain(`static preload`)
   })
 
   it(`should export data as json file`, async () => {
-    const { statusCode, content } = await app.visit(
+    const { statusCode, content } = await app.fetch(
       '/static-preload.preload.json'
     )
     expect(statusCode).toBe(200)

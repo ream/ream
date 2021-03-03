@@ -180,19 +180,23 @@ importers:
       execa: 5.0.0
       fs-extra: 9.1.0
       get-port: 5.1.1
+      node-fetch: 2.6.1
       playwright-chromium: 1.8.1
       polka: 0.5.2
       serve-static: 1.14.1
     devDependencies:
       '@ream/server': link:../server
+      '@types/node-fetch': 2.5.8
       '@types/polka': 0.5.2
       ream: link:../ream
     specifiers:
       '@ream/server': workspace:*
+      '@types/node-fetch': ^2.5.8
       '@types/polka': 0.5.2
       execa: 5.0.0
       fs-extra: 9.1.0
       get-port: 5.1.1
+      node-fetch: ^2.6.1
       playwright-chromium: 1.8.1
       polka: 0.5.2
       ream: workspace:*
@@ -909,6 +913,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-FUqxhURwqFtFBCuUj3uQMp7rPSQs//b3O9XecAVxhqS9y4/W8SIJEZFq2mmpnFVZBXwR/2OyPLE97CpyYiB8Mw==
+  /@types/node-fetch/2.5.8:
+    dependencies:
+      '@types/node': 14.14.31
+      form-data: 3.0.1
+    dev: true
+    resolution:
+      integrity: sha512-fbjI6ja0N5ZA8TV53RUqzsKNkl9fv8Oj3T7zxW7FGv1GSH7gwJaNF8dzCjrqKaxKeUpTz4yT1DaJFq/omNpGfw==
   /@types/node/14.14.31:
     resolution:
       integrity: sha512-vFHy/ezP5qI0rFgJ7aQnjDXwAMrG0KqqIH7tQG5PPv3BWBayOPIQNBjVc/P6hhdZfMx51REc6tfDNXHUio893g==
@@ -2267,6 +2278,16 @@ packages:
       node: '>= 0.12'
     resolution:
       integrity: sha512-1lLKB2Mu3aGP1Q/2eCOx0fNbRMe7XdwktwOruhfqqd0rIJWwN4Dh+E3hrPSlDCXnSR7UtZ1N38rVXm+6+MEhJQ==
+  /form-data/3.0.1:
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      mime-types: 2.1.29
+    dev: true
+    engines:
+      node: '>= 6'
+    resolution:
+      integrity: sha512-RHkBKtLWUVwd7SqRIvCZMEvAMoGUp0XU+seQiZejj0COz3RI3hWP4sCv3gZWWLjJTd7rGwcsF5eKZGii0r/hbg==
   /fragment-cache/0.2.1:
     dependencies:
       map-cache: 0.2.2
