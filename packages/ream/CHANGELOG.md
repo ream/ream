@@ -1,5 +1,10 @@
 # ream
 
+## 5.0.0-beta.4
+
+- Add `--standalone` flag to `ream build`
+- Use user-provided server host in dev server
+
 ## 5.0.0-beta.3
 
 - Do not export pages when the statusCode is 404
