@@ -17,7 +17,7 @@ export { Connect } from './connect'
 export type ServerEntry = {
   render: any
   createClientRouter: () => Router
-  createServerRouter: (routes: RouteRecordRaw[]) => Router
+  createServerRouter: () => Router
   _document: () => Promise<{
     default: GetDocument
   }>
@@ -117,7 +117,6 @@ export function createServer(options: CreateServerOptions) {
   const server = new Server()
 
   // A vue-router instance for matching server routes (aka API routes)
-  let serverRouter: Router | undefined
   let context: ServerContext
   let exportInfo: ExportInfo | undefined
 
@@ -152,12 +151,7 @@ export function createServer(options: CreateServerOptions) {
       return next()
     }
 
-    if (!serverRouter || options.dev) {
-      serverRouter = context.serverEntry.createServerRouter(
-        context.serverEntry.serverRoutes
-      )
-    }
-
+    const serverRouter = context.serverEntry.createServerRouter()
     serverRouter!.push(req.url)
     await serverRouter.isReady()
     const { matched } = serverRouter.currentRoute.value

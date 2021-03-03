@@ -26,7 +26,7 @@ export default {
   },
 
   // Create a router that's used to match server routes.
-  createServerRouter(serverRoutes) {
+  createServerRouter() {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: serverRoutes,
