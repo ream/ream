@@ -95,6 +95,7 @@ export async function prepareFiles(api: Ream) {
             return `{
             path: "${route.path}",
             ${route.routeName ? `name: "${route.routeName}",` : ``}
+            meta: {},
             component: function() {
               return import("${getRelativePathToTemplatesDir(route.file)}")
                 .then(wrapPage)
@@ -111,6 +112,7 @@ export async function prepareFiles(api: Ream) {
           {
             name: '404',
             path: '/:404(.*)',
+            meta:{},
             component: import.meta.env.DEV ? {
               render() {
                 return h('h1','error: this component should not be rendered')
@@ -164,6 +166,7 @@ export async function prepareFiles(api: Ream) {
         $$preload: page.preload,
         $$staticPreload: page.staticPreload,
         $$getStaticPaths: page.getStaticPaths,
+        $$transition: page.transition,
         setup: function () {
           return function() {
             var Component = page.default

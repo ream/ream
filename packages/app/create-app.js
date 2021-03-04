@@ -1,4 +1,11 @@
-import { h, createSSRApp, isReactive, reactive, computed } from 'vue'
+import {
+  h,
+  createSSRApp,
+  isReactive,
+  reactive,
+  computed,
+  Transition,
+} from 'vue'
 import { createHead, useHead } from '@vueuse/head'
 import { RouterView } from 'vue-router'
 import { RouterLink, useRoutePath } from './'
@@ -39,11 +46,35 @@ export const createApp = ({ router, initialState }) => {
     render() {
       const { notFound, error } = this.preloadResult
 
-      let Component = RouterView
+      let Component
       if (notFound) {
         Component = NotFoundComponent
       } else if (error) {
         Component = ErrorComponent
+      } else {
+        Component = h(RouterView, null, (props) => {
+          const { meta } = props.route
+          const transition =
+            meta.transition === false
+              ? { name: undefined }
+              : typeof meta.transition === 'string'
+              ? { name: meta.transition }
+              : meta.transition || {}
+          const transitionProps = {
+            name: 'page',
+            mode: 'out-in',
+            ...transition,
+            onBeforeEnter() {
+              _ream.event.emit('trigger-scroll')
+              if (transition.onBeforeEnter) {
+                transition.onBeforeEnter()
+              }
+            },
+          }
+          return h(Transition, transitionProps, () =>
+            h(props.Component, { key: props.route.path })
+          )
+        })
       }
 
       return h(AppComponent, {}, () => [h(Component)])
