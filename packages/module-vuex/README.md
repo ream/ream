@@ -1,4 +1,4 @@
-# @ream/module-vue
+# @ream/module-vuex
 
 ## Install
 
