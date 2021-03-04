@@ -12,7 +12,7 @@ import { _document, serverRoutes } from '/.ream/templates/server-exports.js'
 
 export default {
   async render(context) {
-    const { app } = createApp(context)
+    const { app } = await createApp(context)
     return app
   },
 

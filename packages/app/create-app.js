@@ -16,7 +16,7 @@ import {
 } from '/.ream/templates/shared-exports.js'
 import { onCreatedApp } from '/.ream/templates/enhance-app.js'
 
-export const createApp = ({ router, initialState }) => {
+export const createApp = async ({ router, initialState }) => {
   const app = createSSRApp({
     setup() {
       useHead({
@@ -78,7 +78,7 @@ export const createApp = ({ router, initialState }) => {
   // Can't use app.component() cause Vue will complain
   app._context.components[RouterLink.name] = RouterLink
 
-  onCreatedApp({ app, router })
+  await onCreatedApp({ app, router, initialState })
 
   return {
     app,

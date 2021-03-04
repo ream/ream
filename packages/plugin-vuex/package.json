@@ -1,0 +1,16 @@
+{
+  "name": "@ream/plugin-vuex",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "files": [
+    "*.js",
+    "*.d.ts"
+  ],
+  "devDependencies": {
+    "ream": "workspace:*",
+    "vuex": "^4.0.0"
+  }
+}

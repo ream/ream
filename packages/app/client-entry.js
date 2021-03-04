@@ -8,43 +8,47 @@ import { createApp } from './create-app'
 import { getBeforeResolve } from './lib/get-before-resolve'
 import { scrollBehavior } from './lib/scroll-behavior'
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes: clientRoutes,
-  scrollBehavior,
-})
+async function start() {
+  const router = createRouter({
+    history: createWebHistory(),
+    routes: clientRoutes,
+    scrollBehavior,
+  })
 
-router.afterEach((to, from) => {
-  let transition
-  for (const m of to.matched) {
-    const { $$transition } = m.components.default
-    if (typeof $$transition === 'function') {
-      $$transition = $$transition(to, from)
+  router.afterEach((to, from) => {
+    let transition
+    for (const m of to.matched) {
+      const { $$transition } = m.components.default
+      if (typeof $$transition === 'function') {
+        $$transition = $$transition(to, from)
+      }
+      if ($$transition != null) {
+        transition = $$transition
+      }
     }
-    if ($$transition != null) {
-      transition = $$transition
-    }
+    to.meta.transition = transition
+  })
+
+  const initialState = reactive(window.INITIAL_STATE)
+
+  const { app } = await createApp({
+    router,
+    initialState,
+  })
+
+  window._ream = {
+    router,
+    initialState,
+    event: mitt(),
   }
-  to.meta.transition = transition
-})
 
-const initialState = reactive(window.INITIAL_STATE)
+  await router.isReady()
 
-const { app } = createApp({
-  router,
-  initialState,
-})
-
-window._ream = {
-  router,
-  initialState,
-  event: mitt(),
-}
-
-router.isReady().then(() => {
   const vm = app.mount('#_ream')
 
   window._ream.app = vm
 
   router.beforeResolve(getBeforeResolve(vm))
-})
+}
+
+start()

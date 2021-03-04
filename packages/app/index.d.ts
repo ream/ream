@@ -1,9 +1,18 @@
 import { ComputedRef } from 'vue'
 import { PreloadResult } from './server-types'
 
-export const usePageData: <TData = any>() => TData
+export const useInitialState: <
+  TInitialState extends object = { [k: string]: any },
+  TData = any
+>() => ComputedRef<
+  TInitialState & { preload: { [pathname: string]: PreloadResult<TData> } }
+>
 
-export const usePreloadResult: <TData = any>() => PreloadResult<TData>
+export const usePreloadResult: <TData = any>() => ComputedRef<
+  PreloadResult<TData>
+>
+
+export const usePageData: <TData = any>() => ComputedRef<TData>
 
 export { useHead } from '@vueuse/head'
 

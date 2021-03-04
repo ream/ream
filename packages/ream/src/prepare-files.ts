@@ -41,17 +41,25 @@ const writeEnhanceApp = async (api: Ream, projectEnhanceAppFiles: string[]) => {
     ${enhanceAppFiles.map((_, i) => `enhanceApp_${i}`).join(',')}
   ]
 
-  var exec = function(name, context) {
+  function getFns(name) {
+    var fns = []
     for (var i = 0; i < files.length; i++) {
       var mod = files[i]
       if (mod[name]) {
-        mod[name](context)
+        fns.push(mod[name])
       }
+    }
+    return fns
+  }
+
+  async function runPromise(name, context) {
+    for (const fn of getFns(name)) {
+      await fn(context)
     }
   }
 
-  export function onCreatedApp(context) {
-    exec('onCreatedApp', context)
+  export async function onCreatedApp(context) {
+    await runPromise('onCreatedApp', context)
   }
   `
   )

@@ -63,6 +63,15 @@ importers:
     specifiers:
       '@ream/app': workspace:*
       ream: workspace:*
+  examples/vuex:
+    dependencies:
+      '@ream/plugin-vuex': link:../../packages/plugin-vuex
+      ream: link:../../packages/ream
+      vuex: 4.0.0
+    specifiers:
+      '@ream/plugin-vuex': workspace:*
+      ream: workspace:*
+      vuex: ^4.0.0
   packages/app:
     dependencies:
       '@ream/fetch': link:../fetch
@@ -93,6 +102,13 @@ importers:
       ream: link:../ream
     specifiers:
       ream: workspace:*
+  packages/plugin-vuex:
+    devDependencies:
+      ream: link:../ream
+      vuex: 4.0.0
+    specifiers:
+      ream: workspace:*
+      vuex: ^4.0.0
   packages/ream:
     dependencies:
       '@babel/core': 7.13.1
@@ -5213,6 +5229,11 @@ packages:
     dev: false
     resolution:
       integrity: sha512-TfaprOmtsAfhQau7WsomXZ8d9op/dkQLNIq8qPV3A0Vxs6GR5E+c1rfJS1SDkXRQj+dFyfnec7+U0Be1huiScg==
+  /vuex/4.0.0:
+    peerDependencies:
+      vue: ^3.0.2
+    resolution:
+      integrity: sha512-56VPujlHscP5q/e7Jlpqc40sja4vOhC4uJD1llBCWolVI8ND4+VzisDVkUMl+z5y0MpIImW6HjhNc+ZvuizgOw==
   /w3c-hr-time/1.0.2:
     dependencies:
       browser-process-hrtime: 1.0.0

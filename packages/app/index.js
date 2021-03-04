@@ -1,6 +1,12 @@
 import { getCurrentInstance, computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+export const useInitialState = () => {
+  const vm = getCurrentInstance()
+
+  return computed(() => vm.root.setupState.initialState)
+}
+
 export const usePreloadResult = () => {
   const vm = getCurrentInstance()
   const routePath = useRoutePath()
