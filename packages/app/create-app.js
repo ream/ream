@@ -8,7 +8,7 @@ import {
 } from 'vue'
 import { createHead, useHead } from '@vueuse/head'
 import { RouterView } from 'vue-router'
-import { RouterLink, useRoutePath } from './'
+import { RouterLink, usePreloadResult } from './'
 import {
   AppComponent,
   NotFoundComponent,
@@ -25,26 +25,14 @@ export const createApp = ({ router, initialState }) => {
           { name: 'viewport', content: 'width=device-width,initial-scale=1' },
         ],
       })
-      const store = isReactive(initialState)
-        ? initialState
-        : reactive(initialState)
-      const routePath = useRoutePath()
-      const preloadResult = computed(() => {
-        if (store[routePath.value]) {
-          return store[routePath.value]
-        }
-        if (Object.keys(store).length === 1 && store['/404.html']) {
-          return store['/404.html']
-        }
-        return {}
-      })
       return {
-        initialState: store,
-        preloadResult,
+        initialState: isReactive(initialState)
+          ? initialState
+          : reactive(initialState),
       }
     },
     render() {
-      const { notFound, error } = this.preloadResult
+      const { notFound, error } = usePreloadResult().value
 
       let Component
       if (notFound) {

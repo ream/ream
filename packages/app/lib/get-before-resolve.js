@@ -14,7 +14,7 @@ export const loadPageData = async (to, next = noop) => {
   const initialState = window._ream.initialState
 
   if (to.name === '404') {
-    initialState[to.path] = { notFound: true }
+    initialState.preload[to.path] = { notFound: true }
     return next()
   }
 
@@ -23,7 +23,7 @@ export const loadPageData = async (to, next = noop) => {
     (component) => component.$$preload || component.$$staticPreload
   )
   if (!hasPreload) {
-    initialState[to.path] = { hasPreload: false }
+    initialState.preload[to.path] = { hasPreload: false }
     return next()
   }
 
@@ -49,11 +49,11 @@ export const loadPageData = async (to, next = noop) => {
       }
     }
 
-    initialState[to.path] = result
+    initialState.preload[to.path] = result
 
     next && next()
   }
-  const prevResult = initialState[to.path]
+  const prevResult = initialState.preload[to.path]
   if (staticPreloadPaths[to.path]) {
     // No need to fetch data for staticPreload pages when they have already fetched data once
     // Since the data doesn't change, hence "staticPreload"

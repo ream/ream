@@ -3,12 +3,23 @@ import { useRoute } from 'vue-router'
 
 export const usePreloadResult = () => {
   const vm = getCurrentInstance()
-  return computed(() => vm.root.setupState.preloadResult)
+  const routePath = useRoutePath()
+
+  return computed(() => {
+    const { preload } = vm.root.setupState.initialState
+    if (preload[routePath.value]) {
+      return preload[routePath.value]
+    }
+    if (Object.keys(preload).length === 1 && preload['/404.html']) {
+      return preload['/404.html']
+    }
+    return {}
+  })
 }
 
 export const usePageData = () => {
-  const vm = getCurrentInstance()
-  return computed(() => vm.root.setupState.preloadResult.data || {})
+  const preloadResult = usePreloadResult()
+  return computed(() => preloadResult.value.data || {})
 }
 
 export { useHead, createHead } from '@vueuse/head'

@@ -234,7 +234,9 @@ export async function renderToHTML(options: {
     router: options.router,
   }
   context.initialState = {
-    [options.path]: options.preloadResult,
+    preload: {
+      [options.path]: options.preloadResult,
+    },
   }
 
   const app = await options.serverEntry.render(context)
