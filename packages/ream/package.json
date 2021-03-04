@@ -15,8 +15,7 @@
     "test": "echo skip",
     "dev": "npm run clean && tsc --watch",
     "build": "npm run clean && tsc --declarationDir temp && dtsup temp/index.d.ts",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build"
+    "clean": "rm -rf dist"
   },
   "license": "MIT",
   "author": {
