@@ -19,7 +19,7 @@ const writeFileIfChanged = async (filepath: string, content: string) => {
 }
 
 const writeEnhanceApp = async (api: Ream, projectEnhanceAppFiles: string[]) => {
-  const { pluginsFiles } = api.pluginContext.state
+  const { pluginsFiles } = api.pluginContext
   const enhanceAppFiles = [...pluginsFiles['enhance-app']]
 
   const projectEnhanceAppFile = await resolveFile(projectEnhanceAppFiles)

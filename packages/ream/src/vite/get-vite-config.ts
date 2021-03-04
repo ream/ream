@@ -95,7 +95,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       moveManifestPlugin(api.resolveDotReam('manifest')),
     ],
     define: {
-      ...api.pluginContext.state.constants,
+      ...api.pluginContext.constants,
       'import.meta.env.REAM_SRC_DIR': JSON.stringify(api.resolveSrcDir()),
       'import.meta.env.REAM_ROOT_DIR': JSON.stringify(api.resolveRootDir()),
     },
@@ -109,8 +109,8 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     },
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
-      exclude: ['@ream/app', '@ream/fetch'],
-      // include: ['vue', 'vue-router', '@vueuse/head'],
+      exclude: ['@ream/app', '@ream/fetch', 'node-fetch'],
+      include: ['vue', 'vue-router', '@vueuse/head', 'mitt'],
     },
     // @ts-expect-error vite does not expose these experimental stuff in types yet
     ssr: {

@@ -65,11 +65,11 @@ importers:
       ream: workspace:*
   examples/vuex:
     dependencies:
-      '@ream/plugin-vuex': link:../../packages/plugin-vuex
+      '@ream/module-vuex': link:../../packages/module-vuex
       ream: link:../../packages/ream
       vuex: 4.0.0
     specifiers:
-      '@ream/plugin-vuex': workspace:*
+      '@ream/module-vuex': workspace:*
       ream: workspace:*
       vuex: ^4.0.0
   packages/app:
@@ -97,18 +97,21 @@ importers:
       node-fetch: 2.6.1
     specifiers:
       node-fetch: ^2.6.0
-  packages/plugin-google-analytics:
+  packages/module-google-analytics:
     devDependencies:
       ream: link:../ream
     specifiers:
       ream: workspace:*
-  packages/plugin-vuex:
+  packages/module-vuex:
+    dependencies:
+      vuex-router-sync: 6.0.0-rc.1_vuex@4.0.0
     devDependencies:
       ream: link:../ream
       vuex: 4.0.0
     specifiers:
       ream: workspace:*
       vuex: ^4.0.0
+      vuex-router-sync: ^6.0.0-rc.1
   packages/ream:
     dependencies:
       '@babel/core': 7.13.1
@@ -222,7 +225,7 @@ importers:
   website:
     devDependencies:
       '@ream/app': link:../packages/app
-      '@ream/plugin-google-analytics': link:../packages/plugin-google-analytics
+      '@ream/module-google-analytics': link:../packages/module-google-analytics
       '@ream/server': link:../packages/server
       '@types/marked': 1.2.2
       '@types/prismjs': 1.16.3
@@ -233,7 +236,7 @@ importers:
       vite-plugin-windicss: 0.4.12
     specifiers:
       '@ream/app': workspace:*
-      '@ream/plugin-google-analytics': workspace:*
+      '@ream/module-google-analytics': workspace:*
       '@ream/server': workspace:*
       '@types/marked': ^1.1.0
       '@types/prismjs': ^1.16.0
@@ -5229,6 +5232,15 @@ packages:
     dev: false
     resolution:
       integrity: sha512-TfaprOmtsAfhQau7WsomXZ8d9op/dkQLNIq8qPV3A0Vxs6GR5E+c1rfJS1SDkXRQj+dFyfnec7+U0Be1huiScg==
+  /vuex-router-sync/6.0.0-rc.1_vuex@4.0.0:
+    dependencies:
+      vuex: 4.0.0
+    dev: false
+    peerDependencies:
+      vue-router: ^4.0.0
+      vuex: ^4.0.0
+    resolution:
+      integrity: sha512-pzVrX/rmQsDjJiKPAjgKxpkxWdiBBQmxATFA6eFyS2Tmo6jauq8iDk9BWxkw41/OA+pbq4wkONRC0aeErDw8GQ==
   /vuex/4.0.0:
     peerDependencies:
       vue: ^3.0.2

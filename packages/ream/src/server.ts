@@ -23,7 +23,7 @@ export const createServer = async (api: Ream) => {
   const viteDevServer = await createViteServer(viteConfig)
   api.viteDevServer = viteDevServer
 
-  for (const callback of api.pluginContext.state.hookCallbacks.onFileChange) {
+  for (const callback of api.pluginContext.hookCallbacks.onFileChange) {
     viteDevServer.watcher.on('all', callback)
   }
 

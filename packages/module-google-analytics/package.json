@@ -1,0 +1,26 @@
+{
+  "name": "@ream/module-google-analytics",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts"
+  ],
+  "ream-module": {
+    "name": "google-analytics",
+    "requiredEnv": [
+      "GA_TRACKING_ID"
+    ],
+    "optionalEnv": [
+      "GA_ANONYMIZE_IP"
+    ]
+  },
+  "scripts": {
+    "test": "echo skip"
+  },
+  "devDependencies": {
+    "ream": "workspace:*"
+  }
+}

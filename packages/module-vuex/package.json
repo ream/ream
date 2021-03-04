@@ -1,5 +1,5 @@
 {
-  "name": "@ream/plugin-vuex",
+  "name": "@ream/module-vuex",
   "version": "0.0.0",
   "publishConfig": {
     "access": "public"
@@ -9,8 +9,14 @@
     "*.js",
     "*.d.ts"
   ],
+  "ream-module": {
+    "name": "vuex"
+  },
   "devDependencies": {
     "ream": "workspace:*",
     "vuex": "^4.0.0"
+  },
+  "dependencies": {
+    "vuex-router-sync": "^6.0.0-rc.1"
   }
 }

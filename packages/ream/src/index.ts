@@ -1,6 +1,6 @@
 import { resolve, join, dirname, relative } from 'path'
 import type { SetRequired } from 'type-fest'
-import type { ViteDevServer, UserConfig as ViteConfig } from 'vite'
+import { ViteDevServer, UserConfig as ViteConfig } from 'vite'
 import resolveFrom from 'resolve-from'
 import consola from 'consola'
 import { loadConfig } from './utils/load-config'
@@ -21,9 +21,10 @@ export interface Options {
 
 export type ReamConfig = {
   env?: {
-    [k: string]: string | boolean | number
+    [envName: string]: string | number | boolean
   }
   plugins?: Array<ReamPlugin>
+  modules?: string[]
   imports?: string[]
   hmr?: {
     host?: string

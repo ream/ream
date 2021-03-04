@@ -21,7 +21,7 @@ type State = {
 }
 
 export class PluginContext {
-  state: State = {
+  private state: State = {
     constants: {},
     pluginsFiles: {
       'enhance-app': new Set(),
@@ -37,6 +37,26 @@ export class PluginContext {
 
   constructor(api: Ream) {
     this.api = api
+  }
+
+  get constants(): Record<string, string> {
+    return {
+      ...this.state.constants,
+      ...Object.keys(this.api.config.env).reduce((res, key) => {
+        return {
+          ...res,
+          [`import.meta.env.${key}`]: JSON.stringify(this.api.config.env[key]),
+        }
+      }, {}),
+    }
+  }
+
+  get pluginsFiles() {
+    return this.state.pluginsFiles
+  }
+
+  get hookCallbacks() {
+    return this.state.hookCallbacks
   }
 
   resolveSrcDir(...args: string[]) {
