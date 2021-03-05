@@ -14,6 +14,11 @@ export type PreloadResult<TData> =
        * Page data
        */
       data: TData
+      /**
+       * Update the cached result in specific seconds
+       * Only apply to staticPreload
+       */
+      revalidate?: number
     }
   | { notFound: true }
   | { error: { statusCode: number; stack?: string } }

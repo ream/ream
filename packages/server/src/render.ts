@@ -131,6 +131,7 @@ export async function render({
       if (isPreloadRequest) {
         body = serializeJavascript(pageCache.preloadResult, { isJSON: true })
       } else {
+        console.log('using the cache')
         body = pageCache.html || ''
       }
     }
@@ -271,6 +272,8 @@ export type PreloadResult = {
   notFound?: boolean
   error?: { statusCode: number; stack?: string }
   redirect?: { url: string; permanent?: boolean }
+  revalidate?: number
+  expiry?: number
 }
 
 export async function getPreloadData(
@@ -284,6 +287,7 @@ export async function getPreloadData(
   let notFound: boolean | undefined
   let error: { statusCode: number; stack?: string } | undefined
   let redirect: PreloadResult['redirect'] | undefined
+  let revalidate: number | undefined
 
   const fns: any[] = globalPreload ? [globalPreload] : []
 
@@ -310,6 +314,9 @@ export async function getPreloadData(
           params: options.params,
         })
         if (result) {
+          if (typeof result.revalidate === 'number') {
+            revalidate = result.revalidate * 1000
+          }
           if (result.notFound) {
             notFound = true
           } else if (result.redirect) {
@@ -340,5 +347,7 @@ export async function getPreloadData(
     notFound,
     error,
     redirect,
+    revalidate,
+    expiry: revalidate && revalidate + Date.now(),
   }
 }

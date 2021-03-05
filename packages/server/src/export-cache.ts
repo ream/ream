@@ -78,15 +78,24 @@ export class ExportCache {
       }
     }
 
+    if (
+      data &&
+      data.preloadResult.expiry &&
+      data.preloadResult.expiry <= Date.now()
+    ) {
+      return
+    }
+
     return data
   }
 
   async set(
     pathname: string,
-    { html, preloadResult }: { html?: string; preloadResult: PreloadResult }
+    { html, preloadResult }: { html?: string; preloadResult: PreloadResult },
+    flushToDisk = this.options.flushToDisk
   ) {
     this.cache.set(pathname, { html, preloadResult })
-    if (this.options.flushToDisk) {
+    if (flushToDisk) {
       const htmlPath = this.getOutputPath(pathname, 'html')
       const jsonPath = this.getOutputPath(pathname, 'json')
       const json = serializeJavascript(preloadResult, { isJSON: true })
