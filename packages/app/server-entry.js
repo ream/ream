@@ -42,8 +42,8 @@ export default {
   },
 
   async getGlobalPreload() {
-    const { $$preload } = await AppComponent.__asyncLoader()
-    return $$preload
+    const { preload } = await AppComponent.__asyncLoader()
+    return preload
   },
 
   clientRoutes,

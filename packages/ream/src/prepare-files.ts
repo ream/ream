@@ -195,10 +195,10 @@ export async function prepareFiles(api: Ream) {
     var wrapPage = function(page) {
       return {
         name: 'PageWrapper',
-        $$preload: page.preload,
-        $$staticPreload: page.staticPreload,
-        $$getStaticPaths: page.getStaticPaths,
-        $$transition: page.transition,
+        preload: page.preload,
+        staticPreload: page.staticPreload,
+        getStaticPaths: page.getStaticPaths,
+        transition: page.transition,
         setup: function () {
           return function() {
             var Component = page.default

@@ -230,9 +230,9 @@ export async function getPreloadData(
   const fns: any[] = globalPreload ? [globalPreload] : []
 
   for (const component of components) {
-    const preload = component.$$staticPreload || component.$$preload
+    const preload = component.staticPreload || component.preload
 
-    if (component.$$preload) {
+    if (component.preload) {
       isStatic = false
     }
 
