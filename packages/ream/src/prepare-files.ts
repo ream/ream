@@ -98,7 +98,7 @@ export async function prepareFiles(api: Ream) {
           .map((route) => {
             return `{
             path: "${route.path}",
-            ${route.routeName ? `name: "${route.routeName}",` : ``}
+            name: "${route.name}",
             meta: {},
             component: function() {
               return import("${getRelativePathToTemplatesDir(route.file)}")

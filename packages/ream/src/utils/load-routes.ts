@@ -11,10 +11,6 @@ export const filesToRoutes = (files: string[], dir: string) => {
 
   for (const file of files) {
     const slug = file
-      // Dynamic param, e.g. `[slug]` -> `:slug`
-      .replace(/\[([^\]\.]+)\]/g, ':$1')
-      // Call all route: e.g. `post/[...slug]` -> `/post/:slug(.*)`
-      .replace(/\[\.{3}([^\]]+)\]/, ':$1(.*)')
       // Remove extension
       .replace(/\.[a-zA-Z0-9]+$/, '')
 
@@ -47,7 +43,7 @@ export const filesToRoutes = (files: string[], dir: string) => {
     let parent = routes
 
     for (let i = 0; i < pathParts.length; i++) {
-      const part = pathParts[i]
+      let part = pathParts[i]
       const prevPart = pathParts[i - 1]
       const nextPart = pathParts[i + 1]
 
@@ -56,7 +52,13 @@ export const filesToRoutes = (files: string[], dir: string) => {
       }
 
       const expectedParentRouteName = route.name
-      route.name += route.name ? `-${part}` : part
+      route.name += route.name ? `/${part}` : part
+
+      part = part
+        // Dynamic param, e.g. `[slug]` -> `:slug`
+        .replace(/\[([^\]\.]+)\]/g, ':$1')
+        // Call all route: e.g. `[...slug]` -> `:slug(.*)`
+        .replace(/\[\.{3}([^\]]+)\]/, ':$1(.*)')
 
       // Find a parent route
       // Except for server routes

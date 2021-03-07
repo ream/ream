@@ -9,12 +9,18 @@ import { getBeforeResolve } from './lib/get-before-resolve'
 import { scrollBehavior } from './lib/scroll-behavior'
 import { callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
 
+window._ream = {
+  event: mitt(),
+}
+
 async function start() {
   const router = createRouter({
     history: createWebHistory(),
     routes: clientRoutes,
     scrollBehavior,
   })
+
+  window._ream.router = router
 
   await callEnhanceAppAsync('onCreatedRouter', { router })
 
@@ -33,17 +39,12 @@ async function start() {
   })
 
   const initialState = reactive(window.INITIAL_STATE)
+  window._ream.initialState = initialState
 
   const { app } = await createApp({
     router,
     initialState,
   })
-
-  window._ream = {
-    router,
-    initialState,
-    event: mitt(),
-  }
 
   await router.isReady()
 

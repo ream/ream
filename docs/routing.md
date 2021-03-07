@@ -101,6 +101,16 @@ To create children pages, put them in a folder with the same name as the parent 
 ]
 ```
 
+## Route Name
+
+Vue Router allows you to [assign a name to a route](https://next.router.vuejs.org/guide/essentials/named-routes.html#named-routes) for various advantages, by default Ream automatically infers the name from the file path, for instance, following pages:
+
+- `pages/index.vue` -> `index`
+- `pages/user/[user].vue` -> `user/[user]`
+- `pages/settings/[...slug].vue` -> `settings/[...slug]`
+
+Basically it's just the file path but without the extension.
+
 ## Access the Router
 
 ```ts

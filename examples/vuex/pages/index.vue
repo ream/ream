@@ -15,6 +15,10 @@ export default defineComponent({
 
 <template>
   <div>
+    <ul>
+      <li><router-link to="/egoist">egoist</router-link></li>
+      <li><router-link to="/kevin">kevin</router-link></li>
+    </ul>
     <button @click="inc">{{ count }}</button>
   </div>
 </template>

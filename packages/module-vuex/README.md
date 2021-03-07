@@ -32,22 +32,24 @@ export default () =>
   })
 ```
 
-If you want to prefetch some data on the server-side, add a `serverInit` action, it will be invoked before server-side rendering:
+If you want to prefetch data during SSR, add a `getInitialState` action, it will be invoked before server-side rendering and each navigation in browser:
 
 ```ts
 createStore({
   state: {
-    count: 0,
+    post: null,
   },
   actions: {
-    async serverInit({ commit }) {
-      const count = await getCountFromApi()
-      await commit('setCountFromApi', count)
+    async getInitialState({ commit }, { to, from }) {
+      if (to.name === 'posts/[slug]') {
+        const post = await fetchPost(to.params.slug)
+        commit('setPost', post)
+      }
     },
   },
   mutations: {
-    setCountFromApi(state, count) {
-      state.count = count
+    setPost(state, post) {
+      state.post = post
     },
   },
 })

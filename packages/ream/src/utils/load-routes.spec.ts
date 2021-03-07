@@ -50,19 +50,19 @@ test('build routes', async () => {
           'isServerRoute': false
         },
         {
-          'name': 'settings-a',
+          'name': 'settings/a',
           'path': '/settings/a',
           'file': '/routes/settings/a.vue',
           'isServerRoute': false,
           'children': [
             {
-              'name': 'settings-a-b',
+              'name': 'settings/a/b',
               'path': 'b',
               'file': '/routes/settings/a/b.vue',
               'isServerRoute': false
             },
             {
-              'name': 'settings-a-c',
+              'name': 'settings/a/c',
               'path': 'c',
               'file': '/routes/settings/a/c.vue',
               'isServerRoute': false
@@ -70,43 +70,43 @@ test('build routes', async () => {
           ]
         },
         {
-          'name': 'welcome-index',
+          'name': 'welcome/index',
           'path': '/welcome',
           'file': '/routes/welcome/index.vue',
           'isServerRoute': false
         },
         {
-          'name': 'welcome-a',
+          'name': 'welcome/a',
           'path': '/welcome/a',
           'file': '/routes/welcome/a.vue',
           'isServerRoute': false
         },
         {
-          'name': 'deep-nested-route',
+          'name': 'deep/nested/route',
           'path': '/deep/nested/route',
           'file': '/routes/deep/nested/route.vue',
           'isServerRoute': false,
           'children': [
             {
-              'name': 'deep-nested-route-index',
+              'name': 'deep/nested/route/index',
               'path': '',
               'file': '/routes/deep/nested/route/index.vue',
               'isServerRoute': false
             },
             {
-              'name': 'deep-nested-route-a',
+              'name': 'deep/nested/route/a',
               'path': 'a',
               'file': '/routes/deep/nested/route/a.vue',
               'isServerRoute': false
             },
             {
-              'name': 'deep-nested-route-b',
+              'name': 'deep/nested/route/b',
               'path': 'b',
               'file': '/routes/deep/nested/route/b.vue',
               'isServerRoute': false
             },
             {
-              'name': 'deep-nested-route-c',
+              'name': 'deep/nested/route/c',
               'path': 'c',
               'file': '/routes/deep/nested/route/c.vue',
               'isServerRoute': false
@@ -114,25 +114,25 @@ test('build routes', async () => {
           ]
         },
         {
-          'name': 'api-index',
+          'name': 'api/index',
           'path': '/api',
           'file': '/routes/api/index.ts',
           'isServerRoute': true
         },
         {
-          'name': 'api-foo-index',
+          'name': 'api/foo/index',
           'path': '/api/foo',
           'file': '/routes/api/foo/index.ts',
           'isServerRoute': true
         },
         {
-          'name': 'api-foo-bar',
+          'name': 'api/foo/bar',
           'path': '/api/foo/bar',
           'file': '/routes/api/foo/bar.ts',
           'isServerRoute': true
         },
         {
-          'name': 'api-foo',
+          'name': 'api/foo',
           'path': '/api/foo',
           'file': '/routes/api/foo.ts',
           'isServerRoute': true

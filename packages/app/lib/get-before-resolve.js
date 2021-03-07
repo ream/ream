@@ -69,9 +69,8 @@ export const loadPageData = async (to, next = noop) => {
 
 /**
  * Execute `preload` in router-level `beforeResolve`
- * @param {import('vue').ComponentInternalInstance} vm vm is the root Vue app instance
  */
-export const getBeforeResolve = (vm) =>
+export const getBeforeResolve = () =>
   async function beforeResolve(to, from, next) {
     await loadPageData(to, next)
   }
