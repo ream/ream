@@ -22,10 +22,10 @@ export const onCreatedApp = async ({ initialState, app, router }) => {
     }
 
     if (getInitialState) {
+      // Don't call beforeResolve for initial render
       await router.isReady()
 
       router.beforeResolve(async (to, from, next) => {
-        console.log('resolve')
         await store.dispatch('getInitialState', { to, from })
         next()
       })
