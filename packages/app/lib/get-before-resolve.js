@@ -20,7 +20,7 @@ export const loadPageData = async (to, next = noop) => {
 
   const components = to.matched.map((m) => m.components.default)
   const hasPreload = components.some(
-    (component) => component.preload || component.staticPreload
+    (component) => component.$$preload || component.$$staticPreload
   )
   if (!hasPreload) {
     initialState.preload[to.path] = { hasPreload: false }
@@ -31,7 +31,7 @@ export const loadPageData = async (to, next = noop) => {
     const result = {}
 
     for (const component of components) {
-      if (component.preload || component.staticPreload) {
+      if (component.$$preload || component.$$staticPreload) {
         const _result = await fetch(getPreloadPath(to.path)).then((res) => {
           if (res.status === 404) {
             return { notFound: true }
@@ -39,7 +39,7 @@ export const loadPageData = async (to, next = noop) => {
           return res.json()
         })
 
-        if (component.staticPreload) {
+        if (component.$$staticPreload) {
           staticPreloadPaths[to.path] = true
         }
 

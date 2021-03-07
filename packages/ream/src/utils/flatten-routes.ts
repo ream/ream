@@ -21,9 +21,9 @@ export const flattenRoutes = async (
 
     const path = [parentPath, route.path].filter(Boolean).join('/')
     const page = {
-      preload: component.preload,
-      staticPreload: component.staticPreload,
-      getStaticPaths: component.getStaticPaths,
+      preload: component.$$preload,
+      staticPreload: component.$$staticPreload,
+      getStaticPaths: component.$$getStaticPaths,
     }
 
     if (route.children) {
