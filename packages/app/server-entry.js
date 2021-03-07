@@ -9,6 +9,7 @@ import {
   AppComponent,
 } from '/.ream/templates/shared-exports.js'
 import { _document, serverRoutes } from '/.ream/templates/server-exports.js'
+import { callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
 
 export default {
   async render(context) {
@@ -51,4 +52,6 @@ export default {
   serverRoutes,
 
   ErrorComponent,
+
+  callEnhanceAppAsync,
 }

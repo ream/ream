@@ -52,14 +52,10 @@ const writeEnhanceApp = async (api: Ream, projectEnhanceAppFiles: string[]) => {
     return fns
   }
 
-  async function runPromise(name, context) {
+  export async function callEnhanceAppAsync(name, context) {
     for (const fn of getFns(name)) {
       await fn(context)
     }
-  }
-
-  export async function onCreatedApp(context) {
-    await runPromise('onCreatedApp', context)
   }
   `
   )
@@ -238,7 +234,7 @@ export async function prepareFiles(api: Ream) {
           serverEntry: require('../server/server-entry.js').default,
           // Export info is only available after exporting
           // So we lazy load it here
-          getExportInfo: () => require('../meta/export-info')
+          getExportManifest: () => require('../manifest/export-manifest')
         }
         
         module.exports = {

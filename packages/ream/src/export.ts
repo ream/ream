@@ -2,11 +2,14 @@ import path from 'path'
 import fs from 'fs-extra'
 import consola from 'consola'
 import chalk from 'chalk'
+import serializeJavascript from 'serialize-javascript'
 import {
   render,
   productionGetHtmlAssets,
-  ExportInfo,
-  ExportCache,
+  ExportManifest,
+  ServerContext,
+  createClientRouter,
+  getExportOutputPath,
 } from '@ream/server'
 import { PromiseQueue } from '@egoist/promise-queue'
 import { flattenRoutes } from './utils/flatten-routes'
@@ -19,7 +22,7 @@ function getHref(attrs: string) {
 export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   const exportDir = path.join(dotReamDir, fullyExport ? 'client' : 'export')
 
-  const { serverContext } = require(path.join(
+  const { serverContext }: { serverContext: ServerContext } = require(path.join(
     dotReamDir,
     'meta/server-context'
   ))
@@ -34,7 +37,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
   )
 
   const staticPaths: string[] = []
-  const exportInfo: ExportInfo = { staticPaths, fallbackPathsRaw: [] }
+  const exportManifest: ExportManifest = { staticPages: [] }
 
   await Promise.all(
     clientRoutes.map(async (route) => {
@@ -46,87 +49,91 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
       if (route.path === '/:404(.*)') {
         staticPaths.push('/404.html')
-      } else if (route.path.includes(':')) {
-        const paths = []
+      } else {
+        const isDynamicPath = route.path.includes(':')
         let fallback = false
 
-        for (const m of route.matched) {
-          if (m.getStaticPaths) {
-            const res = await m.getStaticPaths()
-            paths.push(...res.paths)
-            if (res.fallback != null) {
-              fallback = res.fallback
+        const isStatic = route.matched.every((m) => !m.preload)
+
+        if (!isStatic) return
+
+        if (isDynamicPath) {
+          const paths = []
+          for (const m of route.matched) {
+            if (m.getStaticPaths) {
+              const res = await m.getStaticPaths()
+              paths.push(...res.paths)
+              if (res.fallback != null) {
+                fallback = res.fallback
+              }
             }
           }
+          if (paths.length === 0) {
+            consola.warn(
+              `No static paths provided for ${route.path}, skipped exporting`
+            )
+          }
+          for (const path of paths) {
+            const staticPath = route.path
+              .replace('(.*)', '')
+              .replace(/:([^\/]+)/g, (_, p1) => path.params[p1])
+            staticPaths.push(staticPath)
+          }
+        } else {
+          staticPaths.push(route.path)
         }
 
-        if (paths.length === 0) {
-          consola.warn(
-            `No static paths provided for ${route.path}, skipped exporting`
-          )
-        }
-
-        for (const path of paths) {
-          const staticPath = route.path
-            .replace('(.*)', '')
-            .replace(/:([^\/]+)/g, (_, p1) => path.params[p1])
-          staticPaths.push(staticPath)
-        }
-        if (fallback) {
-          exportInfo.fallbackPathsRaw.push(route.path)
-        }
-      } else {
-        staticPaths.push(route.path)
+        exportManifest.staticPages.push({ path: route.path, fallback })
       }
     })
   )
 
   await fs.outputFile(
-    path.join(dotReamDir, 'meta/export-info.json'),
-    JSON.stringify(exportInfo),
+    path.join(dotReamDir, 'manifest/export-manifest.json'),
+    JSON.stringify(exportManifest),
     'utf8'
   )
 
   const queue = new PromiseQueue<[string]>(
     async (jobId, url) => {
       consola.info(chalk.dim(jobId))
-      const exportCache = new ExportCache({
-        exportDir: exportDir,
-        flushToDisk: true,
-        writeOnly: true,
-      })
 
-      await render({
+      const router = await createClientRouter(serverContext.serverEntry, url)
+
+      const routePath = router.currentRoute.value.path
+      const { html = '', preloadResult } = await render({
         url,
         ssrManifest: serverContext.ssrManifest,
         serverEntry: serverContext.serverEntry,
         clientManifest: serverContext.clientManifest,
         getHtmlAssets: productionGetHtmlAssets,
-        exportCache,
-        exportInfo: {
-          staticPaths: [],
-          // Skip fallback check, force all static paths to render
-          fallbackPathsRaw: clientRoutes.map((r) => r.path),
-        },
+        router,
       })
+
+      const htmlPath = getExportOutputPath(routePath, 'html', exportDir)
+      const jsonPath = getExportOutputPath(routePath, 'json', exportDir)
+      await Promise.all([
+        fs.outputFile(htmlPath, html, 'utf8'),
+        preloadResult.hasPreload &&
+          preloadResult.isStatic &&
+          (await fs.outputFile(
+            jsonPath,
+            serializeJavascript(preloadResult, { isJSON: true }),
+            'utf8'
+          )),
+      ])
 
       // Crawl pages
       if (fullyExport) {
-        for (const routePath of exportCache.cache.keys()) {
-          const item = exportCache.cache.items[routePath]!
-          const html = item.value.html
-          if (html) {
-            // find all `<a>` tags in exported html files and export links that are not yet exported
-            let match: RegExpExecArray | null = null
-            const LINK_RE = /<a ([\s\S]+?)>/gm
-            while ((match = LINK_RE.exec(html))) {
-              const href = getHref(match[1])
-              if (href) {
-                const url = new URL(href, 'http://self')
-                if (url.host === 'self') {
-                  queue.add(`Exporting ${url.pathname}`, url.pathname)
-                }
-              }
+        // find all `<a>` tags in exported html files and export links that are not yet exported
+        let match: RegExpExecArray | null = null
+        const LINK_RE = /<a ([\s\S]+?)>/gm
+        while ((match = LINK_RE.exec(html))) {
+          const href = getHref(match[1])
+          if (href) {
+            const url = new URL(href, 'http://self')
+            if (url.host === 'self') {
+              queue.add(`Exporting ${url.pathname}`, url.pathname)
             }
           }
         }

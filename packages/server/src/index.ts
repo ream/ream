@@ -3,9 +3,16 @@ import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
 import type { GetDocument, Preload } from '@ream/app'
-import { Server } from './server'
-import { render, renderToHTML, getPreloadData, GetHtmlAssets } from './render'
+import { ReamServerRequest, ReamServerResponse, Server } from './server'
+import {
+  render,
+  renderToHTML,
+  getPreloadData,
+  GetHtmlAssets,
+  PreloadResult,
+} from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
+import serializeJavascript from 'serialize-javascript'
 export {
   ReamServerHandler,
   ReamServerRequest,
@@ -26,18 +33,16 @@ export type ServerEntry = {
   serverRoutes: RouteRecordRaw[]
   clientRoutes: RouteRecordRaw[]
   getGlobalPreload: () => Promise<Preload | undefined>
+  callEnhanceAppAsync: (name: string, context: any) => Promise<void>
 }
 
-export type ExportInfo = {
-  /** The paths that have been exported at build time */
-  staticPaths: string[]
-  /** The raw paths that should fallback to render on demand */
-  fallbackPathsRaw: string[]
+export type ExportManifest = {
+  staticPages: { path: string; fallback?: boolean }[]
 }
 
-type ServerContext = {
+export type ServerContext = {
   serverEntry: ServerEntry
-  getExportInfo?: () => ExportInfo
+  getExportManifest?: () => ExportManifest
   ssrManifest?: any
   clientManifest?: any
 }
@@ -111,6 +116,20 @@ export const start = async (
   console.log(`> http://${host}:${port}`)
 }
 
+export const createClientRouter = async (
+  serverEntry: ServerEntry,
+  url: string
+) => {
+  const router = serverEntry.createClientRouter()
+
+  await serverEntry.callEnhanceAppAsync('onCreatedRouter', { router })
+
+  router.push(url)
+  await router.isReady()
+
+  return router
+}
+
 export function createServer(options: CreateServerOptions) {
   const dotReamDir = path.resolve(options.cwd || '.', '.ream')
   const getHtmlAssets = options.getHtmlAssets || productionGetHtmlAssets
@@ -118,12 +137,38 @@ export function createServer(options: CreateServerOptions) {
 
   // A vue-router instance for matching server routes (aka API routes)
   let context: ServerContext
-  let exportInfo: ExportInfo | undefined
+  let exportCache: ExportCache | undefined
 
-  const exportCache = new ExportCache({
-    exportDir: path.join(dotReamDir, 'export'),
-    flushToDisk: true,
-  })
+  const renderNotFound = async (
+    req: ReamServerRequest,
+    res: ReamServerResponse,
+    router: Router
+  ) => {
+    let html: string | undefined
+    if (exportCache) {
+      const cache = await exportCache.get('/404.html')
+      if (cache) {
+        html = cache.html || ''
+      }
+    }
+    if (!html) {
+      const result = await render({
+        url: req.url,
+        req,
+        res,
+        isPreloadRequest: false,
+        ssrManifest: context.ssrManifest,
+        serverEntry: context.serverEntry,
+        clientManifest: context.clientManifest,
+        getHtmlAssets,
+        router,
+        notFound: true,
+      })
+      html = result.html
+    }
+    res.statusCode = 404
+    res.send(html!)
+  }
 
   if (options.devMiddleware) {
     server.use(options.devMiddleware)
@@ -141,7 +186,16 @@ export function createServer(options: CreateServerOptions) {
         typeof options.context === 'function'
           ? await options.context()
           : options.context
-      exportInfo = context.getExportInfo && context.getExportInfo()
+    }
+    if (!options.dev) {
+      exportCache =
+        exportCache ||
+        new ExportCache({
+          exportDir: path.join(dotReamDir, 'export'),
+          flushToDisk: true,
+          exportManifest:
+            context.getExportManifest && context.getExportManifest(),
+        })
     }
     next()
   })
@@ -175,7 +229,52 @@ export function createServer(options: CreateServerOptions) {
         req.url = `/${req.url}`
       }
     }
-    const result = await render({
+
+    const router = await createClientRouter(context.serverEntry, req.url)
+    const route = router.currentRoute.value
+    req.params = route.params
+
+    if (route.name === '404') {
+      await renderNotFound(req, res, router)
+      return
+    }
+
+    const rawPath = route.matched.map((m) => m.path).join('/')
+
+    // Try loading the cache
+    // Is this a static page? i.e. It doesn't use `preload`
+    const staticPage = exportCache?.findStaticPage(rawPath)
+    const pageCache = staticPage && (await exportCache?.get(req.path))
+
+    if (pageCache) {
+      if (isPreloadRequest) {
+        res.send(serializeJavascript(pageCache.preloadResult, { isJSON: true }))
+      } else if (pageCache.html) {
+        res.send(pageCache.html)
+      }
+
+      // Break the request chain if the cache is not stale
+      // No need to update the cache
+      if (res.writableEnded && !pageCache.isStale) {
+        return
+      }
+    }
+
+    let fallback = true
+
+    // Cache miss, static pages with `fallback` should still render on demand
+    // Otherwise renders 404
+    if (!pageCache && staticPage && !staticPage.fallback) {
+      fallback = false
+    }
+
+    if (!fallback) {
+      await renderNotFound(req, res, router)
+      return
+    }
+
+    // Cache miss, dynamic page, do a fresh render
+    const { html, preloadResult } = await render({
       url: req.url,
       req,
       res,
@@ -184,22 +283,29 @@ export function createServer(options: CreateServerOptions) {
       serverEntry: context.serverEntry,
       clientManifest: context.clientManifest,
       getHtmlAssets,
-      exportInfo,
-      exportCache,
+      router,
     })
 
-    if (result.redirect) {
-      res.writeHead(result.redirect.permanent ? 301 : 302, {
-        Location: result.redirect.url,
-      })
-      res.end()
-    } else {
-      res.statusCode = result.statusCode
-
-      for (const key in result.headers) {
-        res.setHeader(key, result.headers[key])
+    if (!pageCache || !pageCache.isStale) {
+      if (isPreloadRequest) {
+        res.send(serializeJavascript(preloadResult, { isJSON: true }))
+      } else {
+        if (preloadResult.redirect) {
+          res.writeHead(preloadResult.redirect.permanent ? 301 : 302, {
+            Location: preloadResult.redirect.url,
+          })
+          res.end()
+        } else {
+          res.send(html || '')
+        }
       }
-      res.end(result.body)
+    }
+
+    if (exportCache && preloadResult.isStatic && !options.dev) {
+      await exportCache.set(req.path, {
+        html: html,
+        preloadResult,
+      })
     }
   })
 
@@ -212,9 +318,7 @@ export function createServer(options: CreateServerOptions) {
     try {
       res.statusCode =
         !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
-      const router = context.serverEntry.createClientRouter()
-      router.push(req.url)
-      await router.isReady()
+      const router = await createClientRouter(context.serverEntry, req.url)
       const ErrorComponent = await context.serverEntry.ErrorComponent.__asyncLoader()
       const globalPreload = await context.serverEntry.getGlobalPreload()
       const preloadResult = await getPreloadData(

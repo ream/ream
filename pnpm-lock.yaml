@@ -131,6 +131,7 @@ importers:
       hash-sum: 2.0.0
       joycon: 2.2.5
       resolve-from: 5.0.0
+      serialize-javascript: 5.0.1
       vite: 2.0.3
       vue: 3.0.5
     devDependencies:
@@ -165,6 +166,7 @@ importers:
       joycon: 2.2.5
       mock-fs: ^4.13.0
       resolve-from: 5.0.0
+      serialize-javascript: ^5.0.1
       type-fest: ^0.21.1
       vite: ^2.0.3
       vue: ^3.0.5

@@ -19,7 +19,7 @@ export function send(res: ReamServerResponse, data: SendData = '') {
     data = JSON.stringify(data)
     type = type || 'application/json;charset=utf-8'
   } else {
-    type = type || 'text/plain'
+    type = type || 'text/html'
   }
 
   res.setHeader('content-length', Buffer.byteLength(data))

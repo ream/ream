@@ -14,7 +14,7 @@ import {
   NotFoundComponent,
   ErrorComponent,
 } from '/.ream/templates/shared-exports.js'
-import { onCreatedApp } from '/.ream/templates/enhance-app.js'
+import { callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
 
 export const createApp = async ({ router, initialState }) => {
   const app = createSSRApp({
@@ -78,7 +78,7 @@ export const createApp = async ({ router, initialState }) => {
   // Can't use app.component() cause Vue will complain
   app._context.components[RouterLink.name] = RouterLink
 
-  await onCreatedApp({ app, router, initialState })
+  await callEnhanceAppAsync('onCreatedApp', { app, router, initialState })
 
   return {
     app,

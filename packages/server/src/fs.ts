@@ -12,7 +12,7 @@ export const outputFile = async (
 
 export const readFile = fs.promises.readFile
 
-export const pathExists = (filepath: string) =>
+export const pathExists = (filepath: string): Promise<boolean> =>
   new Promise((resolve) => {
     fs.access(filepath, (err) => resolve(!err))
   })

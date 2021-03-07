@@ -16,6 +16,7 @@ export const staticPreload: StaticPreload = async ({ params }) => {
   }
   return {
     data: result,
+    revalidate: 5,
   }
 }
 

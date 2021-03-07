@@ -1,17 +1,20 @@
 import path from 'path'
 import { LRU } from './lru'
 import type { PreloadResult } from './render'
-import { outputFile, readFile } from './fs'
+import { outputFile, pathExists, readFile } from './fs'
 import serializeJavascript from 'serialize-javascript'
+import { ExportManifest } from '.'
 
 type PageCache = {
   html?: string
   preloadResult: PreloadResult
+  isStale?: boolean
 }
 
 type Options = {
   exportDir: string
   flushToDisk: boolean
+  exportManifest?: ExportManifest
   /**
    * Make `.get` always return `undefined`
    * a.k.a use as a write only storage
@@ -59,6 +62,13 @@ export class ExportCache {
     return this.options.writeOnly
   }
 
+  findStaticPage(rawPath: string) {
+    const { exportManifest } = this.options
+    if (!exportManifest) return
+
+    return exportManifest.staticPages.find((record) => record.path === rawPath)
+  }
+
   async get(pathname: string) {
     if (this.options.writeOnly) return
 
@@ -69,12 +79,21 @@ export class ExportCache {
       const jsonPath = this.getOutputPath(pathname, 'json')
       try {
         const [html, preloadResult] = await Promise.all([
-          readFile(htmlPath, 'utf8'),
-          readFile(jsonPath, 'utf8').then((res) => JSON.parse(res)),
+          pathExists(htmlPath).then((exists) =>
+            exists ? readFile(htmlPath, 'utf8') : ''
+          ),
+          pathExists(jsonPath).then(
+            (exists) =>
+              exists &&
+              readFile(jsonPath, 'utf8').then((res) => JSON.parse(res))
+          ),
         ])
-        data = { html, preloadResult }
+        if (html || preloadResult) {
+          data = { html, preloadResult }
+        }
       } catch (_) {
         // Error getting cache
+        console.log(_)
       }
     }
 
@@ -83,7 +102,7 @@ export class ExportCache {
       data.preloadResult.expiry &&
       data.preloadResult.expiry <= Date.now()
     ) {
-      return
+      data.isStale = true
     }
 
     return data
