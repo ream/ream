@@ -13,13 +13,11 @@ Or with TypeScript:
 
 ```ts
 // ream.config.ts
-import { ReamConfig } from 'ream'
+import { defineReamConfig } from 'ream'
 
-const config: ReamConfig = {
+export default defineReamConfig({
   // ...your config
-}
-
-export default config
+})
 ```
 
 All config options are documented below.
@@ -45,17 +43,20 @@ module.exports = {
 
 Then you can use `import.meta.env.API_ENDPOINT` in your app code.
 
-## `plugins`
+`.env` files are also supported.
 
-- Type: `ReamPlugin[]`
+## `modules`
 
-Use Ream plugins. e.g.
+- Type: `string[]`
+
+Use Ream modules. e.g.
 
 ```ts
-import ga from '@ream/plugin-google-analytics'
-
 export default {
-  plugins: [ga()],
+  modules: ['@ream/module-google-analytics'],
+  env: {
+    GA_TRACKING_ID: 'UA-XXX-XXX',
+  },
 }
 ```
 
@@ -68,7 +69,7 @@ Prepend some `import` statements to both server and client entries, which can be
 Example:
 
 ```js
-module.exports = {
+export default {
   imports: ['./some-polyfill'],
 }
 ```
@@ -78,7 +79,7 @@ module.exports = {
 Extend Ream's internal [Vite config](https://vitejs.dev/config/).
 
 ```js
-module.exports = {
+export default {
   vite(config, { ssr, dev }) {
     // Mutate the config object here
   },

@@ -1,14 +1,12 @@
 import { h, defineComponent } from 'vue'
-import { usePreloadResult } from '@ream/app'
-import { useHead } from '@ream/app'
+import { useServerError, useHead } from '../'
 
 export default defineComponent({
   name: 'DefaultError',
   setup() {
     useHead({ title: 'Error' })
 
-    const result = usePreloadResult()
-    const { error } = result.value
+    const error = useServerError()
     return () =>
       h(
         'div',
@@ -28,17 +26,18 @@ export default defineComponent({
                 color: `red`,
               },
             },
-            [`Error: ${error.statusCode}`]
+            [`Error: ${error.value.statusCode}`]
           ),
-          h(
-            'pre',
-            {
-              style: {
-                overflow: `auto`,
+          error.value.message &&
+            h(
+              'pre',
+              {
+                style: {
+                  overflow: `auto`,
+                },
               },
-            },
-            [error.stack]
-          ),
+              [error.value.message]
+            ),
         ]
       )
   },

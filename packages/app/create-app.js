@@ -14,7 +14,7 @@ import {
   NotFoundComponent,
   ErrorComponent,
 } from '/.ream/templates/shared-exports.js'
-import { callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
+import { callAsync as callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
 
 export const createApp = async ({ router, initialState }) => {
   const app = createSSRApp({

@@ -7,7 +7,7 @@ import {
   ReamServerResponse,
   ReamServerHandler,
 } from './server'
-import type { ServerEntry } from '.'
+import type { GetInitialHTML, ServerEntry } from '.'
 
 export type RenderError = {
   statusCode: number
@@ -122,6 +122,26 @@ export async function render({
 
 export type GetHtmlAssets = (clientManifest?: any) => HtmlAssets
 
+const getInitialHTML: GetInitialHTML = ({
+  head,
+  main,
+  scripts,
+  htmlAttrs,
+  bodyAttrs,
+}) => {
+  return `
+  <html${htmlAttrs}>
+    <head>
+      ${head}
+    </head>
+    <body${bodyAttrs}>
+      ${main}
+      ${scripts}
+    </body>
+  </html>
+  `
+}
+
 export async function renderToHTML(options: {
   params: any
   url: string
@@ -159,21 +179,26 @@ export async function renderToHTML(options: {
     ? renderPreloadLinks(context.modules, options.ssrManifest)
     : ''
   const headHTML = options.serverEntry.renderHeadToString(app)
-  const { default: getDocument } = await options.serverEntry._document()
   const assets = options.getHtmlAssets(options.clientManifest)
-  const html = await getDocument({
-    head: () => `${headHTML.headTags}${assets.cssLinkTags}${preloadLinks}`,
-    main: () => `<div id="_ream">${appHTML}</div>`,
-    scripts: () => `
+  const getInitialHTMLContext = {
+    head: `${headHTML.headTags}${assets.cssLinkTags}${preloadLinks}`,
+    main: `<div id="_ream">${appHTML}</div>`,
+    scripts: `
       <script>INITIAL_STATE=${serializeJavaScript(context.initialState, {
         isJSON: true,
       })}
       </script>
       ${assets.scriptTags}
       `,
-    htmlAttrs: () => headHTML.htmlAttrs,
-    bodyAttrs: () => headHTML.bodyAttrs,
-  })
+    htmlAttrs: headHTML.htmlAttrs,
+    bodyAttrs: headHTML.bodyAttrs,
+  }
+  let html = await options.serverEntry.enhanceServer.getInitialHTML(
+    getInitialHTMLContext
+  )
+  if (!html) {
+    html = await getInitialHTML(getInitialHTMLContext)
+  }
 
   return `<!DOCTYPE html>${html}`
 }
@@ -183,7 +208,7 @@ export type PreloadResult = {
   hasPreload?: boolean
   isStatic?: boolean
   notFound?: boolean
-  error?: { statusCode: number; stack?: string }
+  error?: { statusCode: number; message?: string }
   redirect?: { url: string; permanent?: boolean }
   revalidate?: number
   expiry?: number
@@ -198,7 +223,7 @@ export async function getPreloadData(
   let hasPreload: boolean = false
   let isStatic: boolean = !globalPreload
   let notFound: boolean | undefined
-  let error: { statusCode: number; stack?: string } | undefined
+  let error: { statusCode: number; message?: string } | undefined
   let redirect: PreloadResult['redirect'] | undefined
   let revalidate: number | undefined
 
@@ -246,7 +271,7 @@ export async function getPreloadData(
       } catch (_error) {
         error = {
           statusCode: 500,
-          stack:
+          message:
             process.env.NODE_ENV === 'production' ? undefined : _error.stack,
         }
       }

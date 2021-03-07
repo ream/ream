@@ -2,7 +2,7 @@ import path from 'path'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
-import type { GetDocument, Preload } from '@ream/app'
+import type { Preload } from '@ream/app'
 import { ReamServerRequest, ReamServerResponse, Server } from './server'
 import { render, renderToHTML, getPreloadData, GetHtmlAssets } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
@@ -19,15 +19,29 @@ export type ServerEntry = {
   render: any
   createClientRouter: () => Router
   createServerRouter: () => Router
-  _document: () => Promise<{
-    default: GetDocument
-  }>
   renderHeadToString: (app: any) => HeadResult
   ErrorComponent: any
   serverRoutes: RouteRecordRaw[]
   clientRoutes: RouteRecordRaw[]
   getGlobalPreload: () => Promise<Preload | undefined>
-  callEnhanceAppAsync: (name: string, context: any) => Promise<void>
+  enhanceApp: {
+    callAsync: (name: string, context: any) => Promise<void>
+  }
+  enhanceServer: {
+    getInitialHTML: GetInitialHTML
+  }
+}
+
+export type GetInitialHTML = (
+  context: GetInitialHTMLContext
+) => string | undefined | Promise<string | undefined>
+
+export type GetInitialHTMLContext = {
+  head: string
+  main: string
+  scripts: string
+  htmlAttrs: string
+  bodyAttrs: string
 }
 
 export type ExportManifest = {
@@ -116,7 +130,7 @@ export const createClientRouter = async (
 ) => {
   const router = serverEntry.createClientRouter()
 
-  await serverEntry.callEnhanceAppAsync('onCreatedRouter', { router })
+  await serverEntry.enhanceApp.callAsync('onCreatedRouter', { router })
 
   router.push(url)
   await router.isReady()
@@ -326,7 +340,7 @@ export function createServer(options: CreateServerOptions) {
       )
       preloadResult.error = {
         statusCode: res.statusCode,
-        stack: options.dev ? err.stack : undefined,
+        message: options.dev ? err.stack : undefined,
       }
       const html = await renderToHTML({
         params: req.params,

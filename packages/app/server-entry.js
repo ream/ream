@@ -8,8 +8,9 @@ import {
   ErrorComponent,
   AppComponent,
 } from '/.ream/templates/shared-exports.js'
-import { _document, serverRoutes } from '/.ream/templates/server-exports.js'
-import { callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
+import { serverRoutes } from '/.ream/templates/server-exports.js'
+import * as enhanceApp from '/.ream/templates/enhance-app.js'
+import * as enhanceServer from '/.ream/templates/enhance-server.js'
 
 export default {
   async render(context) {
@@ -45,13 +46,13 @@ export default {
     return $$preload
   },
 
-  _document,
-
   clientRoutes,
 
   serverRoutes,
 
   ErrorComponent,
 
-  callEnhanceAppAsync,
+  enhanceApp,
+
+  enhanceServer,
 }

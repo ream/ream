@@ -23,8 +23,8 @@ export default [
         link: '/docs/data-fetching',
       },
       {
-        text: 'Custom App & Document',
-        link: '/docs/custom-app-and-document',
+        text: 'Special Pages',
+        link: '/docs/special-pages',
       },
       {
         text: 'App Hooks',

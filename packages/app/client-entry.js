@@ -7,7 +7,7 @@ import { clientRoutes } from '/.ream/templates/shared-exports.js'
 import { createApp } from './create-app'
 import { getBeforeResolve } from './lib/get-before-resolve'
 import { scrollBehavior } from './lib/scroll-behavior'
-import { callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
+import { callAsync as callEnhanceAppAsync } from '/.ream/templates/enhance-app.js'
 
 window._ream = {
   event: mitt(),

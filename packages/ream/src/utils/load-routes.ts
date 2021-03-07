@@ -6,7 +6,6 @@ export const filesToRoutes = (files: string[], dir: string) => {
   const routes: Route[] = []
   let errorFile: string = `@ream/app/pages/_error.js`
   let appFile: string | undefined = `@ream/app/pages/_app.js`
-  let documentFile: string | undefined = `@ream/app/pages/_document.js`
   let notFoundFile = `@ream/app/pages/404.js`
 
   for (const file of files) {
@@ -19,9 +18,6 @@ export const filesToRoutes = (files: string[], dir: string) => {
 
     if (slug === '_error') {
       errorFile = absolutePath
-      continue
-    } else if (slug === '_document') {
-      documentFile = absolutePath
       continue
     } else if (slug === '_app') {
       appFile = absolutePath
@@ -92,5 +88,5 @@ export const filesToRoutes = (files: string[], dir: string) => {
     parent.push(route)
   }
 
-  return { routes, appFile, documentFile, errorFile, notFoundFile }
+  return { routes, appFile, errorFile, notFoundFile }
 }

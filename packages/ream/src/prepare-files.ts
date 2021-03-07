@@ -18,46 +18,69 @@ const writeFileIfChanged = async (filepath: string, content: string) => {
   await outputFile(filepath, content, 'utf8')
 }
 
-const writeEnhanceApp = async (api: Ream, projectEnhanceAppFiles: string[]) => {
+const writeEnhanceFile = async (
+  api: Ream,
+  type: 'app' | 'server',
+  projectFiles: string[]
+) => {
   const { pluginsFiles } = api.pluginContext
-  const enhanceAppFiles = [...pluginsFiles['enhance-app']]
+  const files = [
+    ...pluginsFiles[type === 'app' ? 'enhance-app' : 'enhance-server'],
+  ]
 
-  const projectEnhanceAppFile = await resolveFile(projectEnhanceAppFiles)
+  const projectFile = await resolveFile(projectFiles)
 
-  if (projectEnhanceAppFile) {
-    enhanceAppFiles.push(projectEnhanceAppFile)
+  if (projectFile) {
+    files.push(projectFile)
+  }
+
+  let content = `
+  ${files
+    .map((file, index) => {
+      return `import * as enhance_${type}_${index} from "${file}"`
+    })
+    .join('\n')}
+
+var files = [
+  ${files.map((_, i) => `enhance_${type}_${i}`).join(',')}
+]
+
+function getExportByName(name) {
+  var fns = []
+  for (var i = 0; i < files.length; i++) {
+    var mod = files[i]
+    if (mod[name]) {
+      fns.push(mod[name])
+    }
+  }
+  return fns
+}
+
+export async function callAsync(name, context) {
+  for (const fn of getExportByName(name)) {
+    await fn(context)
+  }
+}
+`
+
+  if (type === 'server') {
+    content += `
+  export async function getInitialHTML(context) {
+    let html
+    for (const fn of getExportByName('getInitialHTML')) {
+      const result = fn(context)
+      if (result) {
+        html = result
+      }
+    }
+    return html
+  }
+  `
   }
 
   await writeFileIfChanged(
-    api.resolveDotReam('templates/enhance-app.js'),
-    `
-    ${enhanceAppFiles
-      .map((file, index) => {
-        return `import * as enhanceApp_${index} from "${file}"`
-      })
-      .join('\n')}
-
-  var files = [
-    ${enhanceAppFiles.map((_, i) => `enhanceApp_${i}`).join(',')}
-  ]
-
-  function getFns(name) {
-    var fns = []
-    for (var i = 0; i < files.length; i++) {
-      var mod = files[i]
-      if (mod[name]) {
-        fns.push(mod[name])
-      }
-    }
-    return fns
-  }
-
-  export async function callEnhanceAppAsync(name, context) {
-    for (const fn of getFns(name)) {
-      await fn(context)
-    }
-  }
-  `
+    api.resolveDotReam(`templates/enhance-${type}.js`),
+    content
   )
 }
 
@@ -79,6 +102,11 @@ export async function prepareFiles(api: Ream) {
   const projectEnhanceAppFiles = [
     api.resolveSrcDir('enhance-app.js'),
     api.resolveSrcDir('enhance-app.ts'),
+  ]
+
+  const projectEnhanceServerFiles = [
+    api.resolveSrcDir('enhance-server.js'),
+    api.resolveSrcDir('enhance-server.ts'),
   ]
 
   const writeRoutes = async () => {
@@ -197,8 +225,6 @@ export async function prepareFiles(api: Ream) {
 
     const serverExportsContent = `
    export const serverRoutes = ${stringifyServerRoutes(routesInfo.routes)}
-
-   export const _document = () => import("${routesInfo.documentFile}")
     `
 
     await writeFileIfChanged(
@@ -220,7 +246,8 @@ export async function prepareFiles(api: Ream) {
 
   await Promise.all([
     writeRoutes(),
-    writeEnhanceApp(api, projectEnhanceAppFiles),
+    writeEnhanceFile(api, 'app', projectEnhanceAppFiles),
+    writeEnhanceFile(api, 'server', projectEnhanceServerFiles),
     writeGlobalImports(),
   ])
 
@@ -266,7 +293,10 @@ export async function prepareFiles(api: Ream) {
 
       // Update enhanceApp
       if (projectEnhanceAppFiles.includes(file)) {
-        await writeEnhanceApp(api, projectEnhanceAppFiles)
+        await writeEnhanceFile(api, 'app', projectEnhanceAppFiles)
+      }
+      if (projectEnhanceServerFiles.includes(file)) {
+        await writeEnhanceFile(api, 'server', projectEnhanceServerFiles)
       }
     })
   }

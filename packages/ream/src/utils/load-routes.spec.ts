@@ -139,7 +139,6 @@ test('build routes', async () => {
         }
       ],
       'appFile': '@ream/app/pages/_app.js',
-      'documentFile': '@ream/app/pages/_document.js',
       'errorFile': '@ream/app/pages/_error.js',
       'notFoundFile': '@ream/app/pages/404.js'
     }"

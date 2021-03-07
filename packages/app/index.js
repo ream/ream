@@ -23,6 +23,11 @@ export const usePreloadResult = () => {
   })
 }
 
+export const useServerError = () => {
+  const result = usePreloadResult()
+  return computed(() => result.value.error)
+}
+
 export const usePageData = () => {
   const preloadResult = usePreloadResult()
   return computed(() => preloadResult.value.data || {})
