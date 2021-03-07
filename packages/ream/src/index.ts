@@ -36,6 +36,8 @@ export type ReamConfig = {
   vite?: (viteConfig: ViteConfig, opts: { dev: boolean; ssr?: boolean }) => void
 }
 
+export const defineReamConfig = (config: ReamConfig) => config
+
 export class Ream {
   rootDir: string
   srcDir: string

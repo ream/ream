@@ -1,6 +1,6 @@
-import { ReamConfig } from 'ream'
+import { defineReamConfig } from 'ream'
 
-const config: ReamConfig = {
+export default defineReamConfig({
   env: {
     GA_TRACKING_ID: 'UA-54857209-24',
   },
@@ -12,6 +12,4 @@ const config: ReamConfig = {
   vue: {
     runtimeTemplateCompiler: true,
   },
-}
-
-export default config
+})
