@@ -75,13 +75,13 @@ importers:
   packages/app:
     dependencies:
       '@ream/fetch': link:../fetch
-      '@vueuse/head': 0.2.3_vue@3.0.5
+      '@vueuse/head': 0.5.1_vue@3.0.5
       mitt: 2.1.0
       vue: 3.0.5
       vue-router: 4.0.3_vue@3.0.5
     specifiers:
       '@ream/fetch': workspace:*
-      '@vueuse/head': ^0.2.3
+      '@vueuse/head': ^0.5.1
       mitt: ^2.1.0
       vue: ^3.0.5
       vue-router: ^4.0.3
@@ -1112,14 +1112,14 @@ packages:
     dev: false
     resolution:
       integrity: sha512-gYsNoGkWejBxNO6SNRjOh/xKeZ0H0V+TFzaPzODfBjkAIb0aQgBuixC1brandC/CDJy1wYPwSoYrXpvul7m6yw==
-  /@vueuse/head/0.2.3_vue@3.0.5:
+  /@vueuse/head/0.5.1_vue@3.0.5:
     dependencies:
       vue: 3.0.5
     dev: false
     peerDependencies:
       vue: '>=3'
     resolution:
-      integrity: sha512-bAFZyUlT6+CVIwMcUw3TrtuhG/BfjS+UV5T8oH30tGPnVvqIsNuRCnNt9EbVd1GxHRDZD0K41515B5NiXPt84A==
+      integrity: sha512-xt6qgtItb4z/7vp664opQc0c2+ZoU9itMfvpmg4+h0uJcEnhl7LYxO4V+G8H7EVki7SyXDIFMfoCiCFaJrArmg==
   /@windicss/plugin-utils/0.4.12:
     dependencies:
       esbuild: 0.8.51
