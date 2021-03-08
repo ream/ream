@@ -3,7 +3,11 @@ import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'serve-static'
 import type { Preload } from '@ream/app'
-import { ReamServerRequest, ReamServerResponse, Server } from './server'
+import {
+  ReamServerRequest,
+  ReamServerResponse,
+  createServer as createHttpServer,
+} from './server'
 import { render, renderToHTML, getPreloadData, GetHtmlAssets } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
 import serializeJavascript from 'serialize-javascript'
@@ -115,10 +119,14 @@ export const start = async (
 
   process.env.NODE_ENV = 'production'
 
-  const server = createServer({
-    cwd,
-    context: options.context,
-  })
+  const http = await import('http')
+
+  const server = http.createServer(
+    createHandler({
+      cwd,
+      context: options.context,
+    })
+  )
   // @ts-ignore
   server.listen(port, host)
   console.log(`> http://${host}:${port}`)
@@ -138,10 +146,10 @@ export const createClientRouter = async (
   return router
 }
 
-export function createServer(options: CreateServerOptions) {
+export function createHandler(options: CreateServerOptions) {
   const dotReamDir = path.resolve(options.cwd || '.', '.ream')
   const getHtmlAssets = options.getHtmlAssets || productionGetHtmlAssets
-  const server = new Server()
+  const server = createHttpServer({})
 
   // A vue-router instance for matching server routes (aka API routes)
   let context: ServerContext
@@ -236,6 +244,12 @@ export function createServer(options: CreateServerOptions) {
       if (req.url[0] !== '/') {
         req.url = `/${req.url}`
       }
+      const queryIndex = req.url.indexOf('?')
+      if (queryIndex === -1) {
+        req.path = req.url
+      } else {
+        req.path = req.url.substring(0, queryIndex)
+      }
     }
 
     const router = await createClientRouter(context.serverEntry, req.url)
@@ -294,6 +308,10 @@ export function createServer(options: CreateServerOptions) {
       router,
     })
 
+    if (preloadResult.error) {
+      res.statusCode = preloadResult.error.statusCode
+    }
+
     if (!pageCache || !pageCache.isStale) {
       if (isPreloadRequest) {
         res.send(serializeJavascript(preloadResult, { isJSON: true }))
@@ -317,7 +335,11 @@ export function createServer(options: CreateServerOptions) {
     }
   })
 
-  server.onError(async (err, req, res, next) => {
+  server.onError = async (err, req, res, next) => {
+    if (typeof err === 'string') {
+      err = new Error(err)
+    }
+
     if (options.ssrFixStacktrace) {
       options.ssrFixStacktrace(err)
     }
@@ -365,7 +387,7 @@ export function createServer(options: CreateServerOptions) {
           : 'server error'
       )
     }
-  })
+  }
 
-  return server.handler
+  return server.handler.bind(server)
 }

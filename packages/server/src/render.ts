@@ -245,34 +245,26 @@ export async function getPreloadData(
     hasPreload = true
 
     for (const fn of fns) {
-      try {
-        const result = await fn({
-          req: options.req,
-          res: options.res,
-          params: options.params,
-        })
-        if (result) {
-          if (typeof result.revalidate === 'number') {
-            revalidate = result.revalidate * 1000
-          }
-          if (result.notFound) {
-            notFound = true
-          } else if (result.redirect) {
-            redirect =
-              typeof result.redirect === 'string'
-                ? { url: result.redirect }
-                : result.redirect
-          } else if (result.data) {
-            Object.assign(data, result.data)
-          } else if (result.error) {
-            error = result.error
-          }
+      const result = await fn({
+        req: options.req,
+        res: options.res,
+        params: options.params,
+      })
+      if (result) {
+        if (typeof result.revalidate === 'number') {
+          revalidate = result.revalidate * 1000
         }
-      } catch (_error) {
-        error = {
-          statusCode: 500,
-          message:
-            process.env.NODE_ENV === 'production' ? undefined : _error.stack,
+        if (result.notFound) {
+          notFound = true
+        } else if (result.redirect) {
+          redirect =
+            typeof result.redirect === 'string'
+              ? { url: result.redirect }
+              : result.redirect
+        } else if (result.data) {
+          Object.assign(data, result.data)
+        } else if (result.error) {
+          error = result.error
         }
       }
     }

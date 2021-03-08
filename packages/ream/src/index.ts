@@ -152,9 +152,9 @@ export class Ream {
       shouldCleanDir: this.isDev,
       shouldPrepreFiles: this.isDev,
     })
-    const { createServer } = await import('./server')
-    const server = await createServer(this)
-    return server
+    const { getRequestHandler } = await import('./server')
+    const handler = await getRequestHandler(this)
+    return handler
   }
 
   async serve() {

@@ -1,4 +1,4 @@
-import { createServer as createReamServer } from '@ream/server'
+import { createHandler } from '@ream/server'
 import { createServer as createViteServer, ModuleNode } from 'vite'
 import type { Ream } from './'
 import { getViteConfig } from './vite/get-vite-config'
@@ -18,7 +18,7 @@ const collectCssUrls = (mods: Set<ModuleNode>, styles: Map<string, string>) => {
   }
 }
 
-export const createServer = async (api: Ream) => {
+export const getRequestHandler = async (api: Ream) => {
   const viteConfig = getViteConfig(api)
   const viteDevServer = await createViteServer(viteConfig)
   api.viteDevServer = viteDevServer
@@ -27,7 +27,7 @@ export const createServer = async (api: Ream) => {
     viteDevServer.watcher.on('all', callback)
   }
 
-  const server = createReamServer({
+  const handler = createHandler({
     cwd: api.rootDir,
     context: async () => {
       // waiting to vite to finish reloading devDependencies
@@ -64,5 +64,5 @@ export const createServer = async (api: Ream) => {
     ssrFixStacktrace: (err) => api.viteDevServer!.ssrFixStacktrace(err),
   })
 
-  return server
+  return handler
 }

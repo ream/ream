@@ -22,7 +22,6 @@
     "@ream/app": "workspace:*",
     "@vue/server-renderer": "^3.0.5",
     "cac": "6.7.1",
-    "connect": "3.7.0",
     "debug": "4.3.1",
     "path-to-regexp": "6.1.0",
     "serialize-javascript": "5.0.1",

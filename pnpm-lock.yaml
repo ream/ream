@@ -175,7 +175,6 @@ importers:
       '@ream/app': link:../app
       '@vue/server-renderer': 3.0.5_vue@3.0.5
       cac: 6.7.1
-      connect: 3.7.0
       debug: 4.3.1
       path-to-regexp: 6.1.0
       serialize-javascript: 5.0.1
@@ -192,7 +191,6 @@ importers:
       '@types/serve-static': 1.13.9
       '@vue/server-renderer': ^3.0.5
       cac: 6.7.1
-      connect: 3.7.0
       debug: 4.3.1
       path-to-regexp: 6.1.0
       serialize-javascript: 5.0.1
@@ -1678,17 +1676,6 @@ packages:
   /concat-map/0.0.1:
     resolution:
       integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
-  /connect/3.7.0:
-    dependencies:
-      debug: 2.6.9
-      finalhandler: 1.1.2
-      parseurl: 1.3.3
-      utils-merge: 1.0.1
-    dev: false
-    engines:
-      node: '>= 0.10.0'
-    resolution:
-      integrity: sha512-ZqRXc+tZukToSNmh5C2iWMSoV3X1YUcPbqEM4DkEG5tNQXrQUZCNVGGv3IuicnkMtPfGf3Xtp8WCXs295iQ1pQ==
   /consola/2.15.3:
     dev: false
     resolution:
@@ -2258,20 +2245,6 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==
-  /finalhandler/1.1.2:
-    dependencies:
-      debug: 2.6.9
-      encodeurl: 1.0.2
-      escape-html: 1.0.3
-      on-finished: 2.3.0
-      parseurl: 1.3.3
-      statuses: 1.5.0
-      unpipe: 1.0.0
-    dev: false
-    engines:
-      node: '>= 0.8'
-    resolution:
-      integrity: sha512-aAWcW57uxVNrQZqFXjITpW3sIUQmHGG3qSb9mUah9MgMC4NeWhNOlNjXEYq3HjRAvL6arUviZGGJsBg6z0zsWA==
   /find-up/4.1.0:
     dependencies:
       locate-path: 5.0.0
@@ -5115,12 +5088,6 @@ packages:
       node: '>= 10.0.0'
     resolution:
       integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==
-  /unpipe/1.0.0:
-    dev: false
-    engines:
-      node: '>= 0.8'
-    resolution:
-      integrity: sha1-sr9O6FFKrmFltIF4KdIbLvSZBOw=
   /unset-value/1.0.0:
     dependencies:
       has-value: 0.3.1
@@ -5151,12 +5118,6 @@ packages:
     dev: false
     resolution:
       integrity: sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
-  /utils-merge/1.0.1:
-    dev: false
-    engines:
-      node: '>= 0.4.0'
-    resolution:
-      integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
   /uuid/3.4.0:
     dev: true
     hasBin: true
