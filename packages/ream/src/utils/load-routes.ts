@@ -1,6 +1,6 @@
 import path from 'path'
 import { normalizePath } from '../utils/normalize-path'
-import { Route } from './route'
+import { Route } from '../'
 
 export const filesToRoutes = (files: string[], dir: string) => {
   const routes: Route[] = []

@@ -45,6 +45,50 @@ Then you can use `import.meta.env.API_ENDPOINT` in your app code.
 
 `.env` files are also supported.
 
+## `routes`
+
+- Type: `(defaultRoutes: Route[]) => Route[] | Promise<Route[]>`
+
+```ts
+type Route = AppRoute | ServerRoute
+
+// A route for the Vue app
+type AppRoute = {
+  name?: string
+  path: string
+  file: string
+  children?: AppRoute[]
+}
+
+// A route for server
+type ServerRoute = {
+  path: string
+  file: string
+  isServerRoute: true
+}
+```
+
+Routes returned by this function will be used as app routes and server routes, for example:
+
+```ts
+export default {
+  routes(defaultRoutes) {
+    return [
+      ...defaultRoutes,
+      {
+        path: '/foo',
+        file: path.join(__dirname, './views/Foo.vue'),
+      },
+      {
+        path: '/api',
+        file: path.join(__dirname, './server/api.ts'),
+        isServerRoute: true,
+      },
+    ]
+  },
+}
+```
+
 ## `modules`
 
 - Type: `string[]`

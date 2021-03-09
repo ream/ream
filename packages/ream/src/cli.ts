@@ -1,4 +1,5 @@
 import { cac } from 'cac'
+import { createServer } from 'http'
 import path from 'path'
 
 const cli = cac()
@@ -15,10 +16,13 @@ cli
       const app = new Ream({
         rootDir,
         dev: true,
-        host: options.host,
-        port: options.port,
       })
-      await app.serve().catch(handleError)
+      const handler = await app.getRequestHandler()
+      const server = createServer(handler)
+      const host = options.host || 'localhost'
+      const port = options.port || 3000
+      server.listen(port, host)
+      console.log(`> http://${host}:${port}`)
     }
   )
 

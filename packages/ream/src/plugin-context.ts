@@ -20,23 +20,29 @@ type State = {
   }
 }
 
+const getInitialState = (): State => ({
+  constants: {},
+  pluginsFiles: {
+    'enhance-app': new Set(),
+    'enhance-server': new Set(),
+  },
+  hookCallbacks: {
+    onPrepareFiles: new Set(),
+    onFileChange: new Set(),
+  },
+})
+
 export class PluginContext {
-  private state: State = {
-    constants: {},
-    pluginsFiles: {
-      'enhance-app': new Set(),
-      'enhance-server': new Set(),
-    },
-    hookCallbacks: {
-      onPrepareFiles: new Set(),
-      onFileChange: new Set(),
-    },
-  }
+  private state: State = getInitialState()
 
   api: Ream
 
   constructor(api: Ream) {
     this.api = api
+  }
+
+  reset() {
+    this.state = getInitialState()
   }
 
   get constants(): Record<string, string> {

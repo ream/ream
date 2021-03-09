@@ -1,6 +1,6 @@
 import path from 'path'
 import JoyCon from 'joycon'
-import fs from 'fs'
+import fs from 'fs-extra'
 import { Module } from 'module'
 import { transformSync } from 'esbuild'
 
@@ -20,16 +20,18 @@ const transpileAndRequire = (code: string, filepath: string, isTS: boolean) => {
 
 joycon.addLoader({
   test: /\.[jt]s$/,
-  loadSync(filepath) {
-    const code = fs.readFileSync(filepath, 'utf8')
+  async load(filepath) {
+    const code = await fs.readFile(filepath, 'utf8')
     return transpileAndRequire(code, filepath, filepath.endsWith('.ts'))
   },
 })
 
+export const SUPPORTED_CONFIG_FILES = ['ream.config.js', 'ream.config.ts']
+
 export function loadConfig(cwd: string) {
   joycon.clearCache()
 
-  return joycon.loadSync(['ream.config.js', 'ream.config.ts'], cwd)
+  return joycon.load(SUPPORTED_CONFIG_FILES, cwd)
 }
 
 // https://github.com/floatdrop/require-from-string/blob/master/index.js

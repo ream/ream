@@ -1,7 +1,6 @@
 import { createHandler } from '@ream/server'
-import { createServer as createViteServer, ModuleNode } from 'vite'
+import { ModuleNode } from 'vite'
 import type { Ream } from './'
-import { getViteConfig } from './vite/get-vite-config'
 
 const SERVER_ENTRY_PATH = require.resolve(`@ream/app/server-entry.js`)
 
@@ -19,14 +18,7 @@ const collectCssUrls = (mods: Set<ModuleNode>, styles: Map<string, string>) => {
 }
 
 export const getRequestHandler = async (api: Ream) => {
-  const viteConfig = getViteConfig(api)
-  const viteDevServer = await createViteServer(viteConfig)
-  api.viteDevServer = viteDevServer
-
-  for (const callback of api.pluginContext.hookCallbacks.onFileChange) {
-    viteDevServer.watcher.on('all', callback)
-  }
-
+  const viteDevServer = api.viteDevServer!
   const handler = createHandler({
     cwd: api.rootDir,
     context: async () => {
@@ -60,8 +52,8 @@ export const getRequestHandler = async (api: Ream) => {
       }
     },
     dev: true,
-    devMiddleware: api.viteDevServer.middlewares,
-    ssrFixStacktrace: (err) => api.viteDevServer!.ssrFixStacktrace(err),
+    devMiddleware: viteDevServer.middlewares,
+    ssrFixStacktrace: (err) => viteDevServer.ssrFixStacktrace(err),
   })
 
   return handler

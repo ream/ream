@@ -1,7 +1,7 @@
 import glob from 'fast-glob'
 import { outputFile, pathExists, readFile } from 'fs-extra'
-import { Ream } from './'
-import { Route } from './utils/route'
+import consola from 'consola'
+import { Ream, Route } from './'
 import path from 'path'
 import { filesToRoutes } from './utils/load-routes'
 import { normalizePath } from './utils/normalize-path'
@@ -112,6 +112,14 @@ export async function prepareFiles(api: Ream) {
   const writeRoutes = async () => {
     const routesInfo = filesToRoutes(files, pagesDir)
 
+    const getRoutes = api.config.routes
+    if (getRoutes) {
+      consola.info(`Loading extra routes`)
+    }
+    const routes = getRoutes
+      ? await getRoutes(routesInfo.routes)
+      : routesInfo.routes
+
     const getRelativePathToTemplatesDir = (p: string) => {
       if (!isAbsolutPath(p)) {
         return p
@@ -208,7 +216,7 @@ export async function prepareFiles(api: Ream) {
       }
     }
 
-    var clientRoutes = ${stringifyClientRoutes(routesInfo.routes)}
+    var clientRoutes = ${stringifyClientRoutes(routes)}
 
     export {
       clientRoutes,
@@ -224,7 +232,7 @@ export async function prepareFiles(api: Ream) {
     )
 
     const serverExportsContent = `
-   export const serverRoutes = ${stringifyServerRoutes(routesInfo.routes)}
+   export const serverRoutes = ${stringifyServerRoutes(routes)}
     `
 
     await writeFileIfChanged(
