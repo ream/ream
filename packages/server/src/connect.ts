@@ -1,11 +1,20 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
 
-export type Middleware<TReq = any, TRes = any> = (
+export type SimpleHandleFunction<TReq = any, TRes = any> = (
+  req: TReq,
+  res: TRes
+) => void | Promise<void>
+
+export type NextHandleFunction<TReq = any, TRes = any> = (
   req: TReq,
   res: TRes,
   next: NextFunction
 ) => void | Promise<void>
+
+export type HandleFunction<TReq = any, TRes = any> =
+  | SimpleHandleFunction<TReq, TRes>
+  | NextHandleFunction<TReq, TRes>
 
 export interface ConnectRequest extends IncomingMessage {
   originalUrl: string
@@ -30,14 +39,11 @@ const parseUrl = (url: string) => {
   return { path, search }
 }
 
-const onError: OnError<any, any> = (err, req, res) => {
-  res.statusCode = typeof err === 'string' ? 500 : err.code || err.status || 500
-  if (typeof err === 'string') {
-    res.end(err)
-  } else {
-    res.end(err.message)
-  }
-}
+export type OnError<TReq, TRes> = (
+  error: ConnectError | string,
+  req: TReq,
+  res: TRes
+) => void
 
 export interface ConnectError extends Error {
   code?: number
@@ -46,41 +52,47 @@ export interface ConnectError extends Error {
 
 export type NextFunction = (err?: ConnectError) => void
 
-export type OnError<TReq, TRes> = (
-  err: ConnectError | string,
-  req: TReq,
-  res: TRes,
-  next: NextFunction
-) => void
-
 export type Options<TReq, TRes> = {
   onError?: OnError<TReq, TRes>
 }
+
 export class Connect<
   TReq extends ConnectRequest,
   TRes extends ConnectResponse
 > {
   wares: {
-    [base: string]: Middleware<TReq, TRes>[]
+    [base: string]: HandleFunction<TReq, TRes>[]
   }
+  options: Options<TReq, TRes>
 
-  onError: OnError<TReq, TRes>
-
-  constructor(options: Options<TReq, TRes>) {
+  constructor(options: Options<TReq, TRes> = {}) {
     this.wares = { '': [] }
-    this.onError = options.onError || onError
+    this.options = options
   }
 
-  use(base: string | Middleware<TReq, TRes>, ...fns: Middleware<TReq, TRes>[]) {
-    if (typeof base === 'string') {
+  onError(fn: OnError<TReq, TRes>) {
+    this.options.onError = fn
+  }
+
+  use(fn: NextHandleFunction<TReq, TRes>): void
+  use(fn: HandleFunction<TReq, TRes>): void
+
+  use(base: string, fn: NextHandleFunction<TReq, TRes>): void
+  use(base: string, fn: HandleFunction<TReq, TRes>): void
+
+  use(
+    base: string | NextHandleFunction<TReq, TRes> | HandleFunction<TReq, TRes>,
+    fn?: NextHandleFunction<TReq, TRes> | HandleFunction<TReq, TRes>
+  ) {
+    if (typeof base === 'string' && fn) {
       this.wares[base] = this.wares[base] || []
-      this.wares[base].push(...fns)
+      this.wares[base].push(fn)
     } else if (typeof base === 'function') {
-      this.wares[''].push(base, ...fns)
+      this.wares[''].push(base)
     }
   }
 
-  handler(_req: IncomingMessage, _res: ServerResponse) {
+  handler(_req: IncomingMessage, _res: ServerResponse, done?: () => void) {
     const req = _req as TReq
     const res = _res as TRes
     const info = parseUrl(req.url!)
@@ -98,27 +110,33 @@ export class Connect<
     let i = 0
     const size = wares.length
 
-    const next = (err?: ConnectError) => {
-      err ? this.onError(err, req, res, next) : loop()
-    }
-    const loop = async () => {
+    const { onError } = this.options
+
+    const next = async (error?: ConnectError) => {
+      if (error) {
+        return onError && onError(error, req, res)
+      }
+
+      // Run `done` when `next` is called in the last middleware
+      if (done && i === size) {
+        return done()
+      }
+
       if (!res.writableEnded && i < size) {
-        const fn = wares[i++]
         try {
+          const fn = wares[i++]
           await fn(req, res, next)
-        } catch (err) {
-          next(err)
+        } catch (error) {
+          next(error)
         }
       }
     }
 
-    loop()
+    next()
   }
 }
 
 export const connect = <
   TReq extends ConnectRequest,
   TRes extends ConnectResponse
->(
-  options: Options<TReq, TRes>
-) => new Connect(options)
+>() => new Connect<TReq, TRes>()

@@ -11,6 +11,7 @@ import {
 import { render, renderToHTML, getPreloadData, GetHtmlAssets } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
 import serializeJavascript from 'serialize-javascript'
+import { Connect, connect, OnError } from './connect'
 export {
   ReamServerHandler,
   ReamServerRequest,
@@ -32,7 +33,9 @@ export type ServerEntry = {
     callAsync: (name: string, context: any) => Promise<void>
   }
   enhanceServer: {
+    hasExport: (name: string) => boolean
     getInitialHTML: GetInitialHTML
+    callAsync: (name: string, context: any) => Promise<void>
   }
 }
 
@@ -121,12 +124,11 @@ export const start = async (
 
   const http = await import('http')
 
-  const server = http.createServer(
-    createHandler({
-      cwd,
-      context: options.context,
-    })
-  )
+  const { handler } = await createHandler({
+    cwd,
+    context: options.context,
+  })
+  const server = http.createServer(handler)
   // @ts-ignore
   server.listen(port, host)
   console.log(`> http://${host}:${port}`)
@@ -146,14 +148,99 @@ export const createClientRouter = async (
   return router
 }
 
-export function createHandler(options: CreateServerOptions) {
+export async function createHandler(options: CreateServerOptions) {
   const dotReamDir = path.resolve(options.cwd || '.', '.ream')
   const getHtmlAssets = options.getHtmlAssets || productionGetHtmlAssets
-  const server = createHttpServer({})
+  const server = createHttpServer()
+  let subServer: Connect<ReamServerRequest, ReamServerResponse> | undefined
 
   // A vue-router instance for matching server routes (aka API routes)
   let context: ServerContext
   let exportCache: ExportCache | undefined
+
+  const handleError: OnError<ReamServerRequest, ReamServerResponse> = async (
+    err,
+    req,
+    res
+  ) => {
+    if (typeof err === 'string') {
+      err = new Error(err)
+    }
+
+    if (options.ssrFixStacktrace) {
+      options.ssrFixStacktrace(err)
+    }
+    console.error('server error', err.stack)
+
+    try {
+      res.statusCode =
+        !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
+      const router = await createClientRouter(context.serverEntry, req.url)
+      const ErrorComponent = await context.serverEntry.ErrorComponent.__asyncLoader()
+      const globalPreload = await context.serverEntry.getGlobalPreload()
+      const preloadResult = await getPreloadData(
+        globalPreload,
+        [ErrorComponent],
+        {
+          req,
+          res,
+          params: req.params,
+        }
+      )
+      preloadResult.error = {
+        statusCode: res.statusCode,
+        message: options.dev ? err.stack : undefined,
+      }
+      const html = await renderToHTML({
+        params: req.params,
+        path: req.path,
+        url: req.url,
+        req,
+        res,
+        router,
+        preloadResult,
+        serverEntry: context.serverEntry,
+        ssrManifest: context.ssrManifest,
+        clientManifest: context.clientManifest,
+        getHtmlAssets,
+      })
+      res.setHeader('content-type', 'text-html')
+      res.end(html)
+    } catch (error) {
+      res.statusCode = 500
+      res.send(
+        options.dev
+          ? `<h1>Error occurs while rendering error page:</h1><pre>${error.stack}</pre>`
+          : 'server error'
+      )
+    }
+  }
+
+  server.onError(handleError)
+
+  const prepare = async () => {
+    context =
+      typeof options.context === 'function'
+        ? await options.context()
+        : options.context
+
+    if (!options.dev) {
+      exportCache = new ExportCache({
+        exportDir: path.join(dotReamDir, 'export'),
+        flushToDisk: true,
+        exportManifest:
+          context.getExportManifest && context.getExportManifest(),
+      })
+    }
+
+    if (context.serverEntry.enhanceServer.hasExport('onCreatedServer')) {
+      subServer = connect()
+      subServer.onError(handleError)
+      await context.serverEntry.enhanceServer.callAsync('onCreatedServer', {
+        server: subServer,
+      })
+    }
+  }
 
   const renderNotFound = async (
     req: ReamServerRequest,
@@ -196,27 +283,22 @@ export function createHandler(options: CreateServerOptions) {
     server.use(serveStaticFiles as any)
   }
 
+  if (options.dev) {
+    server.use(async (req, res, next) => {
+      await prepare()
+      next()
+    })
+  }
+
+  // Use a sub server for addtional middlewares added in `onCreatedServer`
   server.use(async (req, res, next) => {
-    if (options.dev || !context) {
-      context =
-        typeof options.context === 'function'
-          ? await options.context()
-          : options.context
-    }
-    if (!options.dev) {
-      exportCache =
-        exportCache ||
-        new ExportCache({
-          exportDir: path.join(dotReamDir, 'export'),
-          flushToDisk: true,
-          exportManifest:
-            context.getExportManifest && context.getExportManifest(),
-        })
+    if (subServer) {
+      return subServer.handler(req, res, next)
     }
     next()
   })
 
-  server.use(async (req, res, next) => {
+  server.use(async function handleServerRoutes(req, res, next) {
     if (!req.path.startsWith('/api/')) {
       return next()
     }
@@ -233,7 +315,7 @@ export function createHandler(options: CreateServerOptions) {
     mod.default(req, res, next)
   })
 
-  server.use(async (req, res, next) => {
+  server.use(async function handleAppRoute(req, res, next) {
     if (req.method !== 'GET') {
       return next()
     }
@@ -335,59 +417,9 @@ export function createHandler(options: CreateServerOptions) {
     }
   })
 
-  server.onError = async (err, req, res, next) => {
-    if (typeof err === 'string') {
-      err = new Error(err)
-    }
-
-    if (options.ssrFixStacktrace) {
-      options.ssrFixStacktrace(err)
-    }
-    console.error('server error', err.stack)
-
-    try {
-      res.statusCode =
-        !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
-      const router = await createClientRouter(context.serverEntry, req.url)
-      const ErrorComponent = await context.serverEntry.ErrorComponent.__asyncLoader()
-      const globalPreload = await context.serverEntry.getGlobalPreload()
-      const preloadResult = await getPreloadData(
-        globalPreload,
-        [ErrorComponent],
-        {
-          req,
-          res,
-          params: req.params,
-        }
-      )
-      preloadResult.error = {
-        statusCode: res.statusCode,
-        message: options.dev ? err.stack : undefined,
-      }
-      const html = await renderToHTML({
-        params: req.params,
-        path: req.path,
-        url: req.url,
-        req,
-        res,
-        router,
-        preloadResult,
-        serverEntry: context.serverEntry,
-        ssrManifest: context.ssrManifest,
-        clientManifest: context.clientManifest,
-        getHtmlAssets,
-      })
-      res.setHeader('content-type', 'text-html')
-      res.end(html)
-    } catch (error) {
-      res.statusCode = 500
-      res.send(
-        options.dev
-          ? `<h1>Error occurs while rendering error page:</h1><pre>${error.stack}</pre>`
-          : 'server error'
-      )
-    }
+  if (!options.dev) {
+    await prepare()
   }
 
-  return server.handler.bind(server)
+  return { handler: server.handler.bind(server), prepare }
 }

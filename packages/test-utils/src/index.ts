@@ -45,13 +45,12 @@ export async function buildAndLaunch({
     server = createServer(s.handler as any)
   } else {
     await execa(REAM_BIN, ['build'], { cwd: appDir })
-    server = createServer(
-      createHandler({
-        cwd: appDir,
-        context: require(path.join(appDir, '.ream/meta/server-context'))
-          .serverContext,
-      })
-    )
+    const { handler } = await createHandler({
+      cwd: appDir,
+      context: require(path.join(appDir, '.ream/meta/server-context'))
+        .serverContext,
+    })
+    server = createServer(handler)
   }
   server.listen(port, () => {
     // console.log(`Serve site at http://localhost:${port}`)

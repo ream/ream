@@ -75,6 +75,8 @@ export async function callAsync(name, context) {
     }
     return html
   }
+
+  export const hasExport = (name) => getExportByName(name).length > 0
   `
   }
 

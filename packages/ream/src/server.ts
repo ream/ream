@@ -19,7 +19,8 @@ const collectCssUrls = (mods: Set<ModuleNode>, styles: Map<string, string>) => {
 
 export const getRequestHandler = async (api: Ream) => {
   const viteDevServer = api.viteDevServer!
-  const handler = createHandler({
+
+  const { handler } = await createHandler({
     cwd: api.rootDir,
     context: async () => {
       // waiting to vite to finish reloading devDependencies

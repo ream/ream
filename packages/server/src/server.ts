@@ -1,7 +1,6 @@
 import { send, SendData, status } from './response-helpers'
 import {
   connect,
-  Options,
   ConnectRequest,
   ConnectResponse,
   NextFunction,
@@ -25,10 +24,8 @@ export interface ReamServerResponse extends ConnectResponse {
   send: (data: SendData) => void
 }
 
-export const createServer = (
-  options: Options<ReamServerRequest, ReamServerResponse>
-) => {
-  const app = connect<ReamServerRequest, ReamServerResponse>(options)
+export const createServer = () => {
+  const app = connect<ReamServerRequest, ReamServerResponse>()
 
   app.use((req, res, next) => {
     Object.defineProperties(res, {

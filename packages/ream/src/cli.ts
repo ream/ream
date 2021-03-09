@@ -11,19 +11,21 @@ cli
   .option('--host <host>', 'Server host (default: localhost)')
   .option('--port <port>', 'Server port (default: 3000)')
   .action(
-    async (rootDir: string, options: { host?: string; port?: number }) => {
-      const { Ream } = await import('./')
-      const app = new Ream({
-        rootDir,
-        dev: true,
-      })
-      const handler = await app.getRequestHandler()
-      const server = createServer(handler)
-      const host = options.host || 'localhost'
-      const port = options.port || 3000
-      server.listen(port, host)
-      console.log(`> http://${host}:${port}`)
-    }
+    handleError(
+      async (rootDir: string, options: { host?: string; port?: number }) => {
+        const { Ream } = await import('./')
+        const app = new Ream({
+          rootDir,
+          dev: true,
+        })
+        const handler = await app.getRequestHandler()
+        const server = createServer(handler)
+        const host = options.host || 'localhost'
+        const port = options.port || 3000
+        server.listen(port, host)
+        console.log(`> http://${host}:${port}`)
+      }
+    )
   )
 
 cli
@@ -31,18 +33,19 @@ cli
     ignoreOptionDefaultValue: true,
   })
   .option('--standalone', 'Bundle external dependencies in server code')
-  .action(async (rootDir: string, flags: { standalone?: boolean }) => {
-    const { Ream } = await import('./')
-    const app = new Ream({
-      rootDir,
-      dev: false,
+  .action(
+    handleError(async (rootDir: string, flags: { standalone?: boolean }) => {
+      const { Ream } = await import('./')
+      const app = new Ream({
+        rootDir,
+        dev: false,
+      })
+      await app.build({ standalone: flags.standalone })
     })
-    await app.build({ standalone: flags.standalone }).catch(handleError)
-  })
+  )
 
-cli
-  .command('export [dir]', 'Export a hybrid site to a static site')
-  .action(async (rootDir: string) => {
+cli.command('export [dir]', 'Export a hybrid site to a static site').action(
+  handleError(async (rootDir: string) => {
     const { Ream } = await import('./')
     const app = new Ream({
       rootDir,
@@ -50,29 +53,40 @@ cli
     })
     await app.build({ fullyExport: true }).catch(handleError)
   })
+)
 
 cli
   .command('start [dir]', 'Start a production server')
   .option('--host <host>', 'Server host (default: localhost)')
   .option('--port <port>', 'Server port (default: 3000)')
-  .action(async (rootDir = '.', options: { host?: string; port?: number }) => {
-    const { start } = await import('@ream/server')
-    const { serverContext } = require(path.resolve(
-      rootDir,
-      '.ream/meta/server-context'
-    ))
-    await start(rootDir, {
-      host: options.host,
-      port: options.port,
-      context: serverContext,
-    })
-  })
+  .action(
+    handleError(
+      async (rootDir = '.', options: { host?: string; port?: number }) => {
+        const { start } = await import('@ream/server')
+        const { serverContext } = require(path.resolve(
+          rootDir,
+          '.ream/meta/server-context'
+        ))
+        await start(rootDir, {
+          host: options.host,
+          port: options.port,
+          context: serverContext,
+        })
+      }
+    )
+  )
 
 cli.version(require('../package').version)
 cli.help()
 cli.parse()
 
-function handleError(error: Error) {
-  require('consola').error(error)
-  process.exit(1)
+function handleError(fn: (...args: any[]) => Promise<void>) {
+  return async (...args: any[]) => {
+    try {
+      await fn(...args)
+    } catch (error) {
+      require('consola').error(error)
+      process.exitCode = 1
+    }
+  }
 }
