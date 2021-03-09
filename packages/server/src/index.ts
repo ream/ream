@@ -11,7 +11,7 @@ import {
 import { render, renderToHTML, getPreloadData, GetHtmlAssets } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
 import serializeJavascript from 'serialize-javascript'
-import { Connect, connect, OnError } from './connect'
+import { OnError } from './connect'
 export {
   ReamServerHandler,
   ReamServerRequest,
@@ -152,10 +152,7 @@ export async function createHandler(options: CreateServerOptions) {
   const dotReamDir = path.resolve(options.cwd || '.', '.ream')
   const getHtmlAssets = options.getHtmlAssets || productionGetHtmlAssets
   const server = createHttpServer()
-  let subServer: Connect<ReamServerRequest, ReamServerResponse> | undefined
 
-  // A vue-router instance for matching server routes (aka API routes)
-  let context: ServerContext
   let exportCache: ExportCache | undefined
 
   const handleError: OnError<ReamServerRequest, ReamServerResponse> = async (
@@ -219,7 +216,7 @@ export async function createHandler(options: CreateServerOptions) {
   server.onError(handleError)
 
   const prepare = async () => {
-    context =
+    const context =
       typeof options.context === 'function'
         ? await options.context()
         : options.context
@@ -233,14 +230,10 @@ export async function createHandler(options: CreateServerOptions) {
       })
     }
 
-    if (context.serverEntry.enhanceServer.hasExport('onCreatedServer')) {
-      subServer = connect()
-      subServer.onError(handleError)
-      await context.serverEntry.enhanceServer.callAsync('onCreatedServer', {
-        server: subServer,
-      })
-    }
+    return { context }
   }
+
+  const { context } = await prepare()
 
   const renderNotFound = async (
     req: ReamServerRequest,
@@ -283,19 +276,9 @@ export async function createHandler(options: CreateServerOptions) {
     server.use(serveStaticFiles as any)
   }
 
-  if (options.dev) {
-    server.use(async (req, res, next) => {
-      await prepare()
-      next()
-    })
-  }
-
   // Use a sub server for addtional middlewares added in `onCreatedServer`
-  server.use(async (req, res, next) => {
-    if (subServer) {
-      return subServer.handler(req, res, next)
-    }
-    next()
+  await context.serverEntry.enhanceServer.callAsync('onCreatedServer', {
+    server,
   })
 
   server.use(async function handleServerRoutes(req, res, next) {
@@ -416,10 +399,6 @@ export async function createHandler(options: CreateServerOptions) {
       })
     }
   })
-
-  if (!options.dev) {
-    await prepare()
-  }
 
   return { handler: server.handler.bind(server), prepare }
 }
