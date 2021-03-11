@@ -1,4 +1,4 @@
-# @ream/module-google-analytics
+# @ream/plugin-google-analytics
 
 ## Install
 
