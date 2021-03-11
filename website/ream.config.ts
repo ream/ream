@@ -1,10 +1,11 @@
 import { defineReamConfig } from 'ream'
+import ga from '@ream/plugin-google-analytics'
 
 export default defineReamConfig({
   env: {
-    GA_TRACKING_ID: 'UA-54857209-24',
+    REAM_GA_TRACKING_ID: 'UA-54857209-24',
   },
-  modules: ['@ream/module-google-analytics'],
+  plugins: [ga()],
   imports: ['prismjs/themes/prism-tomorrow.css', 'windi.css', '@/css/main.css'],
   vite(config) {
     config.plugins!.push(require('vite-plugin-windicss').default())

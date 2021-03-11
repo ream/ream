@@ -95,7 +95,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       moveManifestPlugin(api.resolveDotReam('manifest')),
     ],
     define: {
-      ...api.pluginContext.constants,
+      ...api.state.constants,
       'import.meta.env.REAM_SRC_DIR': JSON.stringify(api.resolveSrcDir()),
       'import.meta.env.REAM_ROOT_DIR': JSON.stringify(api.resolveRootDir()),
     },

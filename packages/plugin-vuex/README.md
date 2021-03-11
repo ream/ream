@@ -1,11 +1,11 @@
-# @ream/module-vuex
+# @ream/plugin-vuex
 
 ## Install
 
 ```bash
-npm i @ream/module-vuex vuex
+npm i @ream/plugin-vuex vuex
 # Or Yarn
-yarn add @ream/module-vuex vuex
+yarn add @ream/plugin-vuex vuex
 ```
 
 ## Usage
@@ -13,12 +13,14 @@ yarn add @ream/module-vuex vuex
 Add it to your `ream.config.js`:
 
 ```js
+import vuex from '@ream/plugin-vuex'
+
 export default {
-  modules: ['@ream/module-vuex'],
+  plugins: [vuex()],
 }
 ```
 
-This module assumes you have created a Vuex store instance in `@/store`, `@` is an alias to your source directory.
+This plugin assumes you have created a Vuex store instance in `@/store`, `@` is an alias to your source directory.
 
 ```ts
 // store.ts or store/index.ts

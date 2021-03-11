@@ -3,9 +3,9 @@
 ## Install
 
 ```bash
-npm i @ream/module-google-analytics
+npm i @ream/plugin-google-analytics
 # Or Yarn
-yarn add @ream/module-google-analytics
+yarn add @ream/plugin-google-analytics
 ```
 
 ## Usage
@@ -13,8 +13,11 @@ yarn add @ream/module-google-analytics
 Add it to `ream.config.js`:
 
 ```ts
+import ga from '@ream/plugin-google-analytics'
+
 export default {
-  modules: ['@ream/module-google-analytics'],
+  plugins: [ga()],
+
   env: {
     // Set your ga tracking ID
     GA_TRACKING_ID: 'UA-XXX-XXX',

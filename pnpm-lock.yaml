@@ -65,11 +65,11 @@ importers:
       ream: workspace:*
   examples/vuex:
     dependencies:
-      '@ream/module-vuex': link:../../packages/module-vuex
+      '@ream/plugin-vuex': link:../../packages/plugin-vuex
       ream: link:../../packages/ream
       vuex: 4.0.0
     specifiers:
-      '@ream/module-vuex': workspace:*
+      '@ream/plugin-vuex': workspace:*
       ream: workspace:*
       vuex: ^4.0.0
   packages/app:
@@ -97,12 +97,12 @@ importers:
       node-fetch: 2.6.1
     specifiers:
       node-fetch: ^2.6.0
-  packages/module-google-analytics:
+  packages/plugin-google-analytics:
     devDependencies:
       ream: link:../ream
     specifiers:
       ream: workspace:*
-  packages/module-vuex:
+  packages/plugin-vuex:
     dependencies:
       vuex-router-sync: 6.0.0-rc.1_vuex@4.0.0
     devDependencies:
@@ -225,7 +225,7 @@ importers:
   website:
     devDependencies:
       '@ream/app': link:../packages/app
-      '@ream/module-google-analytics': link:../packages/module-google-analytics
+      '@ream/plugin-google-analytics': link:../packages/plugin-google-analytics
       '@ream/server': link:../packages/server
       '@types/marked': 1.2.2
       '@types/prismjs': 1.16.3
@@ -236,7 +236,7 @@ importers:
       vite-plugin-windicss: 0.4.12
     specifiers:
       '@ream/app': workspace:*
-      '@ream/module-google-analytics': workspace:*
+      '@ream/plugin-google-analytics': workspace:*
       '@ream/server': workspace:*
       '@types/marked': ^1.1.0
       '@types/prismjs': ^1.16.0

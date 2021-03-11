@@ -89,17 +89,19 @@ export default {
 }
 ```
 
-## `modules`
+## `plugins`
 
-- Type: `string[]`
+- Type: `ReamPlugin[]`
 
-Use Ream modules. e.g.
+Use Ream plugins. e.g.
 
 ```ts
+import ga from '@ream/plugin-google-analytics'
+
 export default {
-  modules: ['@ream/module-google-analytics'],
+  plugin: [ga()],
   env: {
-    GA_TRACKING_ID: 'UA-XXX-XXX',
+    REAM_GA_TRACKING_ID: 'UA-XXX-XXX',
   },
 }
 ```

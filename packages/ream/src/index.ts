@@ -1,14 +1,14 @@
 import { resolve, join, dirname, relative } from 'path'
 import type { SetRequired } from 'type-fest'
-import { ViteDevServer, UserConfig as ViteConfig } from 'vite'
+import { ViteDevServer, UserConfig as ViteConfig, loadEnv } from 'vite'
 import resolveFrom from 'resolve-from'
 import consola from 'consola'
 import { loadConfig, SUPPORTED_CONFIG_FILES } from './utils/load-config'
 import { loadPlugins } from './load-plugins'
-import { PluginContext } from './plugin-context'
 import { remove, existsSync } from 'fs-extra'
 import { OWN_DIR } from './utils/constants'
 import { ReamPlugin } from './types'
+import { getInitialState, State } from './state'
 
 export interface Options {
   rootDir?: string
@@ -25,11 +25,8 @@ export type Route = {
 }
 
 export type ReamConfig = {
-  env?: {
-    [envName: string]: string | number | boolean
-  }
+  env?: Record<string, string>
   plugins?: Array<ReamPlugin>
-  modules?: string[]
   imports?: string[]
   hmr?: {
     host?: string
@@ -45,14 +42,15 @@ export type ReamConfig = {
 export const defineReamConfig = (config: ReamConfig) => config
 
 export class Ream {
+  state!: State
   rootDir: string
   srcDir: string
   isDev: boolean
   inlineConfig: ReamConfig
   config!: SetRequired<ReamConfig, 'env' | 'plugins' | 'imports'>
   configPath?: string
-  pluginContext: PluginContext
   viteDevServer?: ViteDevServer
+  userEnv!: Record<string, string>
 
   constructor(options: Options = {}, inlineConfig: ReamConfig = {}) {
     this.inlineConfig = inlineConfig
@@ -67,7 +65,6 @@ export class Ream {
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
     }
-    this.pluginContext = new PluginContext(this)
   }
 
   resolveRootDir(...args: string[]) {
@@ -121,9 +118,15 @@ export class Ream {
     shouldCleanDir: boolean
     shouldPrepreFiles: boolean
   }) {
+    this.state = getInitialState()
+
     await this.loadConfig()
 
-    this.pluginContext.reset()
+    this.userEnv = loadEnv(
+      this.isDev ? 'development' : 'production',
+      this.rootDir,
+      'REAM_'
+    )
 
     await loadPlugins(this)
 
@@ -153,8 +156,8 @@ export class Ream {
       this.viteDevServer = viteDevServer
 
       // Reuse Vite watcher to register `onFileChange` callbacks
-      for (const callback of this.pluginContext.hookCallbacks.onFileChange) {
-        viteDevServer.watcher.on('all', callback)
+      for (const callback of this.state.callbacks.onFileChange) {
+        viteDevServer.watcher.on('all', callback.callback)
       }
 
       // Restart Ream when config file changes

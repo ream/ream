@@ -1,68 +1,51 @@
 import { Ream } from '.'
+import { OnFileChangeCallback, State } from './state'
 import { normalizePath } from './utils/normalize-path'
 
-type OnFileChangeCallback = (
-  event: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir',
-  filepath: string
-) => any
-
-type State = {
-  constants: {
-    [k: string]: string
-  }
-  pluginsFiles: {
-    app: Set<string>
-    server: Set<string>
-  }
-  hookCallbacks: {
-    onPrepareFiles: Set<() => Promise<void>>
-    onFileChange: Set<OnFileChangeCallback>
-  }
-}
-
-const getInitialState = (): State => ({
-  constants: {},
-  pluginsFiles: {
-    app: new Set(),
-    server: new Set(),
-  },
-  hookCallbacks: {
-    onPrepareFiles: new Set(),
-    onFileChange: new Set(),
-  },
-})
-
 export class PluginContext {
-  private state: State = getInitialState()
+  private api: Ream
+  pluginName: string
 
-  api: Ream
-
-  constructor(api: Ream) {
+  constructor(api: Ream, pluginName: string) {
     this.api = api
+    this.pluginName = pluginName
   }
 
-  reset() {
-    this.state = getInitialState()
+  get state() {
+    return this.api.state
+  }
+
+  get env() {
+    return { ...this.api.userEnv, ...this.api.config.env }
   }
 
   get constants(): Record<string, string> {
+    const { env } = this
     return {
       ...this.state.constants,
-      ...Object.keys(this.api.config.env).reduce((res, key) => {
+      ...Object.keys(env).reduce((res, key) => {
+        const value = JSON.stringify(env[key])
         return {
           ...res,
-          [`import.meta.env.${key}`]: JSON.stringify(this.api.config.env[key]),
+          [`import.meta.env.${key}`]: value,
+          [`process.env.${key}`]: value,
         }
       }, {}),
     }
   }
 
-  get pluginsFiles() {
-    return this.state.pluginsFiles
+  ensureEnv(name: string, defaultValue?: string) {
+    const value = this.env[name]
+    if (!value && !defaultValue) {
+      throw new Error(
+        `Plugin "${this.pluginName}" requires environment variable "${name}" to be set.`
+      )
+    }
+    return value || defaultValue
   }
 
-  get hookCallbacks() {
-    return this.state.hookCallbacks
+  get pluginsFiles() {
+    return this.state.pluginsFiles
   }
 
   resolveSrcDir(...args: string[]) {
@@ -86,10 +69,16 @@ export class PluginContext {
   }
 
   onPrepareFiles(callback: () => Promise<void>) {
-    this.state.hookCallbacks.onPrepareFiles.add(callback)
+    this.state.callbacks.onPrepareFiles.add({
+      pluginName: this.pluginName,
+      callback,
+    })
   }
 
   onFileChange(callback: OnFileChangeCallback) {
-    this.state.hookCallbacks.onFileChange.add(callback)
+    this.state.callbacks.onFileChange.add({
+      pluginName: this.pluginName,
+      callback,
+    })
   }
 }

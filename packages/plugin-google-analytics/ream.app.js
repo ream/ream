@@ -4,7 +4,7 @@ export function extendRouter({ router }) {
   if (
     !import.meta.env.SSR &&
     import.meta.env.PROD &&
-    import.meta.env.GA_TRACKING_ID
+    import.meta.env.REAM_GA_TRACKING_ID
   ) {
     function doNotTrackEnabled() {
       const dntNumber = parseInt(
@@ -38,7 +38,7 @@ export function extendRouter({ router }) {
 
     ga('create', import.meta.env.GA_TRACKING_ID, 'auto')
 
-    if (import.meta.env.GA_ANONYMIZE_IP) {
+    if (import.meta.env.REAM_GA_TRACKING_ID) {
       ga('set', 'anonymizeIp', true)
     }
 

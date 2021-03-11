@@ -23,7 +23,7 @@ const writeHookFile = async (
   type: 'app' | 'server',
   projectFiles: string[]
 ) => {
-  const { pluginsFiles } = api.pluginContext
+  const { pluginsFiles } = api.state
   const files = [...pluginsFiles[type]]
 
   const projectFile = await resolveFile(projectFiles)
@@ -286,26 +286,29 @@ export async function prepareFiles(api: Ream) {
   }
 
   if (api.isDev) {
-    api.pluginContext.onFileChange(async (type, file) => {
-      // Update routes
-      if (file.startsWith(pagesDir) && routesFileRegexp.test(file)) {
-        const relativePath = path.relative(pagesDir, file)
-        if (type === 'add') {
-          files.push(relativePath)
-          await writeRoutes()
-        } else if (type === 'unlink') {
-          files.splice(files.indexOf(relativePath), 1)
-          await writeRoutes()
+    api.state.callbacks.onFileChange.add({
+      pluginName: 'ream:prepare-files',
+      callback: async (type, file) => {
+        // Update routes
+        if (file.startsWith(pagesDir) && routesFileRegexp.test(file)) {
+          const relativePath = path.relative(pagesDir, file)
+          if (type === 'add') {
+            files.push(relativePath)
+            await writeRoutes()
+          } else if (type === 'unlink') {
+            files.splice(files.indexOf(relativePath), 1)
+            await writeRoutes()
+          }
         }
-      }
 
-      // Update enhanceApp
-      if (projectAppHookFiles.includes(file)) {
-        await writeHookFile(api, 'app', projectAppHookFiles)
-      }
-      if (projectServerHookFiles.includes(file)) {
-        await writeHookFile(api, 'server', projectServerHookFiles)
-      }
+        // Update enhanceApp
+        if (projectAppHookFiles.includes(file)) {
+          await writeHookFile(api, 'app', projectAppHookFiles)
+        }
+        if (projectServerHookFiles.includes(file)) {
+          await writeHookFile(api, 'server', projectServerHookFiles)
+        }
+      },
     })
   }
 }

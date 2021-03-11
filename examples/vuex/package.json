@@ -8,7 +8,7 @@
     "export": "ream export"
   },
   "dependencies": {
-    "@ream/module-vuex": "workspace:*",
+    "@ream/plugin-vuex": "workspace:*",
     "ream": "workspace:*",
     "vuex": "^4.0.0"
   }

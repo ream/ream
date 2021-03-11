@@ -1,3 +1,5 @@
+import vuex from '@ream/plugin-vuex'
+
 export default {
-  modules: ['@ream/module-vuex'],
+  plugins: [vuex()],
 }
