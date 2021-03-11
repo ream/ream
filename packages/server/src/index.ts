@@ -12,11 +12,15 @@ import { render, renderToHTML, getPreloadData, GetHtmlAssets } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
 import serializeJavascript from 'serialize-javascript'
 import { OnError } from './connect'
+import { GetInitialHTML } from './hooks'
 export {
   ReamServerHandler,
   ReamServerRequest,
   ReamServerResponse,
 } from './server'
+
+// Re-export hook types
+export * from './hooks'
 
 export { Connect } from './connect'
 
@@ -37,18 +41,6 @@ export type ServerEntry = {
     getInitialHTML: GetInitialHTML
     callAsync: (name: string, context: any) => Promise<void>
   }
-}
-
-export type GetInitialHTML = (
-  context: GetInitialHTMLContext
-) => string | undefined | Promise<string | undefined>
-
-export type GetInitialHTMLContext = {
-  head: string
-  main: string
-  scripts: string
-  htmlAttrs: string
-  bodyAttrs: string
 }
 
 export type ExportManifest = {

@@ -28,14 +28,8 @@ export * from './server-types'
 
 export * from './link'
 
+export * from './hooks'
+
 export const useRoutePath: () => ComputedRef<string>
 
 export { ClientOnly, defineClientOnlyComponent } from './components/ClientOnly'
-
-export type ExtendApp = (context: {
-  router: Router
-  app: ComponentPublicInstance
-  initialState: any
-}) => void | Promise<void>
-
-export type ExtendRouter = (context: { router: Router }) => void | Promise<void>
