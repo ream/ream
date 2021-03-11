@@ -276,8 +276,8 @@ export async function createHandler(options: CreateServerOptions) {
     server.use(serveStaticFiles as any)
   }
 
-  // Use a sub server for addtional middlewares added in `onCreatedServer`
-  await context.serverEntry.enhanceServer.callAsync('onCreatedServer', {
+  // Use a sub server for addtional middlewares added in `extendServer`
+  await context.serverEntry.enhanceServer.callAsync('extendServer', {
     server,
   })
 

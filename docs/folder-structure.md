@@ -5,7 +5,8 @@
 ├── .ream/
 ├── public/
 ├── pages/
-├── enhance-app.js
+├── ream.app.js
+├── ream.server.js
 └── ream.config.js
 ```
 
@@ -17,17 +18,20 @@
   - `pages/_error.vue`: (optional) Custom error page.
   - `pages/_app.vue`: (optional) [Custom App Component](/docs/custom-app-and-document).
 - `ream.config.js`, `ream.config.ts`: (optional) Config file for Ream, see [all config options here](/docs/configuration).
-- `enhance-app.js`, `enhance-app.ts`: (optional) Access [app hooks](/docs/app-hooks).
+- `ream.app.js`, `ream.app.ts`: (optional) Access [app hooks](/docs/references/app-hooks).
+- `ream.server.js`, `ream.server.ts`: (optional) Access [server hooks](/docs/references/server-hooks).
 
 ## Source Directory
 
-`pages`, `enhance-app.js` are resolved from the source directory, by default it's the same as the root directory of your project, but if you move pages folder to `src/pages` then we will use `src` as source direcotry instead.
+`pages` folder is resolved from the source directory, by default it's the same as the root directory of your project, but if you move pages folder to `src/pages` then we will use `src` as source direcotry instead.
 
 ```
 .
 ├── .ream/
 ├── public/
 ├── src/pages/
-├── src/enhance-app.js
+├── ream.app.js
 └── ream.config.js
 ```
+
+A Vite alias `@` is also pointed to the source directory so you can use a shortcut like `@/some-path` to import files in the source directory.

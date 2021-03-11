@@ -3,7 +3,7 @@ import createStore from '@/store'
 
 const STATE_KEY = 'VUEX_STATE'
 
-export const onCreatedApp = async ({ initialState, app, router }) => {
+export const extendApp = async ({ initialState, app, router }) => {
   const store = createStore()
   app.use(store)
 

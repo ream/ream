@@ -32,12 +32,10 @@ export const useRoutePath: () => ComputedRef<string>
 
 export { ClientOnly, defineClientOnlyComponent } from './components/ClientOnly'
 
-export type OnCreatedApp = (context: {
+export type ExtendApp = (context: {
   router: Router
   app: ComponentPublicInstance
   initialState: any
 }) => void | Promise<void>
 
-export type OnCreatedRouter = (context: {
-  router: Router
-}) => void | Promise<void>
+export type ExtendRouter = (context: { router: Router }) => void | Promise<void>

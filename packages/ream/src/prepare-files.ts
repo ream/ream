@@ -18,15 +18,13 @@ const writeFileIfChanged = async (filepath: string, content: string) => {
   await outputFile(filepath, content, 'utf8')
 }
 
-const writeEnhanceFile = async (
+const writeHookFile = async (
   api: Ream,
   type: 'app' | 'server',
   projectFiles: string[]
 ) => {
   const { pluginsFiles } = api.pluginContext
-  const files = [
-    ...pluginsFiles[type === 'app' ? 'enhance-app' : 'enhance-server'],
-  ]
+  const files = [...pluginsFiles[type]]
 
   const projectFile = await resolveFile(projectFiles)
 
@@ -37,12 +35,12 @@ const writeEnhanceFile = async (
   let content = `
   ${files
     .map((file, index) => {
-      return `import * as enhance_${type}_${index} from "${file}"`
+      return `import * as hook_${type}_${index} from "${file}"`
     })
     .join('\n')}
 
 var files = [
-  ${files.map((_, i) => `enhance_${type}_${i}`).join(',')}
+  ${files.map((_, i) => `hook_${type}_${i}`).join(',')}
 ]
 
 function getExportByName(name) {
@@ -81,7 +79,7 @@ export async function callAsync(name, context) {
   }
 
   await writeFileIfChanged(
-    api.resolveDotReam(`templates/enhance-${type}.js`),
+    api.resolveDotReam(`templates/ream.${type}.js`),
     content
   )
 }
@@ -101,14 +99,14 @@ export async function prepareFiles(api: Ream) {
     ignore: ['node_modules', 'dist'],
   })
 
-  const projectEnhanceAppFiles = [
-    api.resolveSrcDir('enhance-app.js'),
-    api.resolveSrcDir('enhance-app.ts'),
+  const projectAppHookFiles = [
+    api.resolveRootDir('ream.app.js'),
+    api.resolveRootDir('ream.app.ts'),
   ]
 
-  const projectEnhanceServerFiles = [
-    api.resolveSrcDir('enhance-server.js'),
-    api.resolveSrcDir('enhance-server.ts'),
+  const projectServerHookFiles = [
+    api.resolveRootDir('ream.server.js'),
+    api.resolveRootDir('ream.server.ts'),
   ]
 
   const writeRoutes = async () => {
@@ -256,8 +254,8 @@ export async function prepareFiles(api: Ream) {
 
   await Promise.all([
     writeRoutes(),
-    writeEnhanceFile(api, 'app', projectEnhanceAppFiles),
-    writeEnhanceFile(api, 'server', projectEnhanceServerFiles),
+    writeHookFile(api, 'app', projectAppHookFiles),
+    writeHookFile(api, 'server', projectServerHookFiles),
     writeGlobalImports(),
   ])
 
@@ -302,11 +300,11 @@ export async function prepareFiles(api: Ream) {
       }
 
       // Update enhanceApp
-      if (projectEnhanceAppFiles.includes(file)) {
-        await writeEnhanceFile(api, 'app', projectEnhanceAppFiles)
+      if (projectAppHookFiles.includes(file)) {
+        await writeHookFile(api, 'app', projectAppHookFiles)
       }
-      if (projectEnhanceServerFiles.includes(file)) {
-        await writeEnhanceFile(api, 'server', projectEnhanceServerFiles)
+      if (projectServerHookFiles.includes(file)) {
+        await writeHookFile(api, 'server', projectServerHookFiles)
       }
     })
   }

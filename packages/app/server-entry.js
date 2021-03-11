@@ -9,8 +9,8 @@ import {
   AppComponent,
 } from '/.ream/templates/shared-exports.js'
 import { serverRoutes } from '/.ream/templates/server-exports.js'
-import * as enhanceApp from '/.ream/templates/enhance-app.js'
-import * as enhanceServer from '/.ream/templates/enhance-server.js'
+import * as enhanceApp from '/.ream/templates/ream.app.js'
+import * as enhanceServer from '/.ream/templates/ream.server.js'
 
 export default {
   async render(context) {

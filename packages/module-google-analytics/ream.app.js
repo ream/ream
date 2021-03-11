@@ -1,6 +1,6 @@
 /* eslint-disable */
 // Google analytics integration for Vue.js renderer
-export function onCreatedApp({ router }) {
+export function extendRouter({ router }) {
   if (
     !import.meta.env.SSR &&
     import.meta.env.PROD &&

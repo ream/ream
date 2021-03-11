@@ -27,10 +27,6 @@ export default [
         link: '/docs/special-pages',
       },
       {
-        text: 'App Hooks',
-        link: '/docs/app-hooks',
-      },
-      {
         text: 'Dynamic or Static',
         link: '/docs/dynamic-or-static',
       },
@@ -43,6 +39,14 @@ export default [
   {
     text: 'References',
     children: [
+      {
+        text: 'App Hooks',
+        link: '/docs/references/app-hooks',
+      },
+      {
+        text: 'Server Hooks',
+        link: '/docs/references/server-hooks',
+      },
       { text: '@ream/app', link: '/docs/references/app' },
       { text: '@ream/server', link: '/docs/references/server' },
     ],

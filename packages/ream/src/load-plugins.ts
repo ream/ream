@@ -42,12 +42,12 @@ export async function loadPlugins(api: Ream) {
           }
         }
       }
-      const enhanceAppFile = await resolveFile(
-        ['enhance-app.js', 'enhance-app.ts'],
+      const appHookFile = await resolveFile(
+        ['ream.app.js', 'ream.app.ts'],
         modDir
       )
-      if (enhanceAppFile) {
-        api.pluginContext.addPluginFile('enhance-app', enhanceAppFile)
+      if (appHookFile) {
+        api.pluginContext.addPluginFile('app', appHookFile)
       }
     }
   }

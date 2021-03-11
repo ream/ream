@@ -11,8 +11,8 @@ type State = {
     [k: string]: string
   }
   pluginsFiles: {
-    'enhance-app': Set<string>
-    'enhance-server': Set<string>
+    app: Set<string>
+    server: Set<string>
   }
   hookCallbacks: {
     onPrepareFiles: Set<() => Promise<void>>
@@ -23,8 +23,8 @@ type State = {
 const getInitialState = (): State => ({
   constants: {},
   pluginsFiles: {
-    'enhance-app': new Set(),
-    'enhance-server': new Set(),
+    app: new Set(),
+    server: new Set(),
   },
   hookCallbacks: {
     onPrepareFiles: new Set(),
