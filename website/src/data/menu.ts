@@ -27,6 +27,10 @@ export default [
         link: '/docs/special-pages',
       },
       {
+        text: 'Environment Variables',
+        link: '/docs/environment-variables',
+      },
+      {
         text: 'Dynamic or Static',
         link: '/docs/dynamic-or-static',
       },

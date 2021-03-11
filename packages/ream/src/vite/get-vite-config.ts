@@ -84,6 +84,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       )
 
   const config: ViteConfig = {
+    mode: api.mode,
     root: api.rootDir,
     plugins: [
       reamAliasPlugin(api),
@@ -94,11 +95,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       babelPlugin(),
       moveManifestPlugin(api.resolveDotReam('manifest')),
     ],
-    define: {
-      ...api.state.constants,
-      'import.meta.env.REAM_SRC_DIR': JSON.stringify(api.resolveSrcDir()),
-      'import.meta.env.REAM_ROOT_DIR': JSON.stringify(api.resolveRootDir()),
-    },
+    define: api.constants,
     resolve: {
       alias: {
         '@': api.resolveSrcDir(),

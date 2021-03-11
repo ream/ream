@@ -22,29 +22,6 @@ export default defineReamConfig({
 
 All config options are documented below.
 
-## `env`
-
-- Type: `object`
-
-Use build-time environment variables, matched variables in your app code will be replaced with the supplied value.
-
-For example:
-
-```js
-module.exports = {
-  env: {
-    API_ENDPOINT:
-      process.env.NODE_ENV === 'production'
-        ? 'https://api.my.com'
-        : 'http://localhost:4040',
-  },
-}
-```
-
-Then you can use `import.meta.env.API_ENDPOINT` in your app code.
-
-`.env` files are also supported.
-
 ## `routes`
 
 - Type: `(defaultRoutes: Route[]) => Route[] | Promise<Route[]>`

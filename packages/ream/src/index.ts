@@ -14,6 +14,7 @@ export interface Options {
   rootDir?: string
   srcDir?: string
   dev?: boolean
+  mode?: string
 }
 
 export type Route = {
@@ -51,6 +52,7 @@ export class Ream {
   configPath?: string
   viteDevServer?: ViteDevServer
   userEnv!: Record<string, string>
+  mode: string
 
   constructor(options: Options = {}, inlineConfig: ReamConfig = {}) {
     this.inlineConfig = inlineConfig
@@ -62,6 +64,7 @@ export class Ream {
       this.srcDir = hasPagesInSrc ? join(this.rootDir, 'src') : this.rootDir
     }
     this.isDev = Boolean(options.dev)
+    this.mode = options.mode || (this.isDev ? 'development' : 'production')
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
     }
@@ -111,6 +114,30 @@ export class Ream {
     }
   }
 
+  get env(): Record<string, string> {
+    return {
+      ...this.userEnv,
+      ...this.config.env,
+      REAM_SOURCE_DIR: this.resolveSrcDir(),
+      REAM_ROOT_DIR: this.resolveRootDir(),
+    }
+  }
+
+  get constants(): Record<string, string> {
+    const { env } = this
+    return {
+      ...this.state.constants,
+      ...Object.keys(env).reduce((res, key) => {
+        const value = JSON.stringify(env[key])
+        return {
+          ...res,
+          [`import.meta.env.${key}`]: value,
+          [`process.env.${key}`]: value,
+        }
+      }, {}),
+    }
+  }
+
   async prepare({
     shouldCleanDir,
     shouldPrepreFiles,
@@ -122,11 +149,7 @@ export class Ream {
 
     await this.loadConfig()
 
-    this.userEnv = loadEnv(
-      this.isDev ? 'development' : 'production',
-      this.rootDir,
-      'REAM_'
-    )
+    this.userEnv = loadEnv(this.mode, this.rootDir, 'REAM_')
 
     await loadPlugins(this)
 

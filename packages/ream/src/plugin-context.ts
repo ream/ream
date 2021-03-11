@@ -16,22 +16,11 @@ export class PluginContext {
   }
 
   get env() {
-    return { ...this.api.userEnv, ...this.api.config.env }
+    return this.api.env
   }
 
-  get constants(): Record<string, string> {
-    const { env } = this
-    return {
-      ...this.state.constants,
-      ...Object.keys(env).reduce((res, key) => {
-        const value = JSON.stringify(env[key])
-        return {
-          ...res,
-          [`import.meta.env.${key}`]: value,
-          [`process.env.${key}`]: value,
-        }
-      }, {}),
-    }
+  get constants() {
+    return this.api.constants
   }
 
   ensureEnv(name: string, defaultValue?: string) {
