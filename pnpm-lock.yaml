@@ -129,7 +129,7 @@ importers:
       fast-glob: 3.2.5
       fs-extra: 9.1.0
       hash-sum: 2.0.0
-      joycon: 2.2.5
+      joycon: 3.0.0
       resolve-from: 5.0.0
       serialize-javascript: 5.0.1
       vite: 2.0.3
@@ -163,7 +163,7 @@ importers:
       fast-glob: 3.2.5
       fs-extra: 9.1.0
       hash-sum: 2.0.0
-      joycon: 2.2.5
+      joycon: ^3.0.0
       mock-fs: ^4.13.0
       resolve-from: 5.0.0
       serialize-javascript: ^5.0.1
@@ -3283,10 +3283,17 @@ packages:
     resolution:
       integrity: sha512-KWYVV1c4i+jbMpaBC+U++4Va0cp8OisU185o73T1vo99hqi7w8tSJfUXYswwqqrjzwxa6KpRK54WhPvwf5w6PQ==
   /joycon/2.2.5:
+    dev: true
     engines:
       node: '>=6'
     resolution:
       integrity: sha512-YqvUxoOcVPnCp0VU1/56f+iKSdvIRJYPznH22BdXV3xMk75SFXhWeJkZ8C9XxUWt1b5x2X1SxuFygW1U0FmkEQ==
+  /joycon/3.0.0:
+    dev: false
+    engines:
+      node: '>=12'
+    resolution:
+      integrity: sha512-liltsn9SO+IuOHnVb1EgW6HBaHb6rUsMzkLKnGV7izz8UrXBpa3bsMSa2J8pbXo3B4Ebk6Wm2Izs4Dgbl2EGPw==
   /jpeg-js/0.4.3:
     dev: false
     resolution:
