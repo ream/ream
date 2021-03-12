@@ -15,14 +15,15 @@ cli
     handleError(
       async (rootDir: string, options: { host?: string; port?: number }) => {
         const { Ream } = await import('./')
+        const host = options.host || 'localhost'
+        const port = options.port || 3000
         const app = new Ream({
           rootDir,
           dev: true,
         })
         const handler = await app.getRequestHandler()
         const server = createServer(handler)
-        const host = options.host || 'localhost'
-        const port = options.port || 3000
+        process.env.PORT = `${port}`
         server.listen(port, host)
         console.log(`> http://${host}:${port}`)
       }
