@@ -1,5 +1,29 @@
 # ream
 
+## 5.0.0-beta.6
+
+- Better `.env` file support
+- Added [`routes` option](https://ream.dev/docs/configuration#routes) in `ream.config.js`, you can now add routes at build time.
+- `enhance-app.js` is renamed to `ream.app.js`
+  - `onCreatedApp` is renamed to `extendApp`
+  - `onCreatedRouter` is renamed to `extendRouter`
+- A new file `ream.server.js` for server hooks, available hooks for now: `extendServer`, `getInitialHTML`
+- `_document.js` support is removed in favor of `getInitialHTML` hook in `ream.server.js`
+- _Experimental_. Re-enabled plugin API, this is experimental so there're no docs for now, but you can check out existing plugins for references.
+- _Experimental_. `staticPreload` supports _revalidate_ now.
+  ```js
+  export const staticPreload = () => {
+    return {
+      data: {
+        foo: true,
+      },
+      // Cache the result for 5 seconds only
+      // Always use the cache, re-generate in the background
+      revalidate: 5,
+    }
+  }
+  ```
+
 ## 5.0.0-beta.5
 
 - Introduce "modules", modules are a way to extend your app's functionality, for example `@ream/module-vuex` adds Vuex support. Modules are runtime dependencies, so you need to add them to "dependencies" instead of "devDependencies" unless you're building a static site.
