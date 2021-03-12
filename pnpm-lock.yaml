@@ -178,23 +178,21 @@ importers:
       debug: 4.3.1
       path-to-regexp: 6.1.0
       serialize-javascript: 5.0.1
-      serve-static: 1.14.1
+      sirv: 1.0.11
       vue: 3.0.5
     devDependencies:
       '@types/debug': 4.1.5
       '@types/serialize-javascript': 5.0.0
-      '@types/serve-static': 1.13.9
     specifiers:
       '@ream/app': workspace:*
       '@types/debug': 4.1.5
       '@types/serialize-javascript': 5.0.0
-      '@types/serve-static': 1.13.9
       '@vue/server-renderer': ^3.0.5
       cac: 6.7.1
       debug: 4.3.1
       path-to-regexp: 6.1.0
       serialize-javascript: 5.0.1
-      serve-static: 1.14.1
+      sirv: ^1.0.11
       vue: ^3.0.5
   packages/test-utils:
     dependencies:
@@ -767,6 +765,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-oZLYFEAzUKyi3SKnXvj32ZCEGH6RDnao7COuCVhDydMS9NrCSVXhM79VaKyP5+Zc33m0QXEd2DN3UkU7OsHcfw==
+  /@polka/url/1.0.0-next.11:
+    dev: false
+    resolution:
+      integrity: sha512-3NsZsJIA/22P3QUyrEDNA2D133H4j224twJrdipXN38dpnIOzAbUDtOwkcJ5pXmn75w7LSQDjA4tO9dm1XlqlA==
   /@rollup/plugin-node-resolve/11.2.0_rollup@2.39.1:
     dependencies:
       '@rollup/pluginutils': 3.1.0_rollup@2.39.1
@@ -4578,6 +4580,16 @@ packages:
   /signal-exit/3.0.3:
     resolution:
       integrity: sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
+  /sirv/1.0.11:
+    dependencies:
+      '@polka/url': 1.0.0-next.11
+      mime: 2.5.2
+      totalist: 1.1.0
+    dev: false
+    engines:
+      node: '>= 10'
+    resolution:
+      integrity: sha512-SR36i3/LSWja7AJNRBz4fF/Xjpn7lQFI30tZ434dIy+bitLYSP+ZEenHg36i23V2SGEz+kqjksg0uOGZ5LPiqg==
   /sisteransi/1.0.5:
     dev: true
     resolution:
@@ -4958,6 +4970,12 @@ packages:
       node: '>=0.6'
     resolution:
       integrity: sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
+  /totalist/1.1.0:
+    dev: false
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-gduQwd1rOdDMGxFG1gEvhV88Oirdo2p+KjoYFU7k2g+i7n6AFFbDQ5kMPUsW0pNbfQsB/cwXvT1i4Bue0s9g5g==
   /tough-cookie/2.5.0:
     dependencies:
       psl: 1.8.0
