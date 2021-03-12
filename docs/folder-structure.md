@@ -14,9 +14,9 @@
   - `.ream/client` contains the generated static assets of your website, if you are running the command `ream export`, you should deploy `.ream/client` then.
 - `public/`: (optional) Served as public assets under the root path, e.g. `public/favicon.ico` is served at url `/favicon.ico`.
 - `pages/`: (optional) Vue Components under this folder become pages automatically with paths based on their filename, see more about [Routing](/docs/routing). Files inside `pages/api` are treated as [Server Routes](/docs/server-routes).
-  - `pages/404.vue`: (optional) Custom 404 page.
-  - `pages/_error.vue`: (optional) Custom error page.
-  - `pages/_app.vue`: (optional) [Custom App Component](/docs/custom-app-and-document).
+  - `pages/404.vue`: (optional) [Custom 404 page](/docs/special-pages#custom-404-page).
+  - `pages/_error.vue`: (optional) [Custom error page](/docs/special-pages#custom-error-page).
+  - `pages/_app.vue`: (optional) [Custom app component](/docs/special-pages#custom-app-component).
 - `ream.config.js`, `ream.config.ts`: (optional) Config file for Ream, see [all config options here](/docs/configuration).
 - `ream.app.js`, `ream.app.ts`: (optional) Access [app hooks](/docs/references/app-hooks).
 - `ream.server.js`, `ream.server.ts`: (optional) Access [server hooks](/docs/references/server-hooks).
