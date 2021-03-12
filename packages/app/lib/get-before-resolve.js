@@ -3,8 +3,6 @@ import { getPreloadPath } from './runtime-utils'
 
 const noop = () => {}
 
-const staticPreloadPaths = {}
-
 export const loadPageData = async (to, next = noop) => {
   if (!to.matched || to.matched.length === 0) {
     return next()
@@ -39,10 +37,6 @@ export const loadPageData = async (to, next = noop) => {
           return res.json()
         })
 
-        if (component.$$staticPreload) {
-          staticPreloadPaths[to.path] = true
-        }
-
         Object.assign(result, _result)
         // We only need to fetch server once
         break
@@ -51,20 +45,10 @@ export const loadPageData = async (to, next = noop) => {
 
     initialState.preload[to.path] = result
 
-    next && next()
+    next(result.redirect ? result.redirect.url : undefined)
   }
-  const prevResult = initialState.preload[to.path]
-  if (staticPreloadPaths[to.path]) {
-    // No need to fetch data for staticPreload pages when they have already fetched data once
-    // Since the data doesn't change, hence "staticPreload"
-    next()
-  } else if (prevResult && prevResult.cacheFirst) {
-    // Page props already exist, use cache and reinvalidate
-    next()
-    fetchPage()
-  } else {
-    await fetchPage(next)
-  }
+
+  await fetchPage(next)
 }
 
 /**
