@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
-import Router from 'trouter'
+import { Router, HTTPMethod } from '@egoist/router'
 
 export type SimpleHandleFunction<TReq = any, TRes = any> = (
   req: TReq,
@@ -81,14 +81,14 @@ export class Connect<
   }
 
   add(
-    method: Router.HTTPMethod,
+    method: HTTPMethod,
     route: string,
     handler: HandleFunction<TReq, TRes>,
     ...handlers: HandleFunction<TReq, TRes>[]
   ): this
 
   add(
-    method: Router.HTTPMethod,
+    method: HTTPMethod,
     route: string,
     ...handlers: HandleFunction<TReq, TRes>[]
   ) {
@@ -139,7 +139,7 @@ export class Connect<
     req.path = info.path as string
     req.query = parseQuery(info.search.substring(1))
 
-    const obj = this.router.find(req.method as Router.HTTPMethod, req.url!)
+    const obj = this.router.find(req.method as HTTPMethod, req.url!)
     req.params = obj.params
     obj.handlers.push(this.onNoMatch)
 

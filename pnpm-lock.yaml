@@ -172,29 +172,25 @@ importers:
       vue: ^3.0.5
   packages/server:
     dependencies:
+      '@egoist/router': 1.0.1
       '@ream/app': link:../app
       '@vue/server-renderer': 3.0.5_vue@3.0.5
       cac: 6.7.1
-      debug: 4.3.1
-      path-to-regexp: 6.1.0
       serialize-javascript: 5.0.1
       sirv: 1.0.11
-      trouter: 3.1.0
       vue: 3.0.5
     devDependencies:
       '@types/debug': 4.1.5
       '@types/serialize-javascript': 5.0.0
     specifiers:
+      '@egoist/router': ^1.0.1
       '@ream/app': workspace:*
       '@types/debug': 4.1.5
       '@types/serialize-javascript': 5.0.0
       '@vue/server-renderer': ^3.0.5
       cac: 6.7.1
-      debug: 4.3.1
-      path-to-regexp: 6.1.0
       serialize-javascript: 5.0.1
       sirv: ^1.0.11
-      trouter: ^3.1.0
       vue: ^3.0.5
   packages/test-utils:
     dependencies:
@@ -542,6 +538,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-NjSXVWv+qizeLXEzzCzN+vLydR772NXyJ6KFBY2+GPUiB7lldV+XUD+OZBlkJ+IBfaQiWHd+IekFg8AvZJU2Ug==
+  /@egoist/router/1.0.1:
+    dev: false
+    resolution:
+      integrity: sha512-BWlCaN8pX9RPw6hNkeGoviJj1JORAd+WfE8j6EMX7BAi8Fqfif0Vaziy8U94DKPHrNWWH6EeNHsJZnZRQsJVTQ==
   /@istanbuljs/load-nyc-config/1.1.0:
     dependencies:
       camelcase: 5.3.1
@@ -3956,10 +3956,6 @@ packages:
   /path-parse/1.0.6:
     resolution:
       integrity: sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
-  /path-to-regexp/6.1.0:
-    dev: false
-    resolution:
-      integrity: sha512-h9DqehX3zZZDCEm+xbfU0ZmwCGFCAAraPJWMXJ4+v32NjZJilVg3k1TcKsRgIb8IQ/izZSaydDc1OhJCZvs2Dw==
   /pause-stream/0.0.11:
     dependencies:
       through: 2.3.8
@@ -4264,12 +4260,6 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-J6SDjUgDxQj5NusnOtdFxDwN/+HWykR8GELwctJ7mdqhcyy1xEc4SRFHUXvxTp661YaVKAjfRLZ9cCqS6tn32A==
-  /regexparam/1.3.0:
-    dev: false
-    engines:
-      node: '>=6'
-    resolution:
-      integrity: sha512-6IQpFBv6e5vz1QAqI+V4k8P2e/3gRrqfCJ9FI+O1FLQTO+Uz6RXZEZOPmTJ6hlGj7gkERzY5BRCv09whKP96/g==
   /remove-trailing-separator/1.1.0:
     dev: true
     resolution:
@@ -5019,14 +5009,6 @@ packages:
       node: '>=6'
     resolution:
       integrity: sha512-kr8SKKw94OI+xTGOkfsvwZQ8mWoikZDd2n8XZHjJVZUARZT+4/VV6cacRS6CLsH9bNm+HFIPU1Zx4CnNnb4qlQ==
-  /trouter/3.1.0:
-    dependencies:
-      regexparam: 1.3.0
-    dev: false
-    engines:
-      node: '>=6'
-    resolution:
-      integrity: sha512-3Swwu638QQWOefHLss9cdyLi5/9BKYmXZEXpH0KOFfB9YZwUAwHbDAcoYxaHfqAeFvbi/LqAK7rGkhCr1v1BJA==
   /ts-interface-checker/0.1.13:
     dev: true
     resolution:

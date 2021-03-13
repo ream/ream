@@ -12,21 +12,21 @@
   "license": "MIT",
   "files": [
     "dist",
-    "/cli.js"
+    "/cli.js",
+    "!*.spec.js",
+    "!*.spec.d.ts"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc --declarationDir temp && dtsup temp/index.d.ts",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc --watch"
   },
   "dependencies": {
+    "@egoist/router": "^1.0.1",
     "@ream/app": "workspace:*",
     "@vue/server-renderer": "^3.0.5",
     "cac": "6.7.1",
-    "debug": "4.3.1",
-    "path-to-regexp": "6.1.0",
     "serialize-javascript": "5.0.1",
     "sirv": "^1.0.11",
-    "trouter": "^3.1.0",
     "vue": "^3.0.5"
   },
   "devDependencies": {
