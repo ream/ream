@@ -143,11 +143,10 @@ export const createClientRouter = async (
 export async function createHandler(options: CreateServerOptions) {
   const dotReamDir = path.resolve(options.cwd || '.', '.ream')
   const getHtmlAssets = options.getHtmlAssets || productionGetHtmlAssets
-  const server = createHttpServer()
 
   let exportCache: ExportCache | undefined
 
-  const handleError: OnError<ReamServerRequest, ReamServerResponse> = async (
+  const onError: OnError<ReamServerRequest, ReamServerResponse> = async (
     err,
     req,
     res
@@ -205,7 +204,9 @@ export async function createHandler(options: CreateServerOptions) {
     }
   }
 
-  server.onError(handleError)
+  const server = createHttpServer({
+    onError,
+  })
 
   const prepare = async () => {
     const context =
@@ -391,5 +392,5 @@ export async function createHandler(options: CreateServerOptions) {
     }
   })
 
-  return { handler: server.handler.bind(server), prepare }
+  return { handler: server.handler, prepare }
 }

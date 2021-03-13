@@ -1,5 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { parse as parseQuery, ParsedUrlQuery } from 'querystring'
+import Router from 'trouter'
 
 export type SimpleHandleFunction<TReq = any, TRes = any> = (
   req: TReq,
@@ -16,18 +17,16 @@ export type HandleFunction<TReq = any, TRes = any> =
   | SimpleHandleFunction<TReq, TRes>
   | NextHandleFunction<TReq, TRes>
 
+export type NextFunction = (err?: ConnectError) => void
+
 export interface ConnectRequest extends IncomingMessage {
   originalUrl: string
   path: string
   query: ParsedUrlQuery
+  params: Record<string, string>
 }
 
 export interface ConnectResponse extends ServerResponse {}
-
-const getBaseFromPath = (path: string) => {
-  const index = path.indexOf('/')
-  return index > 1 ? path.substring(0, index) : path
-}
 
 const parseUrl = (url: string) => {
   const queryIndex = url.indexOf('?')
@@ -45,90 +44,113 @@ export type OnError<TReq, TRes> = (
   res: TRes
 ) => void
 
-export interface ConnectError extends Error {
+export class ConnectError extends Error {
   code?: number
   status?: number
 }
 
-export type NextFunction = (err?: ConnectError) => void
-
 export type Options<TReq, TRes> = {
   onError?: OnError<TReq, TRes>
+  onNoMatch?: SimpleHandleFunction<TReq, TRes>
 }
 
+const onError = (
+  error: ConnectError | string,
+  _: ConnectRequest,
+  res: ConnectResponse
+) => {
+  const status = typeof error === 'string' ? 500 : error.status || 500
+  res.statusCode = status
+  res.end(status)
+}
+
+const notFoundError = new ConnectError('404 not found')
+notFoundError.status = 404
 export class Connect<
   TReq extends ConnectRequest,
   TRes extends ConnectResponse
 > {
-  wares: {
-    [base: string]: HandleFunction<TReq, TRes>[]
-  }
-  options: Options<TReq, TRes>
+  onError: OnError<TReq, TRes>
+  onNoMatch: SimpleHandleFunction<TReq, TRes>
+  router: Router<HandleFunction<TReq, TRes>>
 
   constructor(options: Options<TReq, TRes> = {}) {
-    this.wares = { '': [] }
-    this.options = options
+    this.router = new Router()
+    this.onError = options.onError || onError
+    this.onNoMatch = options.onNoMatch || this.onError.bind(null, notFoundError)
   }
 
-  onError(fn: OnError<TReq, TRes>) {
-    this.options.onError = fn
+  add(
+    method: Router.HTTPMethod,
+    route: string,
+    handler: HandleFunction<TReq, TRes>,
+    ...handlers: HandleFunction<TReq, TRes>[]
+  ): this
+
+  add(
+    method: Router.HTTPMethod,
+    route: string,
+    ...handlers: HandleFunction<TReq, TRes>[]
+  ) {
+    this.router.add(method, route, ...handlers)
+
+    return this
   }
-
-  use(fn: NextHandleFunction<TReq, TRes>): void
-  use(fn: HandleFunction<TReq, TRes>): void
-
-  use(base: string, fn: NextHandleFunction<TReq, TRes>): void
-  use(base: string, fn: HandleFunction<TReq, TRes>): void
 
   use(
-    base: string | NextHandleFunction<TReq, TRes> | HandleFunction<TReq, TRes>,
-    fn?: NextHandleFunction<TReq, TRes> | HandleFunction<TReq, TRes>
+    route: string,
+    handler: HandleFunction<TReq, TRes>,
+    ...handlers: HandleFunction<TReq, TRes>[]
+  ): this
+  use(
+    handler: HandleFunction<TReq, TRes>,
+    ...handlers: HandleFunction<TReq, TRes>[]
+  ): this
+
+  use(
+    route: string | HandleFunction<TReq, TRes>,
+    ...handlers: HandleFunction<TReq, TRes>[]
   ) {
-    if (typeof base === 'string' && fn) {
-      this.wares[base] = this.wares[base] || []
-      this.wares[base].push(fn)
-    } else if (typeof base === 'function') {
-      this.wares[''].push(base)
+    if (typeof route === 'string') {
+      this.router.use(route, ...handlers)
+    } else if (typeof route === 'function') {
+      this.router.use('*', route, ...handlers)
     }
+
+    return this
   }
 
-  handler(_req: IncomingMessage, _res: ServerResponse, done?: () => void) {
+  get = this.add.bind(this, 'GET')
+  head = this.add.bind(this, 'HEAD')
+  patch = this.add.bind(this, 'PATCH')
+  options = this.add.bind(this, 'OPTIONS')
+  connect = this.add.bind(this, 'CONNECT')
+  delete = this.add.bind(this, 'DELETE')
+  trace = this.add.bind(this, 'TRACE')
+  post = this.add.bind(this, 'POST')
+  put = this.add.bind(this, 'PUT')
+
+  handler = (_req: IncomingMessage, _res: ServerResponse) => {
     const req = _req as TReq
     const res = _res as TRes
     const info = parseUrl(req.url!)
-    const wares = [...(this.wares[''] || [])]
 
     req.originalUrl = req.originalUrl || req.url!
     req.path = info.path as string
     req.query = parseQuery(info.search.substring(1))
 
-    const base = getBaseFromPath(req.path)
-    if (this.wares[base]) {
-      wares.push(...this.wares[base])
-    }
+    const obj = this.router.find(req.method as Router.HTTPMethod, req.url!)
+    req.params = obj.params
+    obj.handlers.push(this.onNoMatch)
 
     let i = 0
-    const size = wares.length
 
-    const { onError } = this.options
+    const next = (error?: string | ConnectError) => {
+      if (error) return this.onError(error, req, res)
 
-    const next = async (error?: ConnectError) => {
-      if (error) {
-        return onError && onError(error, req, res)
-      }
-
-      // Run `done` when `next` is called in the last middleware
-      if (done && i === size) {
-        return done()
-      }
-
-      if (!res.writableEnded && i < size) {
-        try {
-          const fn = wares[i++]
-          await fn(req, res, next)
-        } catch (error) {
-          next(error)
-        }
+      const handle = obj.handlers[i++]
+      if (handle) {
+        handle(req, res, next)
       }
     }
 
@@ -139,4 +161,6 @@ export class Connect<
 export const connect = <
   TReq extends ConnectRequest,
   TRes extends ConnectResponse
->() => new Connect<TReq, TRes>()
+>(
+  options?: Options<TReq, TRes>
+) => new Connect<TReq, TRes>(options)

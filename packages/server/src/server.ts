@@ -4,6 +4,7 @@ import {
   ConnectRequest,
   ConnectResponse,
   NextFunction,
+  Options,
 } from './connect'
 
 export type ReamServerHandler = (
@@ -24,8 +25,10 @@ export interface ReamServerResponse extends ConnectResponse {
   send: (data: SendData) => void
 }
 
-export const createServer = () => {
-  const app = connect<ReamServerRequest, ReamServerResponse>()
+export const createServer = (
+  options?: Options<ReamServerRequest, ReamServerResponse>
+) => {
+  const app = connect<ReamServerRequest, ReamServerResponse>(options)
 
   app.use((req, res, next) => {
     Object.defineProperties(res, {
