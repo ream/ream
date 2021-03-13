@@ -1,7 +1,5 @@
-import { ReamConfig } from 'ream'
+import { defineReamConfig } from 'ream'
 
-const config: ReamConfig = {
-  // Your ream config..
-}
-
-export default config
+export default defineReamConfig({
+  // ...your config
+})
