@@ -13,9 +13,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo skip",
-    "dev": "npm run clean && tsc --watch",
-    "build": "npm run clean && tsc --declarationDir temp && dtsup temp/index.d.ts",
-    "clean": "rm -rf dist"
+    "dev": "tsup --watch",
+    "build": "tsup"
   },
   "license": "MIT",
   "author": {
@@ -55,6 +54,6 @@
     "@types/mock-fs": "^4.13.0",
     "@types/node": "14.14.31",
     "mock-fs": "^4.13.0",
-    "type-fest": "^0.21.1"
+    "ts-essentials": "^7.0.1"
   }
 }

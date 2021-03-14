@@ -1,6 +1,7 @@
 import { cac } from 'cac'
 import { createServer } from 'http'
 import path from 'path'
+import { version } from '../package.json'
 
 const cli = cac()
 
@@ -89,7 +90,7 @@ cli
     )
   )
 
-cli.version(require('../package').version)
+cli.version(version)
 cli.help()
 cli.parse()
 

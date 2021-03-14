@@ -1,5 +1,5 @@
 import { resolve, join, dirname, relative } from 'path'
-import type { SetRequired } from 'type-fest'
+import type { MarkRequired } from 'ts-essentials'
 import { ViteDevServer, UserConfig as ViteConfig, loadEnv } from 'vite'
 import resolveFrom from 'resolve-from'
 import consola from 'consola'
@@ -48,7 +48,7 @@ export class Ream {
   srcDir: string
   isDev: boolean
   inlineConfig: ReamConfig
-  config!: SetRequired<ReamConfig, 'env' | 'plugins' | 'imports'>
+  config!: MarkRequired<ReamConfig, 'env' | 'plugins' | 'imports'>
   configPath?: string
   viteDevServer?: ViteDevServer
   userEnv!: Record<string, string>

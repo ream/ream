@@ -17,8 +17,8 @@
     "!*.spec.d.ts"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "dev": "tsc --watch"
+    "build": "tsup",
+    "dev": "tsup --watch"
   },
   "dependencies": {
     "@egoist/router": "^1.0.1",

@@ -10,24 +10,31 @@ const log = (label: string, buffer: Uint8Array) => {
   }
 }
 
-const run = (name: string) => {
-  const cmd = spawn('npm', ['run', 'dev'], {
-    cwd: `packages/${name}`,
-    env: { ...process.env, FORCE_COLOR: '1', NPM_CONFIG_COLOR: 'always' },
+const run = (name: string) =>
+  new Promise((resolve) => {
+    const cmd = spawn('npm', ['run', 'dev'], {
+      cwd: `packages/${name}`,
+      env: { ...process.env, FORCE_COLOR: '1', NPM_CONFIG_COLOR: 'always' },
+    })
+
+    cmd.on('exit', (code) => {
+      process.exitCode = code || 0
+    })
+    cmd.stdout?.on('data', (data) => {
+      resolve(true)
+      log(name, data)
+    })
+    cmd.stderr?.on('data', (data) => {
+      resolve(true)
+      log(name, data)
+    })
   })
 
-  cmd.on('exit', (code) => {
-    process.exitCode = code || 0
-  })
-  cmd.stdout?.on('data', (data) => {
-    log(name, data)
-  })
-  cmd.stderr?.on('data', (data) => {
-    log(name, data)
-  })
+async function main() {
+  await run('server')
+  await run('app')
+  await run('ream')
+  await run('test-utils')
 }
 
-run('server')
-run('app')
-run('ream')
-run('test-utils')
+main()
