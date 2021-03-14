@@ -1,5 +1,10 @@
 # ream
 
+## 5.0.0-beta.7
+
+- Add router to the server, powered by [egoist/router](https://github.com/egoist/router) 
+- __@ream/app__: Bundle dependencies.
+
 ## 5.0.0-beta.6
 
 - Better `.env` file support

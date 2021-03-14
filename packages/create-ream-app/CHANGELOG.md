@@ -1,5 +1,9 @@
 # create-ream-app
 
+## 1.0.0-beta.2
+
+- Update `ream.config.ts` to use `defineReamConfig`
+
 ## 1.0.0-beta.1
 
 - Use `ream@latest` instead of `ream@beta`
