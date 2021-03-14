@@ -1,5 +1,4 @@
-import '@ream/fetch'
-import '/.ream/templates/global-imports.js'
+import 'dot-ream/templates/global-imports.js'
 import { renderHeadToString } from '@vueuse/head'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createApp } from './create-app'
@@ -7,10 +6,10 @@ import {
   clientRoutes,
   ErrorComponent,
   AppComponent,
-} from '/.ream/templates/shared-exports.js'
-import { serverRoutes } from '/.ream/templates/server-exports.js'
-import * as enhanceApp from '/.ream/templates/ream.app.js'
-import * as enhanceServer from '/.ream/templates/ream.server.js'
+} from 'dot-ream/templates/shared-exports.js'
+import { serverRoutes } from 'dot-ream/templates/server-exports.js'
+import * as enhanceApp from 'dot-ream/templates/ream.app.js'
+import * as enhanceServer from 'dot-ream/templates/ream.server.js'
 
 export default {
   async render(context) {

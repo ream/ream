@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "noUnusedLocals": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "allowJs": true
   }
 }

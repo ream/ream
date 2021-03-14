@@ -3,7 +3,7 @@ import { createHandler } from '@ream/server'
 import { ModuleNode } from 'vite'
 import type { Ream } from './'
 
-const SERVER_ENTRY_PATH = require.resolve(`@ream/app/server-entry.js`)
+const SERVER_ENTRY_PATH = require.resolve(`@ream/app/dist/server-entry.js`)
 
 const collectCssUrls = (mods: Set<ModuleNode>, styles: Map<string, string>) => {
   for (const mod of mods) {
@@ -49,7 +49,7 @@ export const getRequestHandler = async (api: Ream) => {
             .join('\n'),
           scriptTags: `<script type="module" src="/@vite/client"></script>
           <script type="module" src="/@fs/${require.resolve(
-            `@ream/app/client-entry.js`
+            `@ream/app/dist/client-entry.js`
           )}"></script>
           `,
         }

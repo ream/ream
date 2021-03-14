@@ -138,9 +138,9 @@ test('build routes', async () => {
           'isServerRoute': true
         }
       ],
-      'appFile': '@ream/app/pages/_app.js',
-      'errorFile': '@ream/app/pages/_error.js',
-      'notFoundFile': '@ream/app/pages/404.js'
+      'appFile': '@ream/app/dist/_app.js',
+      'errorFile': '@ream/app/dist/_error.js',
+      'notFoundFile': '@ream/app/dist/404.js'
     }"
   `)
 })

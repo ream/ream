@@ -27,6 +27,7 @@ const run = (name: string) => {
   })
 }
 
-run('ream')
 run('server')
+run('app')
+run('ream')
 run('test-utils')

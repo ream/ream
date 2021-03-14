@@ -2,7 +2,7 @@ import path from 'path'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'sirv'
-import type { Preload } from '@ream/app'
+import type { Preload } from './preload'
 import {
   ReamServerRequest,
   ReamServerResponse,
@@ -21,6 +21,8 @@ export {
 
 // Re-export hook types
 export * from './hooks'
+
+export * from './preload'
 
 export { Connect } from './connect'
 

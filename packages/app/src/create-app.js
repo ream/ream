@@ -1,20 +1,13 @@
-import {
-  h,
-  createSSRApp,
-  isReactive,
-  reactive,
-  computed,
-  Transition,
-} from 'vue'
+import { h, createSSRApp, isReactive, reactive, Transition } from 'vue'
 import { createHead, useHead } from '@vueuse/head'
 import { RouterView } from 'vue-router'
-import { RouterLink, usePreloadResult } from './'
+import { RouterLink, usePreloadResult } from './index'
 import {
   AppComponent,
   NotFoundComponent,
   ErrorComponent,
-} from '/.ream/templates/shared-exports.js'
-import { callAsync as callEnhanceAppAsync } from '/.ream/templates/ream.app.js'
+} from 'dot-ream/templates/shared-exports.js'
+import { callAsync as callEnhanceAppAsync } from 'dot-ream/templates/ream.app.js'
 
 export const createApp = async ({ router, initialState }) => {
   const app = createSSRApp({

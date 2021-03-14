@@ -1,13 +1,13 @@
 import 'vite/dynamic-import-polyfill'
-import '/.ream/templates/global-imports.js'
+import 'dot-ream/templates/global-imports.js'
 import { reactive } from 'vue'
 import mitt from 'mitt'
 import { createWebHistory, createRouter } from 'vue-router'
-import { clientRoutes } from '/.ream/templates/shared-exports.js'
+import { clientRoutes } from 'dot-ream/templates/shared-exports.js'
 import { createApp } from './create-app'
 import { getBeforeResolve } from './lib/get-before-resolve'
 import { scrollBehavior } from './lib/scroll-behavior'
-import { callAsync as callEnhanceAppAsync } from '/.ream/templates/ream.app.js'
+import { callAsync as callEnhanceAppAsync } from 'dot-ream/templates/ream.app.js'
 
 window._ream = {
   event: mitt(),
@@ -27,7 +27,7 @@ async function start() {
   router.afterEach((to, from) => {
     let transition
     for (const m of to.matched) {
-      const { $$transition } = m.components.default
+      let { $$transition } = m.components.default
       if (typeof $$transition === 'function') {
         $$transition = $$transition(to, from)
       }

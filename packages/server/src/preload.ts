@@ -1,3 +1,5 @@
+import { ReamServerRequest, ReamServerResponse } from './server'
+
 interface IParams {
   [k: string]: string
 }
@@ -62,5 +64,3 @@ export type GetStaticPathsResult = {
 export type GetStaticPaths = () =>
   | GetStaticPathsResult
   | Promise<GetStaticPathsResult>
-
-export { ReamServerHandler, ReamServerRequest, ReamServerResponse }

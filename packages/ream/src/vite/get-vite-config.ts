@@ -80,7 +80,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const entry = api.isDev
     ? undefined
     : require.resolve(
-        `@ream/app/${server ? 'server-entry.js' : 'client-entry.js'}`
+        `@ream/app/dist/${server ? 'server-entry.js' : 'client-entry.js'}`
       )
 
   const config: ViteConfig = {
@@ -102,12 +102,13 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
         vue: api.config.vue?.runtimeTemplateCompiler
           ? 'vue/dist/vue.esm-bundler.js'
           : 'vue/dist/vue.runtime.esm-bundler.js',
+        'dot-ream': api.resolveDotReam(),
       },
     },
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
       exclude: ['@ream/app', '@ream/fetch', 'node-fetch'],
-      include: ['vue', 'vue-router', '@vueuse/head', 'mitt'],
+      include: ['vue'],
     },
     // @ts-expect-error vite does not expose these experimental stuff in types yet
     ssr: {
@@ -116,7 +117,6 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
         'vue',
         'vue/dist/vue.esm-bundler.js',
         'vue/dist/vue.runtime.esm-bundler.js',
-        'vue-router',
       ],
       noExternal: ['@ream/app'],
     },

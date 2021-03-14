@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@egoist/router": "^1.0.1",
-    "@ream/app": "workspace:*",
     "@vue/server-renderer": "^3.0.5",
     "cac": "6.7.1",
     "serialize-javascript": "5.0.1",

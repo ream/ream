@@ -45,7 +45,7 @@
     "joycon": "^3.0.0",
     "resolve-from": "5.0.0",
     "serialize-javascript": "^5.0.1",
-    "vite": "^2.0.3",
+    "vite": "^2.0.5",
     "vue": "^3.0.5"
   },
   "devDependencies": {

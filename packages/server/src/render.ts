@@ -1,7 +1,7 @@
 import type { Router } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
-import type { Preload } from '@ream/app'
+import type { Preload } from './preload'
 import {
   ReamServerRequest,
   ReamServerResponse,

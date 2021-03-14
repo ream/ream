@@ -4,9 +4,9 @@ import { Route } from '../'
 
 export const filesToRoutes = (files: string[], dir: string) => {
   const routes: Route[] = []
-  let errorFile: string = `@ream/app/pages/_error.js`
-  let appFile: string | undefined = `@ream/app/pages/_app.js`
-  let notFoundFile = `@ream/app/pages/404.js`
+  let errorFile: string = `@ream/app/dist/_error.js`
+  let appFile: string | undefined = `@ream/app/dist/_app.js`
+  let notFoundFile = `@ream/app/dist/404.js`
 
   for (const file of files) {
     const slug = file
