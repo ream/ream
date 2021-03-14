@@ -30,5 +30,9 @@
     "@types/node-fetch": "^2.5.8",
     "@types/polka": "0.5.2",
     "ream": "workspace:*"
+  },
+  "peerDependencies": {
+    "ream": "workspace:*",
+    "@ream/server": "workspace:*"
   }
 }
