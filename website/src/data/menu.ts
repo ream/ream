@@ -52,7 +52,7 @@ export default [
         link: '/docs/references/server-hooks',
       },
       { text: '@ream/app', link: '/docs/references/app' },
-      { text: '@ream/server', link: '/docs/references/server' },
+      { text: 'ream/server', link: '/docs/references/ream' },
     ],
   },
 ]

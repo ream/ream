@@ -1,6 +1,6 @@
 import { getCurrentInstance, computed, ComputedRef } from 'vue'
 import { useRoute } from 'vue-router'
-import type { PreloadResult } from '@ream/server'
+import type { PreloadResult } from 'ream/server'
 
 export const useInitialState = <
   TInitialState extends object = { [k: string]: any },
@@ -75,4 +75,4 @@ export { createSSRApp } from 'vue'
 
 export { useRoute, useRouter, RouterView } from 'vue-router'
 
-export type { Preload, StaticPreload } from '@ream/server'
+export type { Preload, StaticPreload } from 'ream/server'

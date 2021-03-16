@@ -4,7 +4,10 @@
 module.exports = {
   entryPoints: ['./src/cli.ts', './src/index.ts'],
   dts: {
-    entry: './src/index.ts',
+    entry: {
+      index: './src/index.ts',
+      server: './src/server/index.ts',
+    },
     resolve: true,
   },
   clean: true,

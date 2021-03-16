@@ -108,7 +108,6 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
       exclude: ['@ream/app', '@ream/fetch', 'node-fetch'],
-      include: ['vue'],
     },
     // @ts-expect-error vite does not expose these experimental stuff in types yet
     ssr: {

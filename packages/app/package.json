@@ -15,7 +15,6 @@
     "dev": "rollup -c --watch"
   },
   "devDependencies": {
-    "@ream/server": "workspace:*",
     "@rollup/plugin-node-resolve": "^11.2.0",
     "@rollup/plugin-sucrase": "^3.1.0",
     "@vueuse/head": "^0.5.1",
@@ -23,10 +22,10 @@
     "rollup": "^2.41.2",
     "rollup-plugin-dts": "^3.0.1",
     "tiny-glob": "^0.2.8",
-    "vue-router": "^4.0.3"
+    "vue-router": "^4.0.3",
+    "ream": "workspace:*"
   },
   "peerDependencies": {
-    "@ream/server": "workspace:*",
     "vue": "^3.0.6"
   }
 }

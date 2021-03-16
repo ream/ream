@@ -13,7 +13,7 @@ importers:
       semver: 7.3.4
       sucrase: 3.17.1
       tsc-watch: 4.2.9_typescript@4.2.3
-      tsup: 4.6.1_typescript@4.2.3
+      tsup: 4.7.2_typescript@4.2.3
       typescript: 4.2.3
     specifiers:
       '@ream/test-utils': workspace:*
@@ -28,7 +28,7 @@ importers:
       semver: ^7.3.4
       sucrase: ^3.17.1
       tsc-watch: ^4.2.9
-      tsup: ^4.6.1
+      tsup: ^4.7.2
       typescript: ^4.2.3
   examples/automatic-routing:
     dependencies:
@@ -76,21 +76,21 @@ importers:
       vuex: ^4.0.0
   packages/app:
     devDependencies:
-      '@ream/server': link:../server
       '@rollup/plugin-node-resolve': 11.2.0_rollup@2.41.2
       '@rollup/plugin-sucrase': 3.1.0_rollup@2.41.2
       '@vueuse/head': 0.5.1
       mitt: 2.1.0
+      ream: link:../ream
       rollup: 2.41.2
       rollup-plugin-dts: 3.0.1_rollup@2.41.2
       tiny-glob: 0.2.8
       vue-router: 4.0.3
     specifiers:
-      '@ream/server': workspace:*
       '@rollup/plugin-node-resolve': ^11.2.0
       '@rollup/plugin-sucrase': ^3.1.0
       '@vueuse/head': ^0.5.1
       mitt: ^2.1.0
+      ream: workspace:*
       rollup: ^2.41.2
       rollup-plugin-dts: ^3.0.1
       tiny-glob: ^0.2.8
@@ -126,10 +126,11 @@ importers:
     dependencies:
       '@babel/core': 7.13.1
       '@egoist/promise-queue': 1.1.0
+      '@egoist/router': 1.0.1
       '@ream/app': link:../app
-      '@ream/server': link:../server
       '@vitejs/plugin-vue': 1.1.4_@vue+compiler-sfc@3.0.5
       '@vue/compiler-sfc': 3.0.5_vue@3.0.5
+      '@vue/server-renderer': 3.0.5_vue@3.0.5
       cac: 6.6.1
       chalk: 4.1.0
       chokidar: 3.4.2
@@ -142,6 +143,7 @@ importers:
       joycon: 3.0.0
       resolve-from: 5.0.0
       serialize-javascript: 5.0.1
+      sirv: 1.0.11
       vite: 2.0.5
       vue: 3.0.5
     devDependencies:
@@ -150,20 +152,23 @@ importers:
       '@types/hash-sum': 1.0.0
       '@types/mock-fs': 4.13.0
       '@types/node': 14.14.31
+      '@types/serialize-javascript': 5.0.0
       mock-fs: 4.13.0
       ts-essentials: 7.0.1
     specifiers:
       '@babel/core': ^7.12.10
       '@egoist/promise-queue': ^1.1.0
+      '@egoist/router': ^1.0.1
       '@ream/app': workspace:*
-      '@ream/server': workspace:*
       '@types/debug': ^4.1.5
       '@types/fs-extra': 9.0.7
       '@types/hash-sum': 1.0.0
       '@types/mock-fs': ^4.13.0
       '@types/node': 14.14.31
+      '@types/serialize-javascript': ^5.0.0
       '@vitejs/plugin-vue': ^1.1.4
       '@vue/compiler-sfc': ^3.0.5
+      '@vue/server-renderer': ^3.0.5
       cac: 6.6.1
       chalk: ^4.1.0
       chokidar: 3.4.2
@@ -177,28 +182,9 @@ importers:
       mock-fs: ^4.13.0
       resolve-from: 5.0.0
       serialize-javascript: ^5.0.1
+      sirv: ^1.0.11
       ts-essentials: ^7.0.1
       vite: ^2.0.5
-      vue: ^3.0.5
-  packages/server:
-    dependencies:
-      '@egoist/router': 1.0.1
-      '@vue/server-renderer': 3.0.5_vue@3.0.5
-      cac: 6.7.1
-      serialize-javascript: 5.0.1
-      sirv: 1.0.11
-      vue: 3.0.5
-    devDependencies:
-      '@types/debug': 4.1.5
-      '@types/serialize-javascript': 5.0.0
-    specifiers:
-      '@egoist/router': ^1.0.1
-      '@types/debug': 4.1.5
-      '@types/serialize-javascript': 5.0.0
-      '@vue/server-renderer': ^3.0.5
-      cac: 6.7.1
-      serialize-javascript: 5.0.1
-      sirv: ^1.0.11
       vue: ^3.0.5
   packages/test-utils:
     dependencies:
@@ -210,12 +196,10 @@ importers:
       polka: 0.5.2
       serve-static: 1.14.1
     devDependencies:
-      '@ream/server': link:../server
       '@types/node-fetch': 2.5.8
       '@types/polka': 0.5.2
       ream: link:../ream
     specifiers:
-      '@ream/server': workspace:*
       '@types/node-fetch': ^2.5.8
       '@types/polka': 0.5.2
       execa: 5.0.0
@@ -230,7 +214,6 @@ importers:
     devDependencies:
       '@ream/app': link:../packages/app
       '@ream/plugin-google-analytics': link:../packages/plugin-google-analytics
-      '@ream/server': link:../packages/server
       '@types/marked': 1.2.2
       '@types/prismjs': 1.16.3
       fast-glob: 3.2.5
@@ -241,7 +224,6 @@ importers:
     specifiers:
       '@ream/app': workspace:*
       '@ream/plugin-google-analytics': workspace:*
-      '@ream/server': workspace:*
       '@types/marked': ^1.1.0
       '@types/prismjs': ^1.16.0
       fast-glob: 3.2.5
@@ -1556,12 +1538,6 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-uhki4T3Ax68hw7Dufi0bATVAF8ayBSwOKUEJHjObPrUN4tlQ8Lf7oljpTje/mArLxYN0D743c2zJt4C1bVTCqg==
-  /cac/6.7.1:
-    dev: false
-    engines:
-      node: '>=8'
-    resolution:
-      integrity: sha512-LfGt47+ugCY65W4yUEyxnZKd/tJSBJD/gUAxQGiQjH7yqdhbaX2XN0Rli4+0W0DJiDONmYeh0TlJxMtXGZspIg==
   /cac/6.7.2:
     engines:
       node: '>=8'
@@ -2080,10 +2056,17 @@ packages:
     resolution:
       integrity: sha512-MVIom8fgL1+B6iGqWtrG7QJ1gqd64BycxounlsX1kR/IcIITaSlTo7gghKpg4a+bnxkpo0dwcikuvk4MVSA9ww==
   /esbuild/0.8.57:
+    dev: false
     hasBin: true
     requiresBuild: true
     resolution:
       integrity: sha512-j02SFrUwFTRUqiY0Kjplwjm1psuzO1d6AjaXKuOR9hrY0HuPsT6sV42B6myW34h1q4CRy+Y3g4RU/cGJeI/nNA==
+  /esbuild/0.9.2:
+    dev: true
+    hasBin: true
+    requiresBuild: true
+    resolution:
+      integrity: sha512-xE3oOILjnmN8PSjkG3lT9NBbd1DbxNqolJ5qNyrLhDWsFef3yTp/KTQz1C/x7BYFKbtrr9foYtKA6KA1zuNAUQ==
   /escalade/3.1.1:
     engines:
       node: '>=6'
@@ -5271,13 +5254,13 @@ packages:
       typescript: '*'
     resolution:
       integrity: sha512-DlTaoDs74+KUpyWr7dCGhuscAUKCz6CiFduBN7R9RbLJSSN1moWdwoCLASE7+zLgGvV5AwXfYDiEMAsPGaO+Vw==
-  /tsup/4.6.1_typescript@4.2.3:
+  /tsup/4.7.2_typescript@4.2.3:
     dependencies:
       '@rollup/plugin-node-resolve': 11.2.0_rollup@2.41.2
       cac: 6.7.2
       chalk: 4.1.0
       chokidar: 3.5.1
-      esbuild: 0.8.57
+      esbuild: 0.9.2
       globby: 11.0.2
       joycon: 2.2.5
       postcss-load-config: 3.0.1
@@ -5288,12 +5271,12 @@ packages:
     dev: true
     hasBin: true
     peerDependencies:
-      typescript: ^4.2.2
+      typescript: ^4.2.3
     peerDependenciesMeta:
       typescript:
         optional: true
     resolution:
-      integrity: sha512-I6WBrNqEdX2cUhr4Aj8TjAC6WKqMdtCyKDuiKgp4U09xnpjlbUbbaS7Y/AF5YNOX6BsISuF4J4hS0gM1qQieVQ==
+      integrity: sha512-d5as7QBKOZJAlNk1gQ56NDzWY7iecLD3pM/MfI9knD72NrHuRCvYpOkQfDmd6C5hdiBPUlqhE/TOnAJiDOakPA==
   /tunnel-agent/0.6.0:
     dependencies:
       safe-buffer: 5.2.1

@@ -103,31 +103,6 @@ export const productionGetHtmlAssets: GetHtmlAssets = (clientManifest) => {
   return { scriptTags: ``, cssLinkTags: `` }
 }
 
-export const start = async (
-  cwd: string = '.',
-  options: { host?: string; port?: number; context: ServerContext }
-) => {
-  const host = options.host || 'localhost'
-  const port = `${options.port || 3000}`
-
-  if (!process.env.PORT) {
-    process.env.PORT = port
-  }
-
-  process.env.NODE_ENV = 'production'
-
-  const http = await import('http')
-
-  const { handler } = await createHandler({
-    cwd,
-    context: options.context,
-  })
-  const server = http.createServer(handler)
-  // @ts-ignore
-  server.listen(port, host)
-  console.log(`> http://${host}:${port}`)
-}
-
 export const createClientRouter = async (
   serverEntry: ServerEntry,
   url: string

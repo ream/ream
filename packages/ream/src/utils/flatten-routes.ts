@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
-import type { GetStaticPaths, StaticPreload, Preload } from '@ream/server'
+import type { GetStaticPaths, StaticPreload, Preload } from '../server'
 
 export const flattenRoutes = async (
   routes: RouteRecordRaw[],

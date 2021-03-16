@@ -211,9 +211,14 @@ export class Ream {
       shouldCleanDir: this.isDev,
       shouldPrepreFiles: this.isDev,
     })
-    const { getRequestHandler } = await import('./server')
-    const handler = await getRequestHandler(this)
-    return handler
+    if (this.isDev) {
+      const { getRequestHandler } = await import('./server/dev-server')
+      return getRequestHandler(this)
+    }
+
+    const { createHandler } = await import('./server')
+    const context = require(this.resolveDotReam('meta/server-context'))
+    return createHandler({ context })
   }
 
   async build({

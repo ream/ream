@@ -16,7 +16,6 @@
     "prismjs": "^1.20.0",
     "vite-plugin-windicss": "^0.4.3",
     "ream": "workspace:*",
-    "@ream/server": "workspace:*",
     "@ream/plugin-google-analytics": "workspace:*",
     "@ream/app": "workspace:*",
     "fast-glob": "3.2.5"

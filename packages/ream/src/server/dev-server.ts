@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { createHandler } from '@ream/server'
+import { createHandler } from './'
 import { ModuleNode } from 'vite'
-import type { Ream } from './'
+import type { Ream } from '../'
 
 const SERVER_ENTRY_PATH = require.resolve(`@ream/app/dist/server-entry.js`)
 

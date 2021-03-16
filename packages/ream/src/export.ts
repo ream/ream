@@ -10,7 +10,7 @@ import {
   ServerContext,
   createClientRouter,
   getExportOutputPath,
-} from '@ream/server'
+} from './server'
 import { PromiseQueue } from '@egoist/promise-queue'
 import { flattenRoutes } from './utils/flatten-routes'
 

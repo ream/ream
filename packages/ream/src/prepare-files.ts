@@ -275,7 +275,7 @@ export async function prepareFiles(api: Ream) {
         module.exports = {
           serverContext,
           get handler() {
-            const { createServer } = require('@ream/server')
+            const { createServer } = require('ream/server')
             return createServer({ context: serverContext })
           }
         }
