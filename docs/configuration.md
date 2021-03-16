@@ -103,7 +103,7 @@ Extend Ream's internal [Vite config](https://vitejs.dev/config/).
 
 ```js
 export default {
-  vite(config, { ssr, dev }) {
+  vite(config, { ssr }) {
     // Mutate the config object here
   },
 }
