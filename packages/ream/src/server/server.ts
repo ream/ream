@@ -1,5 +1,6 @@
 import { send, SendData, status } from './response-helpers'
 import {
+  Connect,
   connect,
   ConnectRequest,
   ConnectResponse,
@@ -24,6 +25,8 @@ export interface ReamServerRequest extends ConnectRequest {
 export interface ReamServerResponse extends ConnectResponse {
   send: (data: SendData) => void
 }
+
+export type ReamServer = Connect<ReamServerRequest, ReamServerResponse>
 
 export const createServer = (
   options?: Options<ReamServerRequest, ReamServerResponse>

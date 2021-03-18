@@ -23,7 +23,7 @@ export interface ConnectRequest extends IncomingMessage {
   originalUrl: string
   path: string
   query: ParsedUrlQuery
-  params: Record<string, string>
+  params: Record<string, string | string[]>
 }
 
 export interface ConnectResponse extends ServerResponse {}
@@ -61,7 +61,7 @@ const onError = (
 ) => {
   const status = typeof error === 'string' ? 500 : error.status || 500
   res.statusCode = status
-  res.end(status)
+  res.end(`${status}`)
 }
 
 const notFoundError = new ConnectError('404 not found')
@@ -114,7 +114,7 @@ export class Connect<
     if (typeof route === 'string') {
       this.router.use(route, ...handlers)
     } else if (typeof route === 'function') {
-      this.router.use('*', route, ...handlers)
+      this.router.use('/*', route, ...handlers)
     }
 
     return this
@@ -139,18 +139,18 @@ export class Connect<
     req.path = info.path as string
     req.query = parseQuery(info.search.substring(1))
 
-    const obj = this.router.find(req.method as HTTPMethod, req.url!)
-    req.params = obj.params
-    obj.handlers.push(this.onNoMatch)
+    const matches = this.router.find(req.method as HTTPMethod, req.url!)
+    matches.push({ handler: this.onNoMatch, params: {} })
 
     let i = 0
 
     const next = (error?: string | ConnectError) => {
       if (error) return this.onError(error, req, res)
 
-      const handle = obj.handlers[i++]
-      if (handle) {
-        handle(req, res, next)
+      const m = matches[i++]
+      if (m) {
+        req.params = m.params
+        m.handler(req, res, next)
       }
     }
 

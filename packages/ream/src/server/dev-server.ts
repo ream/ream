@@ -1,9 +1,7 @@
-import { IncomingMessage, ServerResponse } from 'http'
+import type { IncomingMessage, ServerResponse } from 'http'
 import { createHandler } from './'
 import { ModuleNode } from 'vite'
 import type { Ream } from '../'
-
-const SERVER_ENTRY_PATH = require.resolve(`@ream/app/dist/server-entry.js`)
 
 const collectCssUrls = (mods: Set<ModuleNode>, styles: Map<string, string>) => {
   for (const mod of mods) {
@@ -19,44 +17,15 @@ const collectCssUrls = (mods: Set<ModuleNode>, styles: Map<string, string>) => {
 }
 
 export const getRequestHandler = async (api: Ream) => {
-  const viteDevServer = api.viteDevServer!
+  const viteServer = api.viteServer!
 
   return async (req: IncomingMessage, res: ServerResponse) => {
     const { handler } = await createHandler({
       cwd: api.rootDir,
-      context: async () => {
-        // waiting to vite to finish reloading devDependencies
-        // @ts-expect-error
-        await viteDevServer._pendingReload
-        const serverEntry = await viteDevServer.ssrLoadModule(
-          `/@fs/${SERVER_ENTRY_PATH}`
-        )
-        return {
-          serverEntry: serverEntry.default,
-        }
-      },
-      getHtmlAssets: () => {
-        const matchedMods = viteDevServer.moduleGraph.getModulesByFile(
-          SERVER_ENTRY_PATH
-        )
-        const styles: Map<string, string> = new Map()
-        if (matchedMods) {
-          collectCssUrls(matchedMods, styles)
-        }
-        return {
-          cssLinkTags: [...styles.values()]
-            .map((style) => `<style>${style}</style>`)
-            .join('\n'),
-          scriptTags: `<script type="module" src="/@vite/client"></script>
-          <script type="module" src="/@fs/${require.resolve(
-            `@ream/app/dist/client-entry.js`
-          )}"></script>
-          `,
-        }
-      },
       dev: true,
-      devMiddleware: viteDevServer.middlewares,
-      ssrFixStacktrace: (err) => viteDevServer.ssrFixStacktrace(err),
+      devMiddleware: viteServer.middlewares,
+      viteServer: viteServer,
+      fixStacktrace: (err) => viteServer.ssrFixStacktrace(err),
     })
 
     return handler(req, res)

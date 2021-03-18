@@ -2,8 +2,6 @@ import path from 'path'
 import fs from 'fs-extra'
 import { Ream } from '../'
 import { UserConfig as ViteConfig, Plugin } from 'vite'
-import vuePlugin from '@vitejs/plugin-vue'
-import { babelPlugin } from './plugins/babel'
 
 const reamAliasPlugin = (api: Ream): Plugin => {
   return {
@@ -26,7 +24,7 @@ const reamForceServerUpdatePlugin = (api: Ream): Plugin => {
     name: `ream:force-server-update`,
 
     handleHotUpdate(ctx) {
-      const { moduleGraph } = api.viteDevServer!
+      const { moduleGraph } = api.viteServer!
       for (const [key, value] of moduleGraph.fileToModulesMap.entries()) {
         if (!key.includes('node_modules')) {
           for (const mod of value) {
@@ -79,9 +77,17 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
     ? undefined
-    : require.resolve(
-        `@ream/app/dist/${server ? 'server-entry.js' : 'client-entry.js'}`
+    : server
+    ? api.store.state.apiRoutes.reduce(
+        (res, route) => {
+          return {
+            ...res,
+            ['api/' + route.name]: route.file,
+          }
+        },
+        { 'server-exports': api.resolveDotReam('generated/server-exports.js') }
       )
+    : ['./index.html']
 
   const config: ViteConfig = {
     mode: api.mode,
@@ -89,36 +95,21 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     plugins: [
       reamAliasPlugin(api),
       reamForceServerUpdatePlugin(api),
-      vuePlugin({
-        include: [/\.vue$/],
-      }),
-      babelPlugin(),
       moveManifestPlugin(api.resolveDotReam('manifest')),
     ],
     define: api.constants,
     resolve: {
       alias: {
         '@': api.resolveSrcDir(),
-        vue: api.config.vue?.runtimeTemplateCompiler
-          ? 'vue/dist/vue.esm-bundler.js'
-          : 'vue/dist/vue.runtime.esm-bundler.js',
         'dot-ream': api.resolveDotReam(),
       },
     },
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
-      exclude: ['@ream/app', '@ream/fetch', 'node-fetch'],
+      exclude: ['@ream/fetch', 'node-fetch'],
     },
     // @ts-expect-error vite does not expose these experimental stuff in types yet
-    ssr: {
-      // https://vitejs.dev/config/#ssr-external
-      external: [
-        'vue',
-        'vue/dist/vue.esm-bundler.js',
-        'vue/dist/vue.runtime.esm-bundler.js',
-      ],
-      noExternal: ['@ream/app'],
-    },
+    ssr: {},
     server: {
       middlewareMode: true,
       hmr: api.config.hmr && {

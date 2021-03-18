@@ -58,6 +58,7 @@ export async function buildAndLaunch({
   const browser = await chromium.launch({
     ignoreDefaultArgs: ['--disable-extensions'],
     args: ['--no-sandbox'],
+    headless: false,
   })
   return {
     async teardown() {

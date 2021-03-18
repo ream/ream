@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "example-minimal",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start"
+  },
+  "devDependencies": {
+    "ream": "workspace:*"
+  },
+  "dependencies": {
+    "preact": "^10.5.13"
+  }
+}

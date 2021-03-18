@@ -7,7 +7,7 @@
 A type for your API handler function:
 
 ```ts
-// pages/api/hello.ts
+// api/hello.ts
 import { ReamServerHandler } from 'ream/server'
 
 const handler: ReamServerHandler = (req, res) => {
