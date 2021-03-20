@@ -1,6 +1,6 @@
 module.exports = {
   title: 'Ream',
-  description: 'A universal web framework',
+  description: 'A toolkit for building web apps',
   themeConfig: {
     sidebar: [
       {
