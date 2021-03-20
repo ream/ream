@@ -1,6 +1,19 @@
+---
+sidebar: auto
+---
+
 # Configuration
 
-Supported configuration file for Ream: `ream.config.ts` or `ream.config.js`, export the config object like this:
+## Config Files
+
+### Config File Resolving
+
+Ream resolves following config files from your project root:
+
+- `ream.config.js`
+- `ream.config.ts`
+
+The most basic config file looks like this:
 
 ```ts
 // ream.config.js
@@ -9,10 +22,24 @@ export default {
 }
 ```
 
-Or with TypeScript:
+### Config Intellisense
+
+If you're using `ream.config.js`:
+
+```js
+/**
+ * @type {import('ream').ReamConfig}
+ */
+const config = {
+  // ...
+}
+
+export default config
+```
+
+Or `ream.config.ts`:
 
 ```ts
-// ream.config.ts
 import { defineReamConfig } from 'ream'
 
 export default defineReamConfig({
@@ -22,34 +49,27 @@ export default defineReamConfig({
 
 All config options are documented below.
 
-## `routes`
+## Options
+
+### `clientRoutes`
 
 - Type: `(defaultRoutes: Route[]) => Route[] | Promise<Route[]>`
 
 ```ts
-type Route = AppRoute | ServerRoute
-
-// A route for the Vue app
-type AppRoute = {
+type Route = {
   name?: string
+  // Route path
   path: string
+  // Absolute path to the file
   file: string
-  children?: AppRoute[]
-}
-
-// A route for server
-type ServerRoute = {
-  path: string
-  file: string
-  isServerRoute: true
 }
 ```
 
-Routes returned by this function will be used as app routes and server routes, for example:
+Extending the default client routes.
 
 ```ts
 export default {
-  routes(defaultRoutes) {
+  clientRoutes(defaultRoutes) {
     return [
       ...defaultRoutes,
       {
@@ -66,7 +86,11 @@ export default {
 }
 ```
 
-## `plugins`
+### `apiRoutes`
+
+Like `clientRoutes` but for the backend server.
+
+### `plugins`
 
 - Type: `ReamPlugin[]`
 
@@ -83,7 +107,7 @@ export default {
 }
 ```
 
-## `imports`
+### `imports`
 
 - Type: `string[]`
 
@@ -97,13 +121,13 @@ export default {
 }
 ```
 
-## `vite`
+### `vite`
 
 Extend Ream's internal [Vite config](https://vitejs.dev/config/).
 
 ```js
 export default {
-  vite(config, { ssr }) {
+  vite(config, { dev }) {
     // Mutate the config object here
   },
 }

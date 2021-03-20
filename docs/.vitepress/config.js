@@ -15,6 +15,7 @@ module.exports = {
     ],
     nav: [
       { text: 'Guide', link: '/', activeMatch: '^/$|^/guide/' },
+      { text: 'Config', link: '/config' },
       {
         text: 'GitHub',
         link: 'https://github.com/ream/ream',
