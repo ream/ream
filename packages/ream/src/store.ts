@@ -11,6 +11,7 @@ export type State = {
   }
   appHandler?: string
   apiHandler?: string
+  apiRoutes: Route[]
   pluginsFiles: {
     app: Set<string>
     server: Set<string>
@@ -22,6 +23,7 @@ export const getInitialState = (): State => {
     constants: {},
     appHandler: undefined,
     apiHandler: undefined,
+    apiRoutes: [],
     pluginsFiles: {
       app: new Set(),
       server: new Set(),
@@ -128,7 +130,11 @@ export class Store {
 
       const context = {routes: clientRoutes}
 
-      main.default && main.default(context)
+      const app = main.default && main.default(context)
+
+      if (app && app.clientRender) {
+        app.clientRender()
+      }
       `
     )
   }
@@ -147,6 +153,8 @@ export class Store {
       consola.info(`Loading user provided api routes`)
       apiRoutes = await this.api.config.apiRoutes(apiRoutes)
     }
+
+    this.state.apiRoutes = apiRoutes
 
     let content = `
     export var apiRoutes = [
@@ -185,6 +193,21 @@ export class Store {
       export { appHandler }
       `
     }
+
+    content += `
+    export const serverRender = async (renderContext) => {
+      if (!REAM_SSR_ENABLED) return
+
+      const main = await import('@/main')
+      const { clientRoutes } = await import('./common-exports.js') 
+
+      const result = main.default && main.default({ routes: clientRoutes }) 
+      const render = result && result.serverRender
+      if (!render) return
+
+      return render(renderContext)
+    }
+    `
 
     for (const plugin of this.api.plugins) {
       if (plugin.plugin.transformServerExports) {

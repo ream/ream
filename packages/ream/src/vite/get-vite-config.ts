@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
 import { Ream } from '../'
-import { UserConfig as ViteConfig, Plugin } from 'vite'
+import { InlineConfig as ViteConfig, Plugin } from 'vite'
 
 const reamAliasPlugin = (api: Ream): Plugin => {
   return {
@@ -10,9 +10,9 @@ const reamAliasPlugin = (api: Ream): Plugin => {
     resolveId(source) {
       // Bundle @ream/app since it's written in esnext modules
       // Otherwise it will break in Node.js (SSR)
-      if (source === '@ream/app' || source.startsWith('@ream/app/')) {
-        return require.resolve(source)
-      }
+      // if (source === '@ream/vue') {
+      //   return require.resolve(source)
+      // }
       return undefined
     },
   }
@@ -73,7 +73,7 @@ const moveManifestPlugin = (manifestDir: string): Plugin => {
   }
 }
 
-export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
+export const getViteConfig = (api: Ream, server?: boolean) => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
     ? undefined
@@ -92,6 +92,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const config: ViteConfig = {
     mode: api.mode,
     root: api.rootDir,
+    configFile: false,
     plugins: [
       reamAliasPlugin(api),
       reamForceServerUpdatePlugin(api),
@@ -106,9 +107,9 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     },
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
-      exclude: ['@ream/fetch', 'node-fetch'],
+      exclude: ['@ream/fetch', 'node-fetch', '@vue/server-renderer'],
     },
-    // @ts-expect-error vite does not expose these experimental stuff in types yet
+    // @ts-expect-error
     ssr: {},
     server: {
       middlewareMode: true,
@@ -131,6 +132,12 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
           }
         : {},
     },
+  }
+
+  for (const plugin of api.plugins) {
+    if (plugin.plugin.vite) {
+      plugin.plugin.vite.call(plugin.context, config)
+    }
   }
 
   if (api.config.vite) {

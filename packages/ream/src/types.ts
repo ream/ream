@@ -1,3 +1,4 @@
+import { InlineConfig as ViteConfig } from 'vite'
 import { PluginContext } from './plugin-context'
 
 export type OnFileChangeCallback<This = null> = (
@@ -16,6 +17,10 @@ export type Route = {
   // An internal key that's used to make nested routes
   // You won't need this
   _nest_key_?: string
+}
+
+export type NestedRoute = Route & {
+  children?: NestedRoute[]
 }
 
 export type TransformServerExports = (
@@ -46,4 +51,6 @@ export type ReamPlugin = {
   getApiRoutes?: GetApiRoutes
 
   onFileChange?: OnFileChangeCallback<PluginContext>
+
+  vite?: (this: PluginContext, config: ViteConfig) => void
 }

@@ -12,6 +12,13 @@ module.exports = {
           { text: 'Routing', link: '/guide/routing' },
         ],
       },
+      {
+        text: 'Frameworks',
+        children: [
+          { text: 'Vue', link: '/frameworks/vue.html' },
+          { text: 'React', link: '/frameworks/react.html' },
+        ],
+      },
     ],
     nav: [
       { text: 'Guide', link: '/', activeMatch: '^/$|^/guide/' },

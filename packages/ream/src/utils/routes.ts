@@ -1,9 +1,5 @@
 import path from 'path'
-import { Route } from '..'
-
-type NestedRoute = Route & {
-  children?: NestedRoute[]
-}
+import { NestedRoute, Route } from '..'
 
 export const makeNestedRoutes = (_routes: Route[]) => {
   const routes: NestedRoute[] = []

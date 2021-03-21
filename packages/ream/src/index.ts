@@ -34,12 +34,13 @@ export type ReamConfig = {
     host?: string
     port?: number
   }
+  ssr?: boolean
   vite?: (viteConfig: ViteConfig, opts: { dev: boolean }) => void
   apiRoutes?: (defaultRoutes: Route[]) => Promise<Route[]> | Route[]
   clientRoutes?: (defaultRoutes: Route[]) => Promise<Route[]> | Route[]
 }
 
-export const defineReamConfig = (config: ReamConfig) => config
+export const defineConfig = (config: ReamConfig) => config
 
 export class Ream {
   rootDir: string
@@ -130,6 +131,7 @@ export class Ream {
           [`process.env.${key}`]: value,
         }
       }, {}),
+      REAM_SSR_ENABLED: JSON.stringify(!!this.config.ssr),
     }
   }
 

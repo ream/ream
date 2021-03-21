@@ -7,6 +7,10 @@ export class PluginContext {
     this.pluginName = pluginName
   }
 
+  get dev() {
+    return this.api.isDev
+  }
+
   get store() {
     return this.api.store
   }

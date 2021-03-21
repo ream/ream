@@ -31,9 +31,8 @@ const run = (name: string) =>
   })
 
 async function main() {
-  await run('app')
   await run('ream')
-  await run('test-utils')
+  await run('framework-vue')
 }
 
 main()
