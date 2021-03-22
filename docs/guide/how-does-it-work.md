@@ -2,7 +2,7 @@
 
 ## SPA mode
 
-By default Ream apps run in SPA mode, which means it only does what Vite does, you can use any client-side libraries to create your app inside `main.ts`, for example, using React:
+By default Ream apps run in SPA mode, which means it only does what Vite does, you can use any librarie to create your app inside the entry file `main.ts`, for example, using React:
 
 ```ts
 import React from 'react'
