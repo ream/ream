@@ -87,7 +87,9 @@ export const getViteConfig = (api: Ream, server?: boolean) => {
         },
         { 'server-exports': api.resolveDotReam('generated/server-exports.js') }
       )
-    : ['./index.html']
+    : {
+        client: './index.html',
+      }
 
   const config: ViteConfig = {
     mode: api.mode,

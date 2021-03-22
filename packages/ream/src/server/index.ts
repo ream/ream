@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import serveStatic from 'sirv'
+import serializeJavascript from 'serialize-javascript'
 import {
   createServer as createHttpServer,
   ReamServer,
@@ -25,7 +26,10 @@ export type ApiRoute = { path: string; load: () => Promise<{ default: any }> }
 
 export type TransformIndexHTML = (url: string, html: string) => Promise<string>
 
-export type ServerRenderContext = { url: string }
+export type ServerRenderContext = {
+  url: string
+  initialState: Record<string, any>
+}
 export interface ServerExports {
   apiRoutes: ApiRoute[]
   serverRender: (
@@ -65,6 +69,7 @@ type ExtendServer = (
     serverExports: ServerExports
     htmlTemplatePath: string
     transformIndexHTML?: TransformIndexHTML
+    initialState: Record<string, any>
   }
 ) => void | Promise<void>
 
@@ -76,20 +81,34 @@ const defaultApiHandler: ExtendServer = async (server, { serverExports }) => {
 
 const defaultAppHandler: ExtendServer = async (
   server,
-  { serverExports, htmlTemplatePath, transformIndexHTML }
+  { serverExports, htmlTemplatePath, transformIndexHTML, initialState }
 ) => {
   debug.request('called default app handler')
 
   const htmlTemplate = await fs.promises.readFile(htmlTemplatePath, 'utf8')
+
+  const ROOT_PLACEHOLDER = `<div id="_ream"></div>`
 
   server.use(async (req: ReamServerRequest, res: ReamServerResponse) => {
     let html = htmlTemplate
     if (transformIndexHTML) {
       html = await transformIndexHTML(req.url, html)
     }
-    const result = await serverExports.serverRender({ url: req.url })
+    const result = await serverExports.serverRender({
+      url: req.url,
+      initialState,
+    })
+
+    html = html.replace(
+      ROOT_PLACEHOLDER,
+      `
+    ${ROOT_PLACEHOLDER}
+    <script>INITIAL_STATE=${serializeJavascript(initialState, {
+      isJSON: true,
+    })}</script>`
+    )
     if (result) {
-      html = html.replace('<div id="_ream"></div>', result.html)
+      html = html.replace(ROOT_PLACEHOLDER, result.html)
     }
     debug.request('sending html')
     res.send(html)
@@ -148,6 +167,7 @@ export async function createHandler(options: CreateServerOptions) {
     transformIndexHTML: options.viteServer?.transformIndexHtml.bind(
       options.viteServer
     ),
+    initialState: {},
   }
   await apiHandler(server, context)
   await appHandler(server, context)
