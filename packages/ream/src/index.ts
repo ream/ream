@@ -180,7 +180,19 @@ export class Ream {
       const { createServer: createViteServer } = await import('vite')
       const { getViteConfig } = await import('./vite/get-vite-config')
       const viteConfig = getViteConfig(this)
-      const viteServer = (this.viteServer = await createViteServer(viteConfig))
+      const viteServer = await createViteServer(viteConfig)
+      if (this.viteServer) {
+        // Properly restart vite server
+        // Ref: https://github.com/vitejs/vite/blob/23f57ee8785aa377ea4b0834d36af86503a742c0/packages/vite/src/node/server/hmr.ts#L419
+        for (const key in viteServer) {
+          if (key !== 'app') {
+            // @ts-expect-error
+            this.viteServer[key] = viteServer[key]
+          }
+        }
+      } else {
+        this.viteServer = viteServer
+      }
 
       // Reuse Vite watcher to register `onFileChange` callbacks
       for (const plugin of this.plugins) {
