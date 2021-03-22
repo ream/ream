@@ -18,18 +18,9 @@ Ream will automatically load the files in the `pages` folder and pass it to your
 
 ```ts
 // main.ts
-export default ({ routes }) => {
-  assert.equal(routes, [
-    { name: 'index', path: '/', load: () => import('./pages/index.tsx') },
-    {
-      name: 'user/[user]',
-      path: '/user/:user',
-      load: () => import('./pages/user/[user].tsx'),
-    },
-  ])
+import { render } from '@ream/framework-vue'
 
-  // Create a router and start your app
-}
+export default render
 ```
 
 Nested routes are also supported, for more details please check out routing.

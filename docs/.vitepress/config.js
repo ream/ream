@@ -7,6 +7,7 @@ module.exports = {
         text: 'Guide',
         children: [
           { text: 'What is Ream', link: '/' },
+          { text: 'How Does It Work', link: '/guide/how-does-it-work' },
           { text: 'Getting Started', link: '/guide/getting-started' },
           { text: 'Folder Structure', link: '/guide/folder-structure' },
           { text: 'Routing', link: '/guide/routing' },

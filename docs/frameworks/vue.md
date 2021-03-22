@@ -36,7 +36,7 @@ export default defineConfig({
 })
 ```
 
-Create app in `main.ts`:
+Using the render function in `main.ts`:
 
 ```ts
 // main.ts
