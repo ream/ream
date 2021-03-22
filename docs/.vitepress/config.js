@@ -10,6 +10,10 @@ module.exports = {
           { text: 'Getting Started', link: '/guide/getting-started' },
           { text: 'Folder Structure', link: '/guide/folder-structure' },
           { text: 'Routing', link: '/guide/routing' },
+          {
+            text: 'Environment Variables',
+            link: '/guide/environment-variables',
+          },
         ],
       },
       {
