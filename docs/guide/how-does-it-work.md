@@ -30,7 +30,7 @@ export default (context: RenderContext) => {
 }
 ```
 
-For example, you can feed `context.routes` to Vue Router or React Router or even implement your own routing.
+For example, you can feed `context.routes` to Vue Router or React Router or even implement your own routing. Learn more about [routing](/guide/routing).
 
 ## SSR mode
 
