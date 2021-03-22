@@ -145,13 +145,7 @@ export class Ream {
     })
   }
 
-  async prepare({
-    shouldCleanDir,
-    shouldPrepreFiles,
-  }: {
-    shouldCleanDir: boolean
-    shouldPrepreFiles: boolean
-  }) {
+  async prepare() {
     this.store.resetState()
 
     await this.loadConfig()
@@ -160,20 +154,16 @@ export class Ream {
 
     this.plugins = this.getPlugins()
 
-    if (shouldCleanDir) {
-      // Remove everything but cache
-      await Promise.all(
-        ['generated', 'server', 'client'].map((name) => {
-          return remove(this.resolveDotReam(name))
-        })
-      )
-    }
+    // Remove everything but cache
+    await Promise.all(
+      ['generated', 'server', 'client'].map((name) => {
+        return remove(this.resolveDotReam(name))
+      })
+    )
 
-    if (shouldPrepreFiles) {
-      consola.info('Preparing Ream files')
-      const { prepareFiles } = await import('./prepare-files')
-      await prepareFiles(this)
-    }
+    consola.info('Preparing Ream files')
+    const { prepareFiles } = await import('./prepare-files')
+    await prepareFiles(this)
 
     if (this.isDev) {
       // Create Vite dev server
@@ -212,7 +202,7 @@ export class Ream {
         if (file === this.configPath || files.includes(file)) {
           consola.info(`Restarting Ream due to changes in ${file}`)
           await viteServer.close()
-          await this.prepare({ shouldCleanDir, shouldPrepreFiles })
+          await this.prepare()
         }
       })
     }
@@ -228,11 +218,9 @@ export class Ream {
   }
 
   async getRequestHandler() {
-    await this.prepare({
-      shouldCleanDir: this.isDev,
-      shouldPrepreFiles: this.isDev,
-    })
     if (this.isDev) {
+      await this.prepare()
+
       const { getRequestHandler } = await import('./server/dev-server')
       return getRequestHandler(this)
     }
@@ -253,7 +241,7 @@ export class Ream {
     fullyExport?: boolean
     standalone?: boolean
   }) {
-    await this.prepare({ shouldCleanDir: true, shouldPrepreFiles: true })
+    await this.prepare()
     const { build, buildStandalone } = await import('./build')
     await build(this)
     // Export static pages
