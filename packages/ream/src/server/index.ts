@@ -16,6 +16,7 @@ export type {
   ReamServerResponse,
 } from './server'
 import { debug } from '../debug'
+import { Render } from '../app'
 
 // Re-export hook types
 export * from './hooks'
@@ -26,15 +27,9 @@ export type ApiRoute = { path: string; load: () => Promise<{ default: any }> }
 
 export type TransformIndexHTML = (url: string, html: string) => Promise<string>
 
-export type ServerRenderContext = {
-  url: string
-  initialState: Record<string, any>
-}
 export interface ServerExports {
   apiRoutes: ApiRoute[]
-  serverRender: (
-    renderContext: ServerRenderContext
-  ) => Promise<undefined | null | { html: string }>
+  serverRender: Render
   serverHandler?: { default: ExtendServer }
   appHandler?: { default: ExtendServer }
   enhanceApp: {
@@ -96,6 +91,7 @@ const defaultAppHandler: ExtendServer = async (
     }
     const result = await serverExports.serverRender({
       url: req.url,
+      routes: [],
       initialState,
     })
 
@@ -110,6 +106,7 @@ const defaultAppHandler: ExtendServer = async (
     if (result) {
       html = html.replace(ROOT_PLACEHOLDER, result.html)
     }
+
     debug.request('sending html')
     res.send(html)
   })

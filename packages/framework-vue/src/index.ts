@@ -1,5 +1,5 @@
 import { createSSRApp, createApp as createClientApp, h, App } from 'vue'
-import { ClientRoutes, EntryResult } from 'ream/app'
+import { ClientRoutes, RenderResult, RenderContext } from 'ream/app'
 import {
   RouterView,
   RouteRecordRaw,
@@ -9,8 +9,6 @@ import {
   createWebHistory,
 } from 'vue-router'
 import { createHead } from '@vueuse/head'
-import { createServerRender } from './server-render'
-import { createClientRender } from './client-render'
 
 const normalizeRoutes = (routes: ClientRoutes): RouteRecordRaw[] => {
   return routes.map((route) => ({
@@ -21,11 +19,7 @@ const normalizeRoutes = (routes: ClientRoutes): RouteRecordRaw[] => {
   }))
 }
 
-export const createApp = ({
-  routes,
-}: {
-  routes: ClientRoutes
-}): EntryResult => {
+export const render = async (context: RenderContext): Promise<RenderResult> => {
   let app: App | undefined
   let router: Router | undefined
 
@@ -43,7 +37,7 @@ export const createApp = ({
       : createWebHistory()
     router = createRouter({
       history,
-      routes: normalizeRoutes(routes),
+      routes: normalizeRoutes(context.routes),
     })
 
     app.use(router)
@@ -52,14 +46,13 @@ export const createApp = ({
     app.use(head)
   }
 
-  return {
-    serverRender:
-      import.meta.env.SSR && app && router
-        ? createServerRender({ app, router })
-        : undefined,
-    clientRender:
-      !import.meta.env.SSR && app && router
-        ? createClientRender({ app, router })
-        : undefined,
+  if (!app || !router) return
+
+  if (import.meta.env.SSR) {
+    const { serverRender } = await import('./server-render')
+    return serverRender(context, { app, router })
   }
+
+  const { clientRender } = await import('./client-render')
+  clientRender({ app, router })
 }

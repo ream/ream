@@ -128,13 +128,15 @@ export class Store {
       `import * as main from '@/main'
       import {clientRoutes} from './common-exports.js'
 
-      const context = {routes: clientRoutes}
-
-      const app = main.default && main.default(context)
-
-      if (app && app.clientRender) {
-        app.clientRender()
+      const context = {
+        initialState: window.INITIAL_STATE,
+        routes: clientRoutes, 
+        get url() {
+          return location.pathname + location.search
+        }
       }
+
+      main.default && main.default(context)
       `
     )
   }
@@ -200,12 +202,11 @@ export class Store {
 
       const main = await import('@/main')
       const { clientRoutes } = await import('./common-exports.js') 
+      renderContext.routes = clientRoutes
+      
+      const result = await main.default && main.default(renderContext) 
 
-      const result = main.default && main.default({ routes: clientRoutes }) 
-      const render = result && result.serverRender
-      if (!render) return
-
-      return render(renderContext)
+      return result
     }
     `
 

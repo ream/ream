@@ -1,8 +1,6 @@
-import { EntryContext } from 'ream/app'
-import { createApp } from '@ream/framework-vue'
+import { RenderContext } from 'ream/app'
+import { render } from '@ream/framework-vue'
 
-export default (context: EntryContext) => {
-  return createApp({
-    routes: context.routes,
-  })
+export default (context: RenderContext) => {
+  return render(context)
 }

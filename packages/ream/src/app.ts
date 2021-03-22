@@ -7,17 +7,14 @@ export type ClientRoute = {
 
 export type ClientRoutes = ClientRoute[]
 
-export type EntryContext = { routes: ClientRoutes }
-
-export type ServerRenderContext = { url: string }
-
-export type ServerRender = (
-  renderContext: ServerRenderContext
-) => Promise<undefined | null | { html: string }>
-
-export type ClientRender = () => void
-
-export type EntryResult = {
-  serverRender?: ServerRender
-  clientRender?: ClientRender
+export type RenderContext = {
+  url: string
+  routes: ClientRoutes
+  initialState: Record<string, any>
 }
+
+export type RenderResult = undefined | null | { html: string }
+
+export type Render = (
+  renderContext: RenderContext
+) => RenderResult | Promise<RenderResult>

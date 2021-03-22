@@ -1,14 +1,17 @@
 import { App } from 'vue'
 import { Router } from 'vue-router'
-import { ServerRenderContext } from 'ream/app'
+import { RenderContext } from 'ream/app'
 
-export const createServerRender = ({
-  app,
-  router,
-}: {
-  app: App
-  router: Router
-}) => async (context: ServerRenderContext) => {
+export const serverRender = async (
+  context: RenderContext,
+  {
+    app,
+    router,
+  }: {
+    app: App
+    router: Router
+  }
+) => {
   router.push(context.url)
   await router.isReady()
 
