@@ -41,7 +41,7 @@ Create app in `main.ts`:
 ```ts
 // main.ts
 import { EntryContext } from 'ream/app'
-import { createApp } from '@ream/vue'
+import { createApp } from '@ream/framework-vue'
 
 export default ({ routes }: EntryContext) => {
   return createApp({
