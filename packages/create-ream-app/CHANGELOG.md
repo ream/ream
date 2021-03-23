@@ -1,5 +1,11 @@
 # create-ream-app
 
+## 1.0.0-beta.5
+
+- Adding `tsconfig.json`
+- Use `defineConfig` in `ream.config.ts`
+- Use `@vitejs/plugin-vue` in vue template
+
 ## 1.0.0-beta.4
 
 - Adding `templates` folder
