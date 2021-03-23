@@ -1,9 +1,13 @@
 # ream
 
+## 5.0.0-beta.8
+
+- Complete rewrite, now `ream` is framework-agnostic, Vue support is provided by package `@ream/framework-vue`. See more in the [docs](https://ream.dev/).
+
 ## 5.0.0-beta.7
 
-- Add router to the server, powered by [egoist/router](https://github.com/egoist/router) 
-- __@ream/app__: Bundle dependencies.
+- Add router to the server, powered by [egoist/router](https://github.com/egoist/router)
+- **@ream/app**: Bundle dependencies.
 
 ## 5.0.0-beta.6
 
