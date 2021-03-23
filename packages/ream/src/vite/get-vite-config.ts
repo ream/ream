@@ -109,7 +109,12 @@ export const getViteConfig = (api: Ream, server?: boolean) => {
     },
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
-      exclude: ['@ream/fetch', 'node-fetch', '@vue/server-renderer'],
+      exclude: [
+        '@ream/fetch',
+        'node-fetch',
+        '@vue/server-renderer',
+        '@ream/framework-vue',
+      ],
     },
     // @ts-expect-error
     ssr: {},

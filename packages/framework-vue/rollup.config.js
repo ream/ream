@@ -6,6 +6,7 @@ export default [
   createConfig({
     input: {
       index: './src/index.ts',
+      exports: './src/exports.ts',
     },
     format: 'esm',
     outDir: 'dist',
