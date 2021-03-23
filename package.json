@@ -9,7 +9,7 @@
   "scripts": {
     "test:unit": "jest --testPathPattern packages",
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
-    "test": "npm run build && npm run test:unit && npm run test:integration",
+    "test": "npm run build && npm run test:unit",
     "build": "node -r sucrase/register  scripts/build.ts",
     "dev": "node -r sucrase/register scripts/dev.ts",
     "ream": "node packages/ream/dist/cli"
