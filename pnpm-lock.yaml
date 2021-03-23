@@ -24,6 +24,8 @@ importers:
       semver: ^7.3.4
       sucrase: ^3.17.1
       typescript: ^4.2.3
+  ../../../../opt/homebrew/Cellar/node/15.11.0/pnpm-global:
+    specifiers: {}
   docs:
     dependencies:
       vitepress: 0.12.2

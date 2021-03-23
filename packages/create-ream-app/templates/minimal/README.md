@@ -6,9 +6,6 @@
 # Start dev server
 npm run dev
 
-# Build for production (server mode)
+# Build for production
 npm run build
-
-# Export as static site
-npm run export
 ```

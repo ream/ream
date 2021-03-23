@@ -47,16 +47,3 @@ export default (context: RenderContext) => {
   return render(context)
 }
 ```
-
-### Server-side rendering
-
-Enable SSR in Ream config:
-
-```ts
-// ream.config.ts
-import { defineConfig } from 'ream'
-
-export default defineConfig({
-  ssr: true,
-})
-```
