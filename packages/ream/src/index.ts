@@ -131,7 +131,7 @@ export class Ream {
           [`process.env.${key}`]: value,
         }
       }, {}),
-      REAM_SSR_ENABLED: JSON.stringify(!!this.config.ssr),
+      REAM_SSR_ENABLED: JSON.stringify(this.config.ssr !== false),
     }
   }
 
