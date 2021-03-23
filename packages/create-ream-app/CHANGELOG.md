@@ -1,5 +1,9 @@
 # create-ream-app
 
+## 1.0.0-beta.4
+
+- Adding `templates` folder
+
 ## 1.0.0-beta.3
 
 - New `vue` and `minimal` templates
