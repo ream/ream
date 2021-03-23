@@ -1,0 +1,30 @@
+{
+  "version": "0.0.0",
+  "name": "@ream/framework-vue",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/index.mjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "rm -rf dist && rollup -c --watch",
+    "build": "rm -rf dist && rollup -c"
+  },
+  "dependencies": {
+    "@vue/server-renderer": "^3.0.7",
+    "ream": "workspace:*",
+    "vue": "^3.0.7"
+  },
+  "peerDependencies": {
+    "ream": "workspace:*"
+  },
+  "devDependencies": {
+    "@egoist/rollup-plugin-ts-resolve": "^0.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@vueuse/head": "^0.5.1",
+    "rollup": "^2.42.1",
+    "rollup-plugin-esbuild": "^3.0.2",
+    "vue-router": "^4.0.5"
+  }
+}

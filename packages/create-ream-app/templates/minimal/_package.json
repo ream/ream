@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "name": "my-ream-app",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start"
+  },
+  "devDependencies": {
+    "ream": "latest"
+  }
+}

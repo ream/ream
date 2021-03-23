@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "example-vue-ssr",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start"
+  },
+  "dependencies": {
+    "ream": "workspace:*",
+    "@ream/framework-vue": "workspace:*"
+  }
+}

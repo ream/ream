@@ -1,18 +1,18 @@
 import { Ream } from '.'
-import { OnFileChangeCallback, State } from './state'
-import { normalizePath } from './utils/normalize-path'
 
 export class PluginContext {
-  private api: Ream
   pluginName: string
 
-  constructor(api: Ream, pluginName: string) {
-    this.api = api
+  constructor(private api: Ream, pluginName: string) {
     this.pluginName = pluginName
   }
 
-  get state() {
-    return this.api.state
+  get dev() {
+    return this.api.isDev
+  }
+
+  get store() {
+    return this.api.store
   }
 
   get env() {
@@ -21,6 +21,10 @@ export class PluginContext {
 
   get constants() {
     return this.api.constants
+  }
+
+  get config() {
+    return this.api.config
   }
 
   ensureEnv(name: string, defaultValue?: string) {
@@ -33,10 +37,6 @@ export class PluginContext {
     return value || defaultValue
   }
 
-  get pluginsFiles() {
-    return this.state.pluginsFiles
-  }
-
   resolveSrcDir(...args: string[]) {
     return this.api.resolveSrcDir(...args)
   }
@@ -47,27 +47,5 @@ export class PluginContext {
 
   resolveDotReam(...args: string[]) {
     return this.api.resolveDotReam(...args)
-  }
-
-  defineConstant(name: string, value: any) {
-    this.state.constants[name] = JSON.stringify(value)
-  }
-
-  addPluginFile(type: keyof State['pluginsFiles'], file: string) {
-    this.state.pluginsFiles[type].add(normalizePath(file))
-  }
-
-  onPrepareFiles(callback: () => Promise<void>) {
-    this.state.callbacks.onPrepareFiles.add({
-      pluginName: this.pluginName,
-      callback,
-    })
-  }
-
-  onFileChange(callback: OnFileChangeCallback) {
-    this.state.callbacks.onFileChange.add({
-      pluginName: this.pluginName,
-      callback,
-    })
   }
 }
