@@ -13,7 +13,10 @@ export type RenderContext = {
   initialState: Record<string, any>
 }
 
-export type RenderResult = undefined | null | { html: string }
+export type RenderResult =
+  | undefined
+  | null
+  | { html?: string; head?: string; htmlAttrs?: string; bodyAttrs?: string }
 
 export type Render = (
   renderContext: RenderContext

@@ -82,7 +82,10 @@ const defaultAppHandler: ExtendServer = async (
 
   const htmlTemplate = await fs.promises.readFile(htmlTemplatePath, 'utf8')
 
-  const ROOT_PLACEHOLDER = `<div id="_ream"></div>`
+  const MAIN_PLACEHOLDER = `<!--ream-main-->`
+  const HEAD_PLACEHOLDER = `<!--ream-head-->`
+  const HTML_ATTRS_PLACEHOLDER = ` ream-html-attrs`
+  const BODY_ATTRS_PLACEHOLDER = ` ream-body-attrs`
 
   server.use(async (req: ReamServerRequest, res: ReamServerResponse) => {
     let html = htmlTemplate
@@ -96,15 +99,19 @@ const defaultAppHandler: ExtendServer = async (
     })
 
     html = html.replace(
-      ROOT_PLACEHOLDER,
+      MAIN_PLACEHOLDER,
       `
-    ${ROOT_PLACEHOLDER}
+    ${MAIN_PLACEHOLDER}
     <script>INITIAL_STATE=${serializeJavascript(initialState, {
       isJSON: true,
     })}</script>`
     )
     if (result) {
-      html = html.replace(ROOT_PLACEHOLDER, result.html)
+      html = html
+        .replace(HTML_ATTRS_PLACEHOLDER, result.htmlAttrs || '')
+        .replace(BODY_ATTRS_PLACEHOLDER, result.bodyAttrs || '')
+        .replace(HEAD_PLACEHOLDER, result.head || '')
+        .replace(MAIN_PLACEHOLDER, result.html || '<div id="_ream"></div>')
     }
 
     debug.request('sending html')

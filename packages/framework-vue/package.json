@@ -8,7 +8,7 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "rollup -c --watch",
+    "dev": "rm -rf dist && rollup -c --watch",
     "build": "rm -rf dist && rollup -c"
   },
   "dependencies": {
