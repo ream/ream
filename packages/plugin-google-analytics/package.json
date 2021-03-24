@@ -1,0 +1,17 @@
+{
+  "name": "@ream/plugin-google-analytics",
+  "version": "1.0.0-beta.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts"
+  ],
+  "scripts": {
+    "test": "echo skip"
+  },
+  "devDependencies": {
+    "ream": "workspace:*"
+  }
+}

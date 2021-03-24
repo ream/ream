@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "my-ream-app",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "export": "ream export",
+    "start": "ream start"
+  },
+  "dependencies": {
+    "ream": "latest",
+    "vue": "next"
+  }
+}

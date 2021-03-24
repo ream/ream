@@ -1,0 +1,32 @@
+{
+  "name": "@ream/app",
+  "version": "5.0.0-beta.5",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf dist && rollup -c",
+    "dev": "rollup -c --watch"
+  },
+  "devDependencies": {
+    "@ream/server": "workspace:*",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@rollup/plugin-sucrase": "^3.1.0",
+    "@vueuse/head": "^0.5.1",
+    "mitt": "^2.1.0",
+    "rollup": "^2.41.2",
+    "rollup-plugin-dts": "^3.0.1",
+    "tiny-glob": "^0.2.8",
+    "vue-router": "^4.0.3"
+  },
+  "peerDependencies": {
+    "@ream/server": "workspace:*",
+    "vue": "^3.0.6"
+  }
+}

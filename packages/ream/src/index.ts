@@ -1,32 +1,31 @@
-import { resolve, dirname, relative } from 'path'
+import { resolve, join, dirname, relative } from 'path'
 import type { MarkRequired } from 'ts-essentials'
 import { ViteDevServer, UserConfig as ViteConfig, loadEnv } from 'vite'
 import resolveFrom from 'resolve-from'
 import consola from 'consola'
 import { loadConfig, SUPPORTED_CONFIG_FILES } from './utils/load-config'
-import { remove } from 'fs-extra'
-import { ReamPlugin, Route } from './types'
-import { routesPlugin } from './plugins/routes-plugin'
-import { Store } from './store'
-import { PluginContext } from './plugin-context'
+import { loadPlugins } from './load-plugins'
+import { remove, existsSync } from 'fs-extra'
+import { OWN_DIR } from './utils/constants'
+import { ReamPlugin } from './types'
+import { getInitialState, State } from './state'
 
-export type { PluginContext } from './plugin-context'
-
-export { normalizePath } from './utils/normalize-path'
 export interface Options {
   rootDir?: string
+  srcDir?: string
   dev?: boolean
   mode?: string
 }
 
-export * from './types'
+export type Route = {
+  name?: string
+  path: string
+  file: string
+  isServerRoute: boolean
+  children?: Route[]
+}
 
 export type ReamConfig = {
-  /**
-   * The directory to load `pages`, `api`, `ream-app.js` etc
-   * Defaults to root dir (`.`)
-   */
-  srcDir?: string
   env?: Record<string, string>
   plugins?: Array<ReamPlugin>
   imports?: string[]
@@ -34,33 +33,38 @@ export type ReamConfig = {
     host?: string
     port?: number
   }
-  ssr?: boolean
-  vite?: (viteConfig: ViteConfig, opts: { dev: boolean }) => void
-  apiRoutes?: (defaultRoutes: Route[]) => Promise<Route[]> | Route[]
-  clientRoutes?: (defaultRoutes: Route[]) => Promise<Route[]> | Route[]
+  vue?: {
+    runtimeTemplateCompiler?: boolean
+  }
+  vite?: (viteConfig: ViteConfig, opts: { dev: boolean; ssr?: boolean }) => void
+  routes?: (defaultRoutes: Route[]) => Promise<Route[]> | Route[]
 }
 
-export const defineConfig = (config: ReamConfig) => config
+export const defineReamConfig = (config: ReamConfig) => config
 
 export class Ream {
+  state!: State
   rootDir: string
+  srcDir: string
   isDev: boolean
   inlineConfig: ReamConfig
   config!: MarkRequired<ReamConfig, 'env' | 'plugins' | 'imports'>
   configPath?: string
-  viteServer?: ViteDevServer
+  viteDevServer?: ViteDevServer
   userEnv!: Record<string, string>
   mode: string
-  store: Store
-  plugins: { plugin: ReamPlugin; context: PluginContext }[]
 
   constructor(options: Options = {}, inlineConfig: ReamConfig = {}) {
     this.inlineConfig = inlineConfig
     this.rootDir = resolve(options.rootDir || '.')
+    if (options.srcDir) {
+      this.srcDir = join(this.rootDir, options.srcDir)
+    } else {
+      const hasPagesInSrc = existsSync(join(this.rootDir, 'src/pages'))
+      this.srcDir = hasPagesInSrc ? join(this.rootDir, 'src') : this.rootDir
+    }
     this.isDev = Boolean(options.dev)
     this.mode = options.mode || (this.isDev ? 'development' : 'production')
-    this.store = new Store(this)
-    this.plugins = []
     if (!process.env.NODE_ENV) {
       process.env.NODE_ENV = this.isDev ? 'development' : 'production'
     }
@@ -71,13 +75,15 @@ export class Ream {
   }
 
   resolveSrcDir(...args: string[]) {
-    if (!this.config.srcDir)
-      throw new Error(`srcDir is only available after loading config file`)
-    return this.resolveRootDir(this.config.srcDir, ...args)
+    return resolve(this.srcDir, ...args)
   }
 
   resolveDotReam(...args: string[]) {
     return this.resolveRootDir('.ream', ...args)
+  }
+
+  resolveOwnDir(...args: string[]) {
+    return resolve(OWN_DIR, ...args)
   }
 
   resolveInPackage(pkg: string, target: string) {
@@ -94,7 +100,6 @@ export class Ream {
     }
     this.configPath = configPath
     this.config = {
-      srcDir: '.',
       ...this.inlineConfig,
       ...projectConfig,
       env: {
@@ -102,7 +107,6 @@ export class Ream {
         ...this.inlineConfig.env,
       },
       plugins: [
-        routesPlugin(),
         ...(this.inlineConfig.plugins || []),
         ...(projectConfig.plugins || []),
       ],
@@ -122,7 +126,7 @@ export class Ream {
   get constants(): Record<string, string> {
     const { env } = this
     return {
-      ...this.store.state.constants,
+      ...this.state.constants,
       ...Object.keys(env).reduce((res, key) => {
         const value = JSON.stringify(env[key])
         return {
@@ -131,78 +135,63 @@ export class Ream {
           [`process.env.${key}`]: value,
         }
       }, {}),
-      REAM_SSR_ENABLED: JSON.stringify(this.config.ssr !== false),
     }
   }
 
-  getPlugins() {
-    return this.config.plugins.map((plugin) => {
-      const context = new PluginContext(this, plugin.name)
-      return {
-        plugin,
-        context,
-      }
-    })
-  }
-
-  async prepare() {
-    this.store.resetState()
+  async prepare({
+    shouldCleanDir,
+    shouldPrepreFiles,
+  }: {
+    shouldCleanDir: boolean
+    shouldPrepreFiles: boolean
+  }) {
+    this.state = getInitialState()
 
     await this.loadConfig()
 
     this.userEnv = loadEnv(this.mode, this.rootDir, 'REAM_')
 
-    this.plugins = this.getPlugins()
+    await loadPlugins(this)
 
-    // Remove everything but cache
-    await Promise.all(
-      ['generated', 'server', 'client'].map((name) => {
-        return remove(this.resolveDotReam(name))
-      })
-    )
+    if (shouldCleanDir) {
+      // Remove everything but cache
+      await Promise.all(
+        ['templates', 'manifest', 'server', 'client', 'export', 'meta'].map(
+          (name) => {
+            return remove(this.resolveDotReam(name))
+          }
+        )
+      )
+    }
 
-    consola.info('Preparing Ream files')
-    const { prepareFiles } = await import('./prepare-files')
-    await prepareFiles(this)
+    if (shouldPrepreFiles) {
+      consola.info('Preparing Ream files')
+      const { prepareFiles } = await import('./prepare-files')
+      await prepareFiles(this)
+    }
 
     if (this.isDev) {
       // Create Vite dev server
       const { createServer: createViteServer } = await import('vite')
       const { getViteConfig } = await import('./vite/get-vite-config')
       const viteConfig = getViteConfig(this)
-      const viteServer = await createViteServer(viteConfig)
-      if (this.viteServer) {
-        // Properly restart vite server
-        // Ref: https://github.com/vitejs/vite/blob/23f57ee8785aa377ea4b0834d36af86503a742c0/packages/vite/src/node/server/hmr.ts#L419
-        for (const key in viteServer) {
-          if (key !== 'app') {
-            // @ts-expect-error
-            this.viteServer[key] = viteServer[key]
-          }
-        }
-      } else {
-        this.viteServer = viteServer
-      }
+      const viteDevServer = await createViteServer(viteConfig)
+      this.viteDevServer = viteDevServer
 
       // Reuse Vite watcher to register `onFileChange` callbacks
-      for (const plugin of this.plugins) {
-        if (plugin.plugin.onFileChange) {
-          viteServer.watcher.on(
-            'all',
-            plugin.plugin.onFileChange.bind(plugin.context)
-          )
-        }
+      for (const callback of this.state.callbacks.onFileChange) {
+        viteDevServer.watcher.on('all', callback.callback)
       }
 
       // Restart Ream when config file changes
-      viteServer.watcher.on('all', async (_, file) => {
+      viteDevServer.watcher.on('all', async (_, file) => {
         const files = SUPPORTED_CONFIG_FILES.map((name) =>
           this.resolveRootDir(name)
         )
         if (file === this.configPath || files.includes(file)) {
           consola.info(`Restarting Ream due to changes in ${file}`)
-          await viteServer.close()
-          await this.prepare()
+          await viteDevServer.close()
+          await this.prepare({ shouldCleanDir, shouldPrepreFiles })
         }
       })
     }
@@ -218,19 +207,12 @@ export class Ream {
   }
 
   async getRequestHandler() {
-    if (this.isDev) {
-      await this.prepare()
-
-      const { getRequestHandler } = await import('./server/dev-server')
-      return getRequestHandler(this)
-    }
-
-    const { createHandler } = await import('./server')
-
-    const { handler } = await createHandler({
-      dev: this.isDev,
-      cwd: this.rootDir,
+    await this.prepare({
+      shouldCleanDir: this.isDev,
+      shouldPrepreFiles: this.isDev,
     })
+    const { getRequestHandler } = await import('./server')
+    const handler = await getRequestHandler(this)
     return handler
   }
 
@@ -241,7 +223,7 @@ export class Ream {
     fullyExport?: boolean
     standalone?: boolean
   }) {
-    await this.prepare()
+    await this.prepare({ shouldCleanDir: true, shouldPrepreFiles: true })
     const { build, buildStandalone } = await import('./build')
     await build(this)
     // Export static pages

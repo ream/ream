@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "version": "0.0.0",
+  "name": "example-data-fetching",
+  "scripts": {
+    "dev": "ream"
+  },
+  "dependencies": {
+    "ream": "workspace:*",
+    "@ream/app": "workspace:*"
+  }
+}

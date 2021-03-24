@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "version": "0.0.0",
+  "name": "example-nested-routes",
+  "scripts": {
+    "dev": "ream"
+  },
+  "dependencies": {
+    "ream": "workspace:*",
+    "@ream/app": "workspace:*"
+  }
+}

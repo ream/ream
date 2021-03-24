@@ -1,7 +1,9 @@
 import path from 'path'
 import fs from 'fs-extra'
 import { Ream } from '../'
-import { InlineConfig as ViteConfig, Plugin } from 'vite'
+import { UserConfig as ViteConfig, Plugin } from 'vite'
+import vuePlugin from '@vitejs/plugin-vue'
+import { babelPlugin } from './plugins/babel'
 
 const reamAliasPlugin = (api: Ream): Plugin => {
   return {
@@ -10,9 +12,9 @@ const reamAliasPlugin = (api: Ream): Plugin => {
     resolveId(source) {
       // Bundle @ream/app since it's written in esnext modules
       // Otherwise it will break in Node.js (SSR)
-      // if (source === '@ream/vue') {
-      //   return require.resolve(source)
-      // }
+      if (source === '@ream/app' || source.startsWith('@ream/app/')) {
+        return require.resolve(source)
+      }
       return undefined
     },
   }
@@ -24,7 +26,7 @@ const reamForceServerUpdatePlugin = (api: Ream): Plugin => {
     name: `ream:force-server-update`,
 
     handleHotUpdate(ctx) {
-      const { moduleGraph } = api.viteServer!
+      const { moduleGraph } = api.viteDevServer!
       for (const [key, value] of moduleGraph.fileToModulesMap.entries()) {
         if (!key.includes('node_modules')) {
           for (const mod of value) {
@@ -73,51 +75,51 @@ const moveManifestPlugin = (manifestDir: string): Plugin => {
   }
 }
 
-export const getViteConfig = (api: Ream, server?: boolean) => {
+export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
     ? undefined
-    : server
-    ? api.store.state.apiRoutes.reduce(
-        (res, route) => {
-          return {
-            ...res,
-            ['api/' + route.name]: route.file,
-          }
-        },
-        { 'server-exports': api.resolveDotReam('generated/server-exports.js') }
+    : require.resolve(
+        `@ream/app/dist/${server ? 'server-entry.js' : 'client-entry.js'}`
       )
-    : {
-        client: './index.html',
-      }
 
   const config: ViteConfig = {
     mode: api.mode,
     root: api.rootDir,
-    configFile: false,
     plugins: [
       reamAliasPlugin(api),
       reamForceServerUpdatePlugin(api),
+      vuePlugin({
+        include: [/\.vue$/],
+      }),
+      babelPlugin(),
       moveManifestPlugin(api.resolveDotReam('manifest')),
     ],
     define: api.constants,
     resolve: {
       alias: {
         '@': api.resolveSrcDir(),
+        vue: api.config.vue?.runtimeTemplateCompiler
+          ? 'vue/dist/vue.esm-bundler.js'
+          : 'vue/dist/vue.runtime.esm-bundler.js',
         'dot-ream': api.resolveDotReam(),
       },
     },
     optimizeDeps: {
       // Don't let Vite optimize these deps with esbuild
-      exclude: [
-        '@ream/fetch',
-        'node-fetch',
-        '@vue/server-renderer',
-        '@ream/framework-vue',
-      ],
+      exclude: ['@ream/app', '@ream/fetch', 'node-fetch'],
+      include: ['vue'],
     },
-    // @ts-expect-error
-    ssr: {},
+    // @ts-expect-error vite does not expose these experimental stuff in types yet
+    ssr: {
+      // https://vitejs.dev/config/#ssr-external
+      external: [
+        'vue',
+        'vue/dist/vue.esm-bundler.js',
+        'vue/dist/vue.runtime.esm-bundler.js',
+      ],
+      noExternal: ['@ream/app'],
+    },
     server: {
       middlewareMode: true,
       hmr: api.config.hmr && {
@@ -141,14 +143,8 @@ export const getViteConfig = (api: Ream, server?: boolean) => {
     },
   }
 
-  for (const plugin of api.plugins) {
-    if (plugin.plugin.vite) {
-      plugin.plugin.vite.call(plugin.context, config)
-    }
-  }
-
   if (api.config.vite) {
-    api.config.vite(config, { dev: api.isDev })
+    api.config.vite(config, { dev: api.isDev, ssr: server })
   }
 
   return config

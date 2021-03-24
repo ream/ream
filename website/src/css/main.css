@@ -1,0 +1,76 @@
+:root {
+  --header-height: 60px;
+  --sidebar-width: 20rem;
+}
+
+body {
+  @apply antialiased;
+}
+
+body[data-no-scroll] {
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1080px;
+  padding: 0 20px;
+}
+
+.main {
+  margin-top: var(--header-height);
+}
+
+.markdown-body pre {
+  @apply bg-gray-900;
+  @apply text-gray-100;
+  @apply p-5;
+  @apply rounded-lg;
+  @apply my-5;
+  @apply overflow-auto;
+}
+
+.markdown-body p {
+  @apply my-5;
+}
+
+.markdown-body h2 {
+  @apply text-3xl;
+  @apply my-8;
+}
+
+.markdown-body h2 code {
+  @apply text-3xl !important;
+}
+
+.markdown-body h3 {
+  @apply text-2xl;
+  @apply my-8;
+}
+
+.markdown-body h3 code {
+  @apply text-2xl !important;
+}
+
+.markdown-body :not(pre) code {
+  @apply bg-blue-50;
+  @apply p-1;
+  @apply rounded;
+  @apply text-sm;
+}
+
+.markdown-body a {
+  @apply text-blue-600;
+}
+
+.markdown-body a:hover {
+  @apply underline;
+}
+
+.markdown-body ul {
+  @apply list-disc;
+  @apply pl-5;
+}
+
+.markdown-body ul li {
+  @apply mb-1;
+}

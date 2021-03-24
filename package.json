@@ -1,30 +1,28 @@
 {
   "private": true,
   "name": "ream-workspace",
-  "workspaces": [
-    "packages/*",
-    "examples/*",
-    "docs"
-  ],
   "scripts": {
     "test:unit": "jest --testPathPattern packages",
     "test:integration": "jest --testPathPattern test/integration/ --runInBand",
-    "test": "npm run build && npm run test:unit",
+    "test": "npm run build && npm run test:unit && npm run test:integration",
     "build": "node -r sucrase/register  scripts/build.ts",
     "dev": "node -r sucrase/register scripts/dev.ts",
     "ream": "node packages/ream/dist/cli"
   },
   "devDependencies": {
+    "@ream/test-utils": "workspace:*",
     "@sucrase/jest-plugin": "^2.0.0",
-    "@types/jest": "^26.0.21",
+    "@types/jest": "^26.0.20",
     "@types/semver": "^7.3.4",
     "chalk": "^4.1.0",
+    "dtsup": "^1.0.1",
     "execa": "^5.0.0",
     "jest-cli": "^26.6.3",
-    "prettier": "^2.2.1",
+    "prettier": "^2.0.5",
     "semver": "^7.3.4",
     "sucrase": "^3.17.1",
-    "typescript": "^4.2.3",
-    "scripts": "workspace:*"
+    "tsc-watch": "^4.2.9",
+    "tsup": "^4.6.1",
+    "typescript": "^4.2.3"
   }
 }

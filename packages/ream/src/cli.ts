@@ -1,5 +1,6 @@
 import { cac } from 'cac'
 import { createServer } from 'http'
+import path from 'path'
 import { version } from '../package.json'
 
 const cli = cac()
@@ -13,14 +14,19 @@ cli
   .option('--port <port>', 'Server port (default: 3000)')
   .action(
     handleError(
-      async (rootDir: string, flags: { host?: string; port?: number }) => {
+      async (rootDir: string, options: { host?: string; port?: number }) => {
         const { Ream } = await import('./')
+        const host = options.host || 'localhost'
+        const port = options.port || 3000
         const app = new Ream({
           rootDir,
           dev: true,
         })
         const handler = await app.getRequestHandler()
-        startServer(handler, flags.host, flags.port)
+        const server = createServer(handler)
+        process.env.PORT = `${port}`
+        server.listen(port, host)
+        console.log(`> http://${host}:${port}`)
       }
     )
   )
@@ -69,14 +75,17 @@ cli
   .option('--port <port>', 'Server port (default: 3000)')
   .action(
     handleError(
-      async (rootDir = '.', flags: { host?: string; port?: number }) => {
-        const { Ream } = await import('./')
-        const app = new Ream({
+      async (rootDir = '.', options: { host?: string; port?: number }) => {
+        const { start } = await import('@ream/server')
+        const { serverContext } = require(path.resolve(
           rootDir,
-          dev: false,
+          '.ream/meta/server-context'
+        ))
+        await start(rootDir, {
+          host: options.host,
+          port: options.port,
+          context: serverContext,
         })
-        const handler = await app.getRequestHandler()
-        startServer(handler, flags.host, flags.port)
       }
     )
   )
@@ -94,11 +103,4 @@ function handleError(fn: (...args: any[]) => Promise<void>) {
       process.exitCode = 1
     }
   }
-}
-
-function startServer(handler: any, host = 'localhost', port = 3000) {
-  const server = createServer(handler)
-  process.env.PORT = `${port}`
-  server.listen(port, host)
-  console.log(`> http://${host}:${port}`)
 }
