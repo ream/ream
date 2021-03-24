@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useHead } from '@ream/app'
+import { useHead } from 'ream/app'
 
 useHead({
   title: 'Home',

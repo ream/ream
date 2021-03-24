@@ -1,10 +1,6 @@
-<template>
-  <div>{{ message }}</div>
-</template>
-
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
-import { Preload, usePageData } from '@ream/app'
+import { Preload, usePageData } from 'ream/app'
 
 export const preload: Preload = ({ params }) => {
   return {
@@ -23,3 +19,7 @@ export default defineComponent({
   },
 })
 </script>
+
+<template>
+  <div>{{ message }}</div>
+</template>

@@ -2,8 +2,12 @@
   "private": true,
   "version": "0.0.0",
   "name": "example-automatic-routing",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start"
+  },
   "dependencies": {
-    "ream": "workspace:*",
-    "@ream/app": "workspace:*"
+    "ream": "workspace:*"
   }
 }

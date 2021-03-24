@@ -3,8 +3,8 @@ import path from 'path'
 import execa from 'execa'
 import { Server, createServer } from 'http'
 import { join } from 'path'
-import { remove } from 'fs-extra'
-import { createHandler } from '@ream/server'
+import fs from 'fs-extra'
+import { createHandler } from 'ream/server'
 import getPort from 'get-port'
 import { chromium } from 'playwright-chromium'
 import serveStatic from 'serve-static'
@@ -32,7 +32,7 @@ export async function buildAndLaunch({
   dev: boolean
   export?: boolean
 }): Promise<ProductionApp> {
-  await remove(join(appDir, '.ream'))
+  await fs.remove(join(appDir, '.ream'))
   const port = await getPort()
   let server: Server | undefined
   if (exportSite) {

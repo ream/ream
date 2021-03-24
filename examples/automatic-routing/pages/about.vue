@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { useHead } from '@ream/app'
-import { RouterLink } from 'vue-router'
+import { useHead } from 'ream/app'
 
 useHead({
   title: 'About!',

@@ -6,7 +6,6 @@
     "dev": "ream"
   },
   "dependencies": {
-    "ream": "workspace:*",
-    "@ream/app": "workspace:*"
+    "ream": "workspace:*"
   }
 }

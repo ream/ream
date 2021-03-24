@@ -1,4 +1,4 @@
-import { ExtendServer } from '@ream/server'
+import { ExtendServer } from 'ream/server'
 
 export const extendServer: ExtendServer = ({ server }) => {
   server.use((req, res, next) => {

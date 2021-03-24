@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "name": "example-data-fetching",
   "scripts": {
-    "dev": "ream"
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start"
   },
   "dependencies": {
-    "ream": "workspace:*",
-    "@ream/app": "workspace:*"
+    "ream": "workspace:*"
   }
 }

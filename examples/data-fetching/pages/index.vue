@@ -1,11 +1,3 @@
-<template>
-  <div class="page">
-    <h1>{{ page.message }}</h1>
-    <Nav />
-    <button @click="page.count++">{{ page.count }}</button>
-  </div>
-</template>
-
 <script lang="ts">
 export const preload = async () => {
   return {
@@ -19,14 +11,13 @@ export const preload = async () => {
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { usePageData } from '@ream/app'
-import { useHead } from '@ream/app'
+import { usePageData, useHead } from 'ream/app'
 import Nav from '../components/Nav.vue'
 
 const page = usePageData()
 
 useHead({
-  title: computed(() => `${page.count} - ${page.message}`),
+  title: computed(() => `${page.value.count} - ${page.value.message}`),
 })
 </script>
 
@@ -35,3 +26,11 @@ useHead({
   background-color: red;
 }
 </style>
+
+<template>
+  <div class="page">
+    <h1>{{ page.message }}</h1>
+    <Nav />
+    <button @click="page.count++">{{ page.count }}</button>
+  </div>
+</template>

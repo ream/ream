@@ -1,10 +1,6 @@
-<template>
-  <div>hello {{ page.name }}</div>
-</template>
-
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { StaticPreload, GetStaticPaths, usePageData } from '@ream/app'
+import { StaticPreload, GetStaticPaths, usePageData } from 'ream/app'
 
 export const staticPreload: StaticPreload = ({ params }) => {
   return {
@@ -33,3 +29,7 @@ export default defineComponent({
   },
 })
 </script>
+
+<template>
+  <div>hello {{ page.name }}</div>
+</template>

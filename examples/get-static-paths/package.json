@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "name": "example-get-static-paths",
   "scripts": {
-    "dev": "ream"
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start",
+    "export": "ream export"
   },
   "dependencies": {
-    "ream": "workspace:*",
-    "@ream/app": "workspace:*"
+    "ream": "workspace:*"
   }
 }
