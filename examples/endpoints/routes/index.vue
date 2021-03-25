@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue'
 
 export const load = async () => {
-  const posts = await fetch(`/api/posts`).then((res) => res.json())
+  const posts = await fetch(`/posts`).then((res) => res.json())
   return {
     props: {
       posts,

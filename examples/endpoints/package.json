@@ -1,7 +1,7 @@
 {
   "private": true,
   "version": "0.0.0",
-  "name": "example-api-routes",
+  "name": "example-endpoints",
   "scripts": {
     "dev": "ream",
     "build": "ream build"

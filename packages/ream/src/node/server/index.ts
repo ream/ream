@@ -207,12 +207,8 @@ export async function createHandler(options: CreateServerOptions) {
   })
 
   server.use(async function handleServerRoutes(req, res, next) {
-    if (!req.path.startsWith('/api/')) {
-      return next()
-    }
-
     const serverRouter = serverEntry.createServerRouter()
-    serverRouter!.push(req.url)
+    await serverRouter.push(req.url)
     await serverRouter.isReady()
     const { matched } = serverRouter.currentRoute.value
     const route = matched[0]
@@ -220,7 +216,7 @@ export async function createHandler(options: CreateServerOptions) {
       return next()
     }
     const mod = await route.meta.load()
-    mod.default(req, res, next)
+    return mod.default(req, res, next)
   })
 
   server.use(async function handleAppRoute(req, res, next) {

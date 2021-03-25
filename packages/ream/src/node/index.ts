@@ -21,7 +21,7 @@ export type Route = {
   name?: string
   path: string
   file: string
-  isServerRoute: boolean
+  isEndpoint: boolean
   children?: Route[]
 }
 
@@ -62,8 +62,8 @@ export class Ream {
     if (options.srcDir) {
       this.srcDir = path.join(this.rootDir, options.srcDir)
     } else {
-      const hasPagesInSrc = fs.existsSync(path.join(this.rootDir, 'src/pages'))
-      this.srcDir = hasPagesInSrc
+      const hasRoutesInSrc = fs.existsSync(path.join(this.rootDir, 'src/route'))
+      this.srcDir = hasRoutesInSrc
         ? path.join(this.rootDir, 'src')
         : this.rootDir
     }

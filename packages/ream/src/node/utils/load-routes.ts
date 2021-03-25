@@ -27,12 +27,12 @@ export const filesToRoutes = (files: string[], dir: string) => {
       continue
     }
 
-    const isServerRoute = /^api[$|\/]/.test(file)
+    const isEndpoint = /\.[jt]s$/.test(file)
     const route: Route = {
       name: '',
       path: '',
       file: absolutePath,
-      isServerRoute,
+      isEndpoint,
       children: undefined,
     }
 
@@ -57,9 +57,9 @@ export const filesToRoutes = (files: string[], dir: string) => {
         .replace(/\[\.{3}([^\]]+)\]/, ':$1(.*)')
 
       // Find a parent route
-      // Except for server routes
+      // Except for endpoints
       const child =
-        !route.isServerRoute &&
+        !route.isEndpoint &&
         parent.find(
           (parentRoute) => parentRoute.name === expectedParentRouteName
         )

@@ -36,8 +36,8 @@ class FileWriter {
     ]
   }
 
-  get pagesDir() {
-    return this.api.resolveSrcDir('pages')
+  get routesDir() {
+    return this.api.resolveSrcDir('routes')
   }
 
   getRelativePathToTemplatesDir(p: string) {
@@ -48,7 +48,7 @@ class FileWriter {
   }
 
   async writeRoutes() {
-    const routesInfo = filesToRoutes(this.files, this.pagesDir)
+    const routesInfo = filesToRoutes(this.files, this.routesDir)
 
     const getRoutes = this.api.config.routes
     if (getRoutes) {
@@ -59,7 +59,7 @@ class FileWriter {
       : routesInfo.routes
 
     const stringifyClientRoutes = (routes: Route[]): string => {
-      const clientRoutes = routes.filter((route) => !route.isServerRoute)
+      const clientRoutes = routes.filter((route) => !route.isEndpoint)
       return `[
         ${clientRoutes
           .map((route) => {
@@ -94,7 +94,7 @@ class FileWriter {
     }
 
     const stringifyServerRoutes = (routes: Route[]): string => {
-      const serverRoutes = routes.filter((route) => route.isServerRoute)
+      const serverRoutes = routes.filter((route) => route.isEndpoint)
       return `[
         ${serverRoutes
           .map((route) => {
@@ -309,13 +309,13 @@ export const preparePlugin = (): ReamPlugin => {
     async prepare() {
       writer = new FileWriter(this)
 
-      if (!(await fs.pathExists(writer.pagesDir))) {
-        throw new Error(`${writer.pagesDir} doesn't exist`)
+      if (!(await fs.pathExists(writer.routesDir))) {
+        throw new Error(`${writer.routesDir} doesn't exist`)
       }
 
       const routesFileGlob = '**/*.{vue,ts,tsx,js,jsx}'
       writer.files = await glob(routesFileGlob, {
-        cwd: writer.pagesDir,
+        cwd: writer.routesDir,
         onlyFiles: true,
         ignore: ['node_modules', 'dist'],
       })
@@ -333,8 +333,8 @@ export const preparePlugin = (): ReamPlugin => {
       const routesFileRegexp = /\.(vue|ts|tsx|js|jsx)$/
 
       // Update routes
-      if (file.startsWith(writer.pagesDir) && routesFileRegexp.test(file)) {
-        const relativePath = path.relative(writer.pagesDir, file)
+      if (file.startsWith(writer.routesDir) && routesFileRegexp.test(file)) {
+        const relativePath = path.relative(writer.routesDir, file)
         if (type === 'add') {
           writer.files.push(relativePath)
           await writer.writeRoutes()

@@ -4,10 +4,10 @@
 
 ### What is Ream
 
-Ream is framework for building server-rendered or statically-generated web apps in Vue 3, it's heavily inspired by Next.js:
+Ream is a framework for building server-rendered or statically-generated web apps in Vue 3, it's heavily inspired by Next.js and Svelte Kit:
 
-- **File-system based routing**, each file inside `pages` folder is a Vue component which will be used as route component.
-- **API routes**, each file inside `pages/api` folder becomes a Node.js request handler.
+- **Pages**, `.vue` files inside `routes` folder is a Vue component which will be used as route component.
+- **Endpoints**, `.js` or `.ts` files inside `routes` folder becomes a request handler.
 
 ### Quick Start
 
@@ -41,10 +41,10 @@ There're two types of routes in Ream: Pages and API routes.
 
 ### Pages
 
-Pages are Vue components located in `pages` folder, they can end with `.vue`, `.jsx` or `.tsx` extensions. For example:
+Pages are Vue components located in `routes` folder, they can end with `.vue`, `.jsx` or `.tsx` extensions. For example:
 
 ```vue
-<!-- pages/index.vue -->
+<!-- routes/index.vue -->
 <template>
   <h1>Welcome to Ream!</h1>
 </template>
@@ -52,12 +52,12 @@ Pages are Vue components located in `pages` folder, they can end with `.vue`, `.
 
 This file would be mapped to `/` route.
 
-### API routes
+### Endpoints
 
-API routes are request handlers located in `pages/api` folder, they can end with `.js` or `.ts` extensions. For example:
+API routes are `.js` or `.ts` files located in `routes` folder. For example:
 
 ```ts
-// pages/api/hello.ts
+// routes/hello.ts
 const handler: ReamServerHandler = (req, res) => {
   res.send({ hello: 'from Ream' })
 }
@@ -65,7 +65,7 @@ const handler: ReamServerHandler = (req, res) => {
 export default handler
 ```
 
-This file would be mapped to `/api/hello` route.
+This file would be mapped to `/hello` route.
 
 ## Data Fetching
 
