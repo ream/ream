@@ -58,6 +58,8 @@ API routes are `.js` or `.ts` files located in `routes` folder. For example:
 
 ```ts
 // routes/hello.ts
+import { ReamServerHandler } from 'ream/server'
+
 const handler: ReamServerHandler = (req, res) => {
   res.send({ hello: 'from Ream' })
 }
@@ -127,3 +129,46 @@ export const preload = () => {
 }
 </script>
 ```
+
+## Recipes
+
+### Head Management
+
+Ream use [vueuse/head](https://github.com/vueuse/head) to manage `<head>` elements, it's bundled with Ream so you don't have to install it:
+
+```ts
+import { defineComponent } from 'vue'
+import { useHead } from 'ream/app'
+
+export default defineComponent({
+  setup() {
+    useHead({
+      title: 'Home',
+    })
+  },
+})
+```
+
+You can also use the `<Head>` component if that's desired:
+
+```vue
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { Head } from 'ream/app'
+
+export default defineComponent({
+  components: {
+    Head,
+  },
+})
+</script>
+
+<template>
+  <Head>
+    <title>Hello World</title>
+    <html lang="en-US" class="theme-dark" />
+  </Head>
+</template>
+```
+
+Check out the docs of [vueuse/head](https://github.com/vueuse/head) for advanced usages.
