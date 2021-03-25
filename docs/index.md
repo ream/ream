@@ -80,7 +80,7 @@ A page can export a `load` function that runs before the component is created, t
 import { Load } from 'ream/app'
 import { defineComponent } form 'vue'
 
-export const load: Load = () => {
+export const load: Load = (options) => {
   return {
     props: {
       message: 'Hello Ream!',
@@ -94,6 +94,23 @@ export default defineComponent({
 })
 </script>
 ```
+
+#### Load Options
+
+- `host`: The host name of the request URL.
+- `path`: The pathname.
+- `query`: The parsed URL query.
+- `params`: The derived parameters from the filename.
+- `headers`: The request headers.
+
+#### Load Result
+
+`load` should return a Promise which returns an object with following properties (all optional), returning `null` or `undefined` is equivalent to `{ notFound: true }`:
+
+- `props`: `object` Page props, must be serializable.
+- `notFound`: `true` Render the 404 page.
+- `error`: `{status: number, message?: string}` Render the error page, with optional error message to display.
+- `redirect`: `string` Redirect to another URL.
 
 ### Fetching at Build Time
 

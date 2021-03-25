@@ -1,51 +1,63 @@
-import { ReamServerRequest, ReamServerResponse } from './server'
-
-interface IParams {
-  [k: string]: string
+/**
+ * Load on demand
+ */
+export interface LoadOptions {
+  readonly params: Record<string, string | string[]>
+  readonly query: Record<string, string | string[] | undefined>
+  readonly path: string
+  readonly host: string
+  readonly headers: Record<string, string | string[] | undefined>
 }
 
-export interface LoadContext {
-  params: IParams
-  req: ReamServerRequest
-  res: ReamServerResponse
-}
-
-export type LoadResult<TProps> =
+export type LoadResult<TProps = object> =
   | {
       /**
        * Page props
        */
-      props: TProps
+      props?: TProps
       /**
-       * Update the cached result in specific seconds
-       * Only apply to preload
+       * 404
        */
-      revalidate?: number
+      notFound?: true
+      /**
+       * Render error page
+       */
+      error?: { status: number; stack?: string }
+      /**
+       * Redirect to a URL
+       */
+      redirect?: string | { url: string; permanent?: boolean }
     }
-  | { notFound: true }
-  | { error: { status: number; stack?: string } }
-  | { redirect: string | { url: string; permanent?: boolean } }
+  // 404
+  | null
+  // 404
+  | undefined
+
+export type Load<TData extends Record<string, any> = object> = LoadFactory<
+  LoadOptions,
+  LoadResult<TData>
+>
 
 type LoadFactory<ContextType = any, ResultType = any> = (
   ctx: ContextType
 ) => ResultType | Promise<ResultType>
 
-/**
- * Load on demand
- */
-export type Load<TData extends Record<string, any> = object> = LoadFactory<
-  LoadContext,
-  LoadResult<TData>
->
-
-export type PreloadContext = Omit<LoadContext, 'req' | 'res'>
+export type PreloadOptions = Omit<LoadOptions, 'query' | 'headers'>
 
 /**
  * Load at build time
  */
+
+export type PreloadResult<TProps = object> = LoadResult<TProps> & {
+  /**
+   * Update the statically generated page in specific seconds
+   */
+  revalidate?: number
+}
+
 export type Preload<TProps extends Record<string, any> = object> = LoadFactory<
-  PreloadContext,
-  LoadResult<TProps>
+  PreloadOptions,
+  PreloadResult<TProps>
 >
 
 export type GetStaticPathsResult = {

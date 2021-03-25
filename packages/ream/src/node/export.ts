@@ -96,15 +96,22 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
       const router = await createClientRouter(serverAssets.serverEntry, url)
 
-      const routePath = router.currentRoute.value.path
+      const route = router.currentRoute.value
       const { html = '', loadResult } = await render({
-        url,
+        url: route.path,
         ...serverAssets,
         router,
+        loadOptions: {
+          params: route.params,
+          host: 'localhost',
+          headers: {},
+          query: {},
+          path: route.path,
+        },
       })
 
-      const htmlPath = getExportOutputPath(routePath, 'html', exportDir)
-      const jsonPath = getExportOutputPath(routePath, 'json', exportDir)
+      const htmlPath = getExportOutputPath(route.path, 'html', exportDir)
+      const jsonPath = getExportOutputPath(route.path, 'json', exportDir)
       await Promise.all([
         fs.outputFile(htmlPath, html, 'utf8'),
         (loadResult.hasPreload || loadResult.hasLoad) &&

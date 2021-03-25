@@ -1,12 +1,8 @@
 import type { Router } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
-import {
-  ReamServerRequest,
-  ReamServerResponse,
-  ReamServerHandler,
-} from './server'
-import type { Load, ServerEntry } from '.'
+import { ReamServerHandler } from './server'
+import type { Load, LoadOptions, ServerEntry } from '.'
 
 export type ServerRouteLoader = {
   type: 'server'
@@ -51,8 +47,7 @@ export type HtmlAssets = {
 
 export async function render({
   url,
-  req,
-  res,
+  loadOptions,
   ssrManifest,
   serverEntry,
   isLoadRequest,
@@ -62,8 +57,7 @@ export async function render({
   htmlTemplate,
 }: {
   url: string
-  req?: ReamServerRequest
-  res?: ReamServerResponse
+  loadOptions: LoadOptions
   ssrManifest?: any
   serverEntry: ServerEntry
   isLoadRequest?: boolean
@@ -85,11 +79,7 @@ export async function render({
 
   const components = route.matched.map((route) => route.components.default)
 
-  loadResult = await loadPageData(globalLoad, components, {
-    req,
-    res,
-    params: route.params,
-  })
+  loadResult = await loadPageData(globalLoad, components, loadOptions)
 
   if (notFound || route.name === '404') {
     loadResult.notFound = true
@@ -98,11 +88,8 @@ export async function render({
   // Also render HTML if not only fetching .load.json
   if (!isLoadRequest) {
     html = await renderToHTML({
-      params: route.params,
       url,
       path: route.path,
-      req,
-      res,
       loadResult,
       serverEntry,
       router,
@@ -116,11 +103,8 @@ export async function render({
 }
 
 export async function renderToHTML(options: {
-  params: any
   url: string
   path: string
-  req?: any
-  res?: any
   loadResult: LoadResult
   router: Router
   serverEntry: ServerEntry
@@ -182,7 +166,7 @@ export type LoadResult = {
 export async function loadPageData(
   globalLoad: Load | undefined,
   components: any[],
-  options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
+  options: LoadOptions
 ): Promise<LoadResult> {
   const props = {}
   let hasPreload: boolean | undefined
@@ -212,15 +196,17 @@ export async function loadPageData(
 
   if (fns.length > 0) {
     for (const fn of fns) {
-      const result = await fn({
-        req: options.req,
-        res: options.res,
-        params: options.params,
-      })
+      const result = await fn(options)
       if (result) {
         if (typeof result.revalidate === 'number') {
           revalidate = result.revalidate * 1000
         }
+
+        if (result.props) {
+          Object.assign(props, result.props)
+          continue
+        }
+
         if (result.notFound) {
           notFound = true
         } else if (result.redirect) {
@@ -228,11 +214,13 @@ export async function loadPageData(
             typeof result.redirect === 'string'
               ? { url: result.redirect }
               : result.redirect
-        } else if (result.props) {
-          Object.assign(props, result.props)
         } else if (result.error) {
           error = result.error
         }
+        break
+      } else if (result == null) {
+        notFound = true
+        break
       }
     }
   }

@@ -2,7 +2,7 @@ import path from 'path'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'sirv'
-import type { Load } from './load'
+import type { Load, LoadOptions } from './load'
 import {
   ReamServerRequest,
   ReamServerResponse,
@@ -85,6 +85,26 @@ export const createClientRouter = async (
   return router
 }
 
+export const getLoadOptions = (req: ReamServerRequest): LoadOptions => {
+  return {
+    get path() {
+      return req.path
+    },
+    get params() {
+      return req.params
+    },
+    get host() {
+      return req.headers.host as string
+    },
+    get query() {
+      return req.query
+    },
+    get headers() {
+      return req.headers
+    },
+  }
+}
+
 export async function createHandler(options: CreateServerOptions) {
   const dotReamDir = path.resolve(options.cwd || '.', '.ream')
 
@@ -120,21 +140,18 @@ export async function createHandler(options: CreateServerOptions) {
       const router = await createClientRouter(serverEntry, req.url)
       const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
       const globalPreload = await serverEntry.getGlobalLoad()
-      const loadResult = await loadPageData(globalPreload, [ErrorComponent], {
-        req,
-        res,
-        params: req.params,
-      })
+      const loadResult = await loadPageData(
+        globalPreload,
+        [ErrorComponent],
+        getLoadOptions(req)
+      )
       loadResult.error = {
         status: res.statusCode,
         message: options.dev ? err.stack : undefined,
       }
       const html = await renderToHTML({
-        params: req.params,
         path: req.path,
         url: req.url,
-        req,
-        res,
         router,
         loadResult,
         serverEntry,
@@ -177,8 +194,7 @@ export async function createHandler(options: CreateServerOptions) {
     if (!html) {
       const result = await render({
         url: req.url,
-        req,
-        res,
+        loadOptions: getLoadOptions(req),
         isLoadRequest: false,
         ssrManifest,
         serverEntry,
@@ -284,8 +300,7 @@ export async function createHandler(options: CreateServerOptions) {
     // Cache miss, dynamic page, do a fresh render
     const { html, loadResult } = await render({
       url: req.url,
-      req,
-      res,
+      loadOptions: getLoadOptions(req),
       isLoadRequest,
       ssrManifest,
       serverEntry,
