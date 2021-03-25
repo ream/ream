@@ -7,6 +7,7 @@ import {
   ReamServerRequest,
   ReamServerResponse,
   createServer as createHttpServer,
+  ReamServer,
 } from './server'
 import { render, renderToHTML, loadPageData } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
@@ -59,7 +60,7 @@ type CreateServerOptions = {
    * Path to your project
    */
   cwd?: string
-  devMiddleware?: any
+  before?: (server: ReamServer) => void
   fixStacktrace?: (err: Error) => void
   serverEntry: ServerEntry
   exportManifest?: any
@@ -78,7 +79,7 @@ export const createClientRouter = async (
 
   await serverEntry.enhanceApp.callAsync('onCreatedRouter', { router })
 
-  router.push(url)
+  await router.push(url)
   await router.isReady()
 
   return router
@@ -157,6 +158,10 @@ export async function createHandler(options: CreateServerOptions) {
     onError,
   })
 
+  if (options.before) {
+    options.before(server)
+  }
+
   const renderNotFound = async (
     req: ReamServerRequest,
     res: ReamServerResponse,
@@ -186,10 +191,6 @@ export async function createHandler(options: CreateServerOptions) {
     }
     res.statusCode = 404
     res.send(html!)
-  }
-
-  if (options.devMiddleware) {
-    server.use(options.devMiddleware)
   }
 
   // Server static assets in production mode

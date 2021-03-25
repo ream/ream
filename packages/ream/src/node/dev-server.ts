@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
-import { createHandler } from './server'
+import { createHandler, ServerEntry } from './server'
 import { ModuleNode } from 'vite'
 import { Ream, resolveOwnDir } from './'
 
@@ -26,9 +26,10 @@ export const getRequestHandler = async (api: Ream) => {
     // waiting to vite to finish reloading devDependencies
     // @ts-expect-error
     await viteDevServer._pendingReload
+
     const serverEntry = (await viteDevServer.ssrLoadModule(
       `/@fs/${SERVER_ENTRY_PATH}`
-    )) as any
+    )) as ServerEntry
 
     const matchedMods = viteDevServer.moduleGraph.getModulesByFile(
       SERVER_ENTRY_PATH
@@ -45,7 +46,7 @@ export const getRequestHandler = async (api: Ream) => {
       api.resolveSrcDir('index.html'),
       'utf8'
     )
-    htmlTemplate = htmlTemplate.replace('<!--ream-head-->', inlineStyles)
+    htmlTemplate = htmlTemplate.replace('<!--ream-head-->', `$&${inlineStyles}`)
     htmlTemplate = await viteDevServer.transformIndexHtml(
       req.url!,
       htmlTemplate
@@ -53,10 +54,12 @@ export const getRequestHandler = async (api: Ream) => {
 
     const handler = await createHandler({
       cwd: api.rootDir,
-      serverEntry,
-      htmlTemplate,
+      serverEntry: serverEntry!,
+      htmlTemplate: htmlTemplate!,
       dev: true,
-      devMiddleware: viteDevServer.middlewares,
+      before(server) {
+        server.use(viteDevServer.middlewares)
+      },
       fixStacktrace: (err) => viteDevServer.ssrFixStacktrace(err),
     })
 
