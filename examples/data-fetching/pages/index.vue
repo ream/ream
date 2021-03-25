@@ -1,8 +1,8 @@
 <script lang="ts">
-export const preload = async () => {
+export const load = async () => {
   return {
-    data: {
-      message: 'hello world',
+    props: {
+      message: new Date().toString(),
       count: 0,
     },
   }
@@ -10,14 +10,15 @@ export const preload = async () => {
 </script>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { usePageData, useHead } from 'ream/app'
+import { computed, defineProps, ref } from 'vue'
+import { useHead } from 'ream/app'
 import Nav from '../components/Nav.vue'
 
-const page = usePageData()
+const props = defineProps<{ message: string; count: number }>()
+const count = ref(props.count)
 
 useHead({
-  title: computed(() => `${page.value.count} - ${page.value.message}`),
+  title: computed(() => `${count.value} - ${props.message}`),
 })
 </script>
 
@@ -29,8 +30,8 @@ useHead({
 
 <template>
   <div class="page">
-    <h1>{{ page.message }}</h1>
+    <h1>{{ props.message }}</h1>
     <Nav />
-    <button @click="page.count++">{{ page.count }}</button>
+    <button @click="count++">{{ count }}</button>
   </div>
 </template>

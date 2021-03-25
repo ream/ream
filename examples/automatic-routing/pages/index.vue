@@ -13,6 +13,12 @@ useHead({
       <li>
         <router-link to="/about">About</router-link>
       </li>
+      <li>
+        <router-link to="/non-existant">Non-existant</router-link>
+      </li>
+      <li>
+        <router-link to="/error">Some error</router-link>
+      </li>
     </ul>
   </div>
 </template>

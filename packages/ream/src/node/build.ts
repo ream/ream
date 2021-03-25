@@ -7,10 +7,9 @@ import { build as viteBuild } from 'vite'
 
 export async function build(api: Ream) {
   const serverConfig = getViteConfig(api, true)
-  await Promise.all([
-    viteBuild(serverConfig),
-    viteBuild(getViteConfig(api, false)),
-  ])
+  const clientConfig = getViteConfig(api, false)
+  await viteBuild(serverConfig)
+  await viteBuild(clientConfig)
 }
 
 export async function buildStandalone(api: Ream) {

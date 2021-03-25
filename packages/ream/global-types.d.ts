@@ -6,3 +6,6 @@ declare interface ImportMeta {
     DEV: boolean
   }
 }
+
+declare const REAM_ROOT_DIR: string
+declare const REAM_SOURCE_DIR: string

@@ -1,13 +1,13 @@
 import { h, createSSRApp, isReactive, reactive, Transition } from 'vue'
 import { createHead, useHead } from '@vueuse/head'
 import { RouterView } from 'vue-router'
-import { RouterLink, usePreloadResult } from './index'
+import { RouterLink } from './index'
 import {
   AppComponent,
   NotFoundComponent,
   ErrorComponent,
 } from 'dot-ream/templates/shared-exports.js'
-import { callAsync as callEnhanceAppAsync } from 'dot-ream/templates/ream.app.js'
+import { callAsync as callEnhanceAppAsync } from 'dot-ream/templates/enhance-app.js'
 
 export const createApp = async ({ router, initialState }) => {
   const app = createSSRApp({
@@ -18,47 +18,62 @@ export const createApp = async ({ router, initialState }) => {
           { name: 'viewport', content: 'width=device-width,initial-scale=1' },
         ],
       })
-      return {
-        initialState: isReactive(initialState)
-          ? initialState
-          : reactive(initialState),
-      }
+    },
+    computed: {
+      initialState() {
+        return initialState
+      },
+
+      loadResult() {
+        const { load } = initialState
+        const routePath = this.$route.path
+        if (load[routePath]) {
+          return load[routePath]
+        }
+        if (Object.keys(load).length === 1 && load['/404.html']) {
+          return load['/404.html']
+        }
+        return {}
+      },
     },
     render() {
-      const { notFound, error } = usePreloadResult().value
+      const { notFound, error } = this.loadResult
 
-      let Component
       if (notFound) {
-        Component = NotFoundComponent
-      } else if (error) {
-        Component = ErrorComponent
-      } else {
-        Component = h(RouterView, null, (props) => {
-          const { meta } = props.route
-          const transition =
-            meta.transition === false
-              ? { name: undefined }
-              : typeof meta.transition === 'string'
-              ? { name: meta.transition }
-              : meta.transition || {}
-          const transitionProps = {
-            name: 'page',
-            mode: 'out-in',
-            ...transition,
-            onBeforeEnter() {
-              _ream.event.emit('trigger-scroll')
-              if (transition.onBeforeEnter) {
-                transition.onBeforeEnter()
-              }
-            },
-          }
-          return h(Transition, transitionProps, () =>
-            h(props.Component, { key: props.route.path })
-          )
-        })
+        return h(NotFoundComponent)
       }
 
-      return h(AppComponent, {}, () => [h(Component)])
+      if (error) {
+        return h(ErrorComponent)
+      }
+
+      return h(AppComponent, {}, () => {
+        return [
+          h(RouterView, null, (props) => {
+            const { meta } = props.route
+            const transition =
+              meta.transition === false
+                ? { name: undefined }
+                : typeof meta.transition === 'string'
+                ? { name: meta.transition }
+                : meta.transition || {}
+            const transitionProps = {
+              name: 'page',
+              mode: 'out-in',
+              ...transition,
+              onBeforeEnter() {
+                _ream.event.emit('trigger-scroll')
+                if (transition.onBeforeEnter) {
+                  transition.onBeforeEnter()
+                }
+              },
+            }
+            return h(Transition, transitionProps, () =>
+              h(props.Component, this.loadResult.props)
+            )
+          }),
+        ]
+      })
     },
   })
 

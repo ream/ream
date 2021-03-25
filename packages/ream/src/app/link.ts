@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue'
 import { RouterLink as VueRouterLink } from 'vue-router'
-import { getPreloadPath } from './lib/runtime-utils'
+import { getLoadPath } from './lib/runtime-utils'
 
 const prefetchedPaths = new Set()
 
@@ -49,8 +49,8 @@ export const RouterLink = defineComponent({
       )
     )
     for (const component of components) {
-      if (component.$$staticPreload) {
-        const url = getPreloadPath(path)
+      if (component.$$preload) {
+        const url = getLoadPath(path)
         prefetchURL(url)
         prefetchedPaths.add(path)
         break

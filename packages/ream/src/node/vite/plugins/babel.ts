@@ -1,6 +1,6 @@
 import { Plugin } from 'vite'
 import { transformSync } from '@babel/core'
-import transformPageExports from '../../babel/transform-page-exports'
+import eliminator from 'babel-plugin-eliminator'
 
 export const babelPlugin = (): Plugin => {
   let needSourceMap = false
@@ -26,7 +26,24 @@ export const babelPlugin = (): Plugin => {
       const result = transformSync(code, {
         sourceFileName: id,
         sourceMaps: needSourceMap,
-        plugins: [transformPageExports],
+        plugins: [
+          [
+            eliminator,
+            {
+              namedExports: ['load', 'preload', 'getStaticPaths'],
+              done(state: any) {
+                if (
+                  state.removedNamedExports.has('load') &&
+                  state.removedNamedExports.has('preload')
+                ) {
+                  throw new Error(
+                    `You can't use "load" and "preload" in the same page.`
+                  )
+                }
+              },
+            },
+          ],
+        ],
       })
       return (
         result && {

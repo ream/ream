@@ -1,1 +1,1 @@
-export * from './dist/node/server.js'
+module.exports = require('./dist/node/server.js')

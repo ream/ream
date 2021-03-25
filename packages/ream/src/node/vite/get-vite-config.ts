@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
 import { Ream, resolveOwnDir } from '../'
-import { UserConfig as ViteConfig, Plugin } from 'vite'
+import { InlineConfig as ViteConfig, Plugin } from 'vite'
 import vuePlugin from '@vitejs/plugin-vue'
 import { babelPlugin } from './plugins/babel'
 
@@ -71,6 +71,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const config: ViteConfig = {
     mode: api.mode,
     root: api.rootDir,
+    configFile: false,
     plugins: [
       reamForceServerUpdatePlugin(api),
       vuePlugin({
@@ -80,17 +81,20 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
       moveManifestPlugin(api.resolveDotReam('manifest')),
       {
         name: 'inject-script-tag',
-        transformIndexHtml() {
-          return [
-            {
-              injectTo: 'body',
-              tag: 'script',
-              attrs: {
-                type: 'module',
-                src: `/@fs/${resolveOwnDir('app/client-entry.js')}`,
+        transformIndexHtml: {
+          enforce: 'pre',
+          transform() {
+            return [
+              {
+                injectTo: 'body',
+                tag: 'script',
+                attrs: {
+                  type: 'module',
+                  src: `/@fs/${resolveOwnDir('app/client-entry.js')}`,
+                },
               },
-            },
-          ]
+            ]
+          },
         },
       },
     ],
@@ -114,7 +118,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
         'vue/dist/vue.esm-bundler.js',
         'vue/dist/vue.runtime.esm-bundler.js',
       ],
-      noExternal: ['ream/app'],
+      noExternal: ['ream/app', 'ream'],
     },
     server: {
       middlewareMode: true,

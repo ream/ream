@@ -137,10 +137,7 @@ test('build routes', async () => {
           'file': '/routes/api/foo.ts',
           'isServerRoute': true
         }
-      ],
-      'appFile': '@ream/app/dist/_app.js',
-      'errorFile': '@ream/app/dist/_error.js',
-      'notFoundFile': '@ream/app/dist/404.js'
+      ]
     }"
   `)
 })

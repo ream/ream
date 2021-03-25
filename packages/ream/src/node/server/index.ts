@@ -2,13 +2,13 @@ import path from 'path'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'sirv'
-import type { Preload } from './preload'
+import type { Load } from './load'
 import {
   ReamServerRequest,
   ReamServerResponse,
   createServer as createHttpServer,
 } from './server'
-import { render, renderToHTML, getPreloadData } from './render'
+import { render, renderToHTML, loadPageData } from './render'
 import { ExportCache, getExportOutputPath } from './export-cache'
 import serializeJavascript from 'serialize-javascript'
 import { OnError } from './connect'
@@ -22,7 +22,7 @@ export type {
 // Re-export hook types
 export * from './hooks'
 
-export * from './preload'
+export * from './load'
 
 export { Connect } from './connect'
 
@@ -34,7 +34,7 @@ export type ServerEntry = {
   ErrorComponent: any
   serverRoutes: RouteRecordRaw[]
   clientRoutes: RouteRecordRaw[]
-  getGlobalPreload: () => Promise<Preload | undefined>
+  getGlobalLoad: () => Promise<Load | undefined>
   enhanceApp: {
     callAsync: (name: string, context: any) => Promise<void>
   }
@@ -47,13 +47,6 @@ export type ServerEntry = {
 
 export type ExportManifest = {
   staticPages: { path: string; fallback?: boolean }[]
-}
-
-export type ServerContext = {
-  serverEntry: ServerEntry
-  getExportManifest?: () => ExportManifest
-  ssrManifest?: any
-  clientManifest?: any
 }
 
 type CreateServerOptions = {
@@ -75,13 +68,7 @@ type CreateServerOptions = {
   htmlTemplate: string
 }
 
-export {
-  render,
-  renderToHTML,
-  getPreloadData,
-  ExportCache,
-  getExportOutputPath,
-}
+export { render, renderToHTML, loadPageData, ExportCache, getExportOutputPath }
 
 export const createClientRouter = async (
   serverEntry: ServerEntry,
@@ -104,7 +91,7 @@ export async function createHandler(options: CreateServerOptions) {
   const ssrManifest = options.ssrManifest || {}
   const clientManifest = options.clientManifest || {}
   const htmlTemplate = options.htmlTemplate
-  const exportCache =
+  const exportCache: ExportCache | undefined =
     options.exportManifest &&
     new ExportCache({
       exportDir: path.join(dotReamDir, 'export'),
@@ -131,18 +118,14 @@ export async function createHandler(options: CreateServerOptions) {
         !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
       const router = await createClientRouter(serverEntry, req.url)
       const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
-      const globalPreload = await serverEntry.getGlobalPreload()
-      const preloadResult = await getPreloadData(
-        globalPreload,
-        [ErrorComponent],
-        {
-          req,
-          res,
-          params: req.params,
-        }
-      )
-      preloadResult.error = {
-        statusCode: res.statusCode,
+      const globalPreload = await serverEntry.getGlobalLoad()
+      const loadResult = await loadPageData(globalPreload, [ErrorComponent], {
+        req,
+        res,
+        params: req.params,
+      })
+      loadResult.error = {
+        status: res.statusCode,
         message: options.dev ? err.stack : undefined,
       }
       const html = await renderToHTML({
@@ -152,7 +135,7 @@ export async function createHandler(options: CreateServerOptions) {
         req,
         res,
         router,
-        preloadResult,
+        loadResult,
         serverEntry,
         ssrManifest,
         clientManifest,
@@ -191,7 +174,7 @@ export async function createHandler(options: CreateServerOptions) {
         url: req.url,
         req,
         res,
-        isPreloadRequest: false,
+        isLoadRequest: false,
         ssrManifest,
         serverEntry,
         clientManifest,
@@ -212,7 +195,10 @@ export async function createHandler(options: CreateServerOptions) {
   // Server static assets in production mode
   if (!options.dev) {
     const serveStaticFiles = serveStatic(path.join(dotReamDir, 'client'))
-    server.use(serveStaticFiles as any)
+    server.use((req, res, next) => {
+      if (req.path === '/' || req.path === '/index.html') return next()
+      return serveStaticFiles(req, res, next)
+    })
   }
 
   await serverEntry.enhanceServer.callAsync('extendServer', {
@@ -241,9 +227,9 @@ export async function createHandler(options: CreateServerOptions) {
       return next()
     }
 
-    const isPreloadRequest = req.path.endsWith('.preload.json')
-    if (isPreloadRequest) {
-      req.url = req.url.replace(/(\/index)?\.preload\.json/, '')
+    const isLoadRequest = req.path.endsWith('.load.json')
+    if (isLoadRequest) {
+      req.url = req.url.replace(/(\/index)?\.load\.json/, '')
       if (req.url[0] !== '/') {
         req.url = `/${req.url}`
       }
@@ -272,8 +258,8 @@ export async function createHandler(options: CreateServerOptions) {
     const pageCache = staticPage && (await exportCache?.get(req.path))
 
     if (pageCache) {
-      if (isPreloadRequest) {
-        res.send(serializeJavascript(pageCache.preloadResult, { isJSON: true }))
+      if (isLoadRequest) {
+        res.send(serializeJavascript(pageCache.loadResult, { isJSON: true }))
       } else if (pageCache.html) {
         res.send(pageCache.html)
       }
@@ -299,11 +285,11 @@ export async function createHandler(options: CreateServerOptions) {
     }
 
     // Cache miss, dynamic page, do a fresh render
-    const { html, preloadResult } = await render({
+    const { html, loadResult } = await render({
       url: req.url,
       req,
       res,
-      isPreloadRequest,
+      isLoadRequest,
       ssrManifest,
       serverEntry,
       clientManifest,
@@ -311,17 +297,17 @@ export async function createHandler(options: CreateServerOptions) {
       router,
     })
 
-    if (preloadResult.error) {
-      res.statusCode = preloadResult.error.statusCode
+    if (loadResult.error) {
+      res.statusCode = loadResult.error.status
     }
 
     if (!pageCache || !pageCache.isStale) {
-      if (isPreloadRequest) {
-        res.send(serializeJavascript(preloadResult, { isJSON: true }))
+      if (isLoadRequest) {
+        res.send(serializeJavascript(loadResult, { isJSON: true }))
       } else {
-        if (preloadResult.redirect) {
-          res.writeHead(preloadResult.redirect.permanent ? 301 : 302, {
-            Location: preloadResult.redirect.url,
+        if (loadResult.redirect) {
+          res.writeHead(loadResult.redirect.permanent ? 301 : 302, {
+            Location: loadResult.redirect.url,
           })
           res.end()
         } else {
@@ -330,10 +316,10 @@ export async function createHandler(options: CreateServerOptions) {
       }
     }
 
-    if (exportCache && preloadResult.isStatic && !options.dev) {
+    if (exportCache && !loadResult.hasLoad && !options.dev) {
       await exportCache.set(req.path, {
         html: html,
-        preloadResult,
+        loadResult,
       })
     }
   })

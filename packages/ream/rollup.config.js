@@ -5,16 +5,18 @@ import { createConfig, createDtsConfig } from 'scripts/rollup-config'
 export default [
   // node
   createConfig({
+    label: 'ream:node',
     input: {
       index: './src/node/index.ts',
       cli: './src/node/cli.ts',
       server: './src/node/server/index.ts',
     },
-    format: 'esm',
+    format: 'cjs',
     outDir: './dist/node',
   }),
   // app
   createConfig({
+    label: 'ream:app',
     input: {
       index: './src/app/index.ts',
       'server-entry': './src/app/server-entry.js',
@@ -25,6 +27,7 @@ export default [
   }),
   // dts
   createDtsConfig({
+    label: 'ream:dts',
     input: {
       'app/index': './src/app/index.ts',
       'node/index': './src/node/index.ts',

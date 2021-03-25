@@ -4,6 +4,7 @@ import execa from 'execa'
 import { Server, createServer } from 'http'
 import { join } from 'path'
 import fs from 'fs-extra'
+import { getServerAssets } from 'ream'
 import { createHandler } from 'ream/server'
 import getPort from 'get-port'
 import { chromium } from 'playwright-chromium'
@@ -45,10 +46,10 @@ export async function buildAndLaunch({
     server = createServer(s.handler as any)
   } else {
     await execa(REAM_BIN, ['build'], { cwd: appDir })
-    const { handler } = await createHandler({
+    const serverAssets = await getServerAssets(path.join(appDir, '.ream'))
+    const handler = await createHandler({
       cwd: appDir,
-      context: require(path.join(appDir, '.ream/meta/server-context'))
-        .serverContext,
+      ...serverAssets,
     })
     server = createServer(handler)
   }

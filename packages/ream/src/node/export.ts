@@ -6,7 +6,6 @@ import serializeJavascript from 'serialize-javascript'
 import {
   render,
   ExportManifest,
-  ServerContext,
   createClientRouter,
   getExportOutputPath,
 } from './server'
@@ -24,10 +23,10 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
   const serverAssets = await getServerAssets(dotReamDir)
 
-  const globalPreload = await serverAssets.serverEntry.getGlobalPreload()
+  const globalLoad = await serverAssets.serverEntry.getGlobalLoad()
 
   // Adding a global `preload` function in `_app.vue` will disable automatic static generation
-  if (globalPreload && !fullyExport) return
+  if (globalLoad && !fullyExport) return
 
   const clientRoutes = await flattenRoutes(
     serverAssets.serverEntry.clientRoutes
@@ -38,7 +37,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
   await Promise.all(
     clientRoutes.map(async (route) => {
-      const shouldExport = route.matched.every((m) => !m.preload)
+      const shouldExport = route.matched.every((m) => fullyExport || !m.load)
 
       if (!shouldExport) {
         return
@@ -98,7 +97,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
       const router = await createClientRouter(serverAssets.serverEntry, url)
 
       const routePath = router.currentRoute.value.path
-      const { html = '', preloadResult } = await render({
+      const { html = '', loadResult } = await render({
         url,
         ...serverAssets,
         router,
@@ -108,11 +107,10 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
       const jsonPath = getExportOutputPath(routePath, 'json', exportDir)
       await Promise.all([
         fs.outputFile(htmlPath, html, 'utf8'),
-        preloadResult.hasPreload &&
-          preloadResult.isStatic &&
+        (loadResult.hasPreload || loadResult.hasLoad) &&
           (await fs.outputFile(
             jsonPath,
-            serializeJavascript(preloadResult, { isJSON: true }),
+            serializeJavascript(loadResult, { isJSON: true }),
             'utf8'
           )),
       ])

@@ -1,17 +1,12 @@
 import type { Router } from 'vue-router'
 import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
-import type { Preload } from './preload'
 import {
   ReamServerRequest,
   ReamServerResponse,
   ReamServerHandler,
 } from './server'
-import type { ServerEntry } from '.'
-
-export type RenderError = {
-  statusCode: number
-}
+import type { Load, ServerEntry } from '.'
 
 export type ServerRouteLoader = {
   type: 'server'
@@ -60,7 +55,7 @@ export async function render({
   res,
   ssrManifest,
   serverEntry,
-  isPreloadRequest,
+  isLoadRequest,
   clientManifest,
   router,
   notFound,
@@ -71,7 +66,7 @@ export async function render({
   res?: ReamServerResponse
   ssrManifest?: any
   serverEntry: ServerEntry
-  isPreloadRequest?: boolean
+  isLoadRequest?: boolean
   clientManifest?: any
   router: Router
   /** Render the 404 page */
@@ -79,36 +74,36 @@ export async function render({
   htmlTemplate: string
 }): Promise<{
   html?: string
-  preloadResult: PreloadResult
+  loadResult: LoadResult
 }> {
   let html: string | undefined
-  let preloadResult: PreloadResult | undefined
+  let loadResult: LoadResult | undefined
 
   const route = router.currentRoute.value
 
-  const globalPreload = await serverEntry.getGlobalPreload()
+  const globalLoad = await serverEntry.getGlobalLoad()
 
   const components = route.matched.map((route) => route.components.default)
 
-  preloadResult = await getPreloadData(globalPreload, components, {
+  loadResult = await loadPageData(globalLoad, components, {
     req,
     res,
     params: route.params,
   })
 
   if (notFound || route.name === '404') {
-    preloadResult.notFound = true
+    loadResult.notFound = true
   }
 
-  // Also render HTML if not only fetching .preload.json
-  if (!isPreloadRequest) {
+  // Also render HTML if not only fetching .load.json
+  if (!isLoadRequest) {
     html = await renderToHTML({
       params: route.params,
       url,
       path: route.path,
       req,
       res,
-      preloadResult,
+      loadResult,
       serverEntry,
       router,
       ssrManifest,
@@ -117,7 +112,7 @@ export async function render({
     })
   }
 
-  return { html, preloadResult }
+  return { html, loadResult }
 }
 
 export async function renderToHTML(options: {
@@ -126,9 +121,7 @@ export async function renderToHTML(options: {
   path: string
   req?: any
   res?: any
-  preloadResult: {
-    [k: string]: any
-  }
+  loadResult: LoadResult
   router: Router
   serverEntry: ServerEntry
   ssrManifest?: any
@@ -146,8 +139,8 @@ export async function renderToHTML(options: {
     router: options.router,
   }
   context.initialState = {
-    preload: {
-      [options.path]: options.preloadResult,
+    load: {
+      [options.path]: options.loadResult,
     },
   }
 
@@ -175,47 +168,49 @@ export async function renderToHTML(options: {
   return html
 }
 
-export type PreloadResult = {
-  data: any
+export type LoadResult = {
+  props: any
+  hasLoad?: boolean
   hasPreload?: boolean
-  isStatic?: boolean
   notFound?: boolean
-  error?: { statusCode: number; message?: string }
+  error?: { status: number; message?: string }
   redirect?: { url: string; permanent?: boolean }
   revalidate?: number
   expiry?: number
 }
 
-export async function getPreloadData(
-  globalPreload: Preload | undefined,
+export async function loadPageData(
+  globalLoad: Load | undefined,
   components: any[],
   options: { req?: ReamServerRequest; res?: ReamServerResponse; params: any }
-): Promise<PreloadResult> {
-  const data = {}
-  let hasPreload: boolean = false
-  let isStatic: boolean = !globalPreload
+): Promise<LoadResult> {
+  const props = {}
+  let hasPreload: boolean | undefined
+  let hasLoad: boolean | undefined
   let notFound: boolean | undefined
-  let error: { statusCode: number; message?: string } | undefined
-  let redirect: PreloadResult['redirect'] | undefined
+  let error: { status: number; message?: string } | undefined
+  let redirect: LoadResult['redirect'] | undefined
   let revalidate: number | undefined
 
-  const fns: any[] = globalPreload ? [globalPreload] : []
+  const fns: any[] = globalLoad ? [globalLoad] : []
 
   for (const component of components) {
-    const preload = component.$$staticPreload || component.$$preload
-
-    if (component.$$preload) {
-      isStatic = false
+    if (component.$$load) {
+      hasLoad = true
     }
 
-    if (preload) {
-      fns.push(preload)
+    if (component.$$preload) {
+      hasPreload = true
+    }
+
+    const load = component.$$load || component.$$preload
+
+    if (load) {
+      fns.push(load)
     }
   }
 
   if (fns.length > 0) {
-    hasPreload = true
-
     for (const fn of fns) {
       const result = await fn({
         req: options.req,
@@ -233,8 +228,8 @@ export async function getPreloadData(
             typeof result.redirect === 'string'
               ? { url: result.redirect }
               : result.redirect
-        } else if (result.data) {
-          Object.assign(data, result.data)
+        } else if (result.props) {
+          Object.assign(props, result.props)
         } else if (result.error) {
           error = result.error
         }
@@ -243,9 +238,9 @@ export async function getPreloadData(
   }
 
   return {
-    data,
+    props,
     hasPreload,
-    isStatic,
+    hasLoad,
     notFound,
     error,
     redirect,

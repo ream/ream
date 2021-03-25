@@ -3,7 +3,7 @@
   "name": "ream-workspace",
   "scripts": {
     "test:unit": "jest --testPathPattern packages",
-    "test:integration": "jest --testPathPattern test/integration/ --runInBand",
+    "test:integration": "jest --testPathPattern examples --runInBand",
     "test": "npm run build && npm run test:unit && npm run test:integration",
     "build": "node -r sucrase/register  scripts/build.ts",
     "dev": "node -r sucrase/register scripts/dev.ts",
@@ -17,8 +17,8 @@
     "execa": "^5.0.0",
     "jest-cli": "^26.6.3",
     "prettier": "^2.0.5",
+    "scripts": "workspace:*",
     "sucrase": "^3.17.1",
-    "typescript": "^4.2.3",
-    "scripts": "workspace:*"
+    "typescript": "^4.2.3"
   }
 }

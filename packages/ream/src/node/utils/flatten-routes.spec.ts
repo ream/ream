@@ -5,18 +5,18 @@ test('flatten routes', async () => {
     { path: '/', component: () => ({}) },
     {
       path: '/docs',
-      component: () => ({ $$staticPreload: 'docs' }),
+      component: () => ({ $$preload: 'docs' }),
       children: [
-        { path: 'foo', component: () => ({ $$staticPreload: 'foo' }) },
+        { path: 'foo', component: () => ({ $$preload: 'foo' }) },
         {
           path: 'bar',
-          component: () => ({ $$staticPreload: 'bar' }),
+          component: () => ({ $$preload: 'bar' }),
           children: [
-            { path: 'a', component: () => ({ $$staticPreload: 'a' }) },
-            { path: 'b', component: () => ({ $$staticPreload: 'b' }) },
+            { path: 'a', component: () => ({ $$preload: 'a' }) },
+            { path: 'b', component: () => ({ $$preload: 'b' }) },
           ],
         },
-        { path: '', component: () => ({ $$staticPreload: '' }) },
+        { path: '', component: () => ({ $$preload: '' }) },
       ],
     },
   ])
@@ -27,8 +27,8 @@ test('flatten routes', async () => {
         "matched": Array [
           Object {
             "getStaticPaths": undefined,
+            "load": undefined,
             "preload": undefined,
-            "staticPreload": undefined,
           },
         ],
         "path": "/",
@@ -37,13 +37,13 @@ test('flatten routes', async () => {
         "matched": Array [
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "docs",
+            "load": undefined,
+            "preload": "docs",
           },
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "foo",
+            "load": undefined,
+            "preload": "foo",
           },
         ],
         "path": "/docs/foo",
@@ -52,18 +52,18 @@ test('flatten routes', async () => {
         "matched": Array [
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "docs",
+            "load": undefined,
+            "preload": "docs",
           },
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "bar",
+            "load": undefined,
+            "preload": "bar",
           },
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "a",
+            "load": undefined,
+            "preload": "a",
           },
         ],
         "path": "/docs/bar/a",
@@ -72,18 +72,18 @@ test('flatten routes', async () => {
         "matched": Array [
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "docs",
+            "load": undefined,
+            "preload": "docs",
           },
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "bar",
+            "load": undefined,
+            "preload": "bar",
           },
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "b",
+            "load": undefined,
+            "preload": "b",
           },
         ],
         "path": "/docs/bar/b",
@@ -92,13 +92,13 @@ test('flatten routes', async () => {
         "matched": Array [
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "docs",
+            "load": undefined,
+            "preload": "docs",
           },
           Object {
             "getStaticPaths": undefined,
-            "preload": undefined,
-            "staticPreload": "",
+            "load": undefined,
+            "preload": "",
           },
         ],
         "path": "/docs",

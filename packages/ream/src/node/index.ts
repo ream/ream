@@ -4,12 +4,12 @@ import { ViteDevServer, UserConfig as ViteConfig, loadEnv } from 'vite'
 import resolveFrom from 'resolve-from'
 import consola from 'consola'
 import { loadConfig, SUPPORTED_CONFIG_FILES } from './utils/load-config'
-import { loadPlugins } from './load-plugins'
 import fs from 'fs-extra'
 import { ReamPlugin } from './types'
 import { getInitialState, State } from './state'
 import { getDirname } from './utils/dirname'
 import { ServerEntry } from './server'
+import { preparePlugin } from './plugins/prepare'
 
 export interface Options {
   rootDir?: string
@@ -110,6 +110,7 @@ export class Ream {
         ...this.inlineConfig.env,
       },
       plugins: [
+        preparePlugin(),
         ...(this.inlineConfig.plugins || []),
         ...(config.plugins || []),
       ],
@@ -121,13 +122,13 @@ export class Ream {
     return {
       ...this.userEnv,
       ...this.config.env,
-      REAM_SOURCE_DIR: this.resolveSrcDir(),
-      REAM_ROOT_DIR: this.resolveRootDir(),
     }
   }
 
   get constants(): Record<string, string> {
     const { env } = this
+    const srcDir = path.relative(process.cwd(), this.resolveSrcDir()) || '.'
+    const rootDir = path.relative(process.cwd(), this.resolveRootDir()) || '.'
     return {
       ...this.state.constants,
       ...Object.keys(env).reduce((res, key) => {
@@ -138,7 +139,17 @@ export class Ream {
           [`process.env.${key}`]: value,
         }
       }, {}),
+      REAM_SOURCE_DIR: JSON.stringify(srcDir),
+      REAM_ROOT_DIR: JSON.stringify(rootDir),
     }
+  }
+
+  ensureEnv(name: string, defaultValue?: string) {
+    const value = this.env[name]
+    if (!value && !defaultValue) {
+      throw new Error(`Environment variable "${name}" is required`)
+    }
+    return value || defaultValue
   }
 
   async prepare({
@@ -154,8 +165,6 @@ export class Ream {
 
     this.userEnv = loadEnv(this.mode, this.rootDir, 'REAM_')
 
-    await loadPlugins(this)
-
     if (shouldCleanDir) {
       // Remove everything but cache
       await Promise.all(
@@ -167,10 +176,10 @@ export class Ream {
       )
     }
 
-    if (shouldPrepreFiles) {
-      consola.info('Preparing Ream files')
-      const { prepareFiles } = await import('./prepare-files')
-      await prepareFiles(this)
+    for (const plugin of this.config.plugins) {
+      if (plugin.prepare) {
+        await plugin.prepare.call(this)
+      }
     }
 
     if (this.isDev) {
@@ -179,11 +188,18 @@ export class Ream {
       const { getViteConfig } = await import('./vite/get-vite-config')
       const viteConfig = getViteConfig(this)
       const viteDevServer = await createViteServer(viteConfig)
-      this.viteDevServer = viteDevServer
 
-      // Reuse Vite watcher to register `onFileChange` callbacks
-      for (const callback of this.state.callbacks.onFileChange) {
-        viteDevServer.watcher.on('all', callback.callback)
+      if (this.viteDevServer) {
+        // Properly restart vite server
+        // Ref: https://github.com/vitejs/vite/blob/23f57ee8785aa377ea4b0834d36af86503a742c0/packages/vite/src/node/server/hmr.ts#L419
+        for (const key in viteDevServer) {
+          if (key !== 'app') {
+            // @ts-expect-error
+            this.viteDevServer[key] = viteDevServer[key]
+          }
+        }
+      } else {
+        this.viteDevServer = viteDevServer
       }
 
       // Restart Ream when config file changes
@@ -197,6 +213,13 @@ export class Ream {
           await this.prepare({ shouldCleanDir, shouldPrepreFiles })
         }
       })
+
+      // Reuse Vite watcher to register `onFileChange` callbacks
+      for (const plugin of this.config.plugins) {
+        if (plugin.onFileChange) {
+          viteDevServer.watcher.on('all', plugin.onFileChange)
+        }
+      }
     }
   }
 

@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
-import type { GetStaticPaths, StaticPreload, Preload } from '../server'
+import type { GetStaticPaths, Load, Preload } from '../server'
 
 export const flattenRoutes = async (
   routes: RouteRecordRaw[],
@@ -8,8 +8,8 @@ export const flattenRoutes = async (
   const result: {
     path: string
     matched: {
+      load?: Load
       preload?: Preload
-      staticPreload?: StaticPreload
       getStaticPaths?: GetStaticPaths
     }[]
   }[] = []
@@ -21,8 +21,8 @@ export const flattenRoutes = async (
 
     const path = [parentPath, route.path].filter(Boolean).join('/')
     const page = {
+      load: component.$$load,
       preload: component.$$preload,
-      staticPreload: component.$$staticPreload,
       getStaticPaths: component.$$getStaticPaths,
     }
 

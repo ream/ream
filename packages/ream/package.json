@@ -2,7 +2,6 @@
   "version": "5.0.0-beta.7",
   "name": "ream",
   "description": "The Vue Framework",
-  "type": "module",
   "files": [
     "/dist",
     "/*.js",
@@ -28,12 +27,13 @@
     "url": "https://github.com/egoist/ream"
   },
   "dependencies": {
-    "@babel/core": "^7.12.10",
+    "@babel/core": "^7.13.10",
     "@egoist/promise-queue": "^1.1.0",
     "@egoist/router": "^1.2.3",
     "@vitejs/plugin-vue": "^1.1.4",
     "@vue/compiler-sfc": "^3.0.5",
     "@vue/server-renderer": "^3.0.5",
+    "babel-plugin-eliminator": "^1.0.1",
     "cac": "6.6.1",
     "chalk": "^4.1.0",
     "chokidar": "3.4.2",

@@ -6,10 +6,12 @@ module.exports = () => {
   return {
     name: 'google-analytics',
 
-    apply(ctx) {
-      ctx.ensureEnv('REAM_GA_TRACKING_ID')
+    prepare() {
+      this.ensureEnv('REAM_GA_TRACKING_ID')
+    },
 
-      ctx.addPluginFile('app', path.join(__dirname, 'ream.app.js'))
+    enhanceAppFiles() {
+      return [path.join(__dirname, 'enhance-app.js')]
     },
   }
 }

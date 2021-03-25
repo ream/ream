@@ -1,10 +1,11 @@
 import execa from 'execa'
+import { PKG_TO_BUILD } from './shared'
 
 async function build() {
-  const pkgs = ['@ream/server', '@ream/app', 'ream', '@ream/test-utils']
-  for (const pkg of pkgs) {
+  console.log('START BUILDING')
+  for (const pkg of PKG_TO_BUILD) {
     await execa('pnpm', ['run', 'build', '--filter', pkg], { stdio: 'inherit' })
   }
 }
 
-build()
+export default build()

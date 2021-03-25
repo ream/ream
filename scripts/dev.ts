@@ -1,5 +1,7 @@
-import { spawn } from 'child_process'
+import execa from 'execa'
 import chalk from 'chalk'
+import { PKG_TO_BUILD } from './shared'
+import buildPromise from './build'
 
 const log = (label: string, buffer: Uint8Array) => {
   const text = buffer.toString()
@@ -12,9 +14,9 @@ const log = (label: string, buffer: Uint8Array) => {
 
 const run = (name: string) =>
   new Promise((resolve) => {
-    const cmd = spawn('npm', ['run', 'dev'], {
-      cwd: `packages/${name}`,
+    const cmd = execa('pnpm', ['run', 'dev', '--filter', name], {
       env: { ...process.env, FORCE_COLOR: '1', NPM_CONFIG_COLOR: 'always' },
+      stdio: 'pipe',
     })
 
     cmd.on('exit', (code) => {
@@ -31,10 +33,12 @@ const run = (name: string) =>
   })
 
 async function main() {
-  await run('server')
-  await run('app')
-  await run('ream')
-  await run('test-utils')
+  // Build first to ensure all .d.ts files exist
+  await buildPromise
+  console.log(`STARTING WATCHING`)
+  for (const name of PKG_TO_BUILD) {
+    await run(name)
+  }
 }
 
 main()

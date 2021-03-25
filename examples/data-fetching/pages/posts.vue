@@ -2,7 +2,7 @@
 export const preload = async () => {
   const arr = new Array(10).fill(null)
   return {
-    data: {
+    props: {
       posts: arr.map((_, index) => ({
         title: `${index} post`,
       })),
@@ -12,10 +12,11 @@ export const preload = async () => {
 </script>
 
 <script setup lang="ts">
-import { usePageData, useHead } from 'ream/app'
+import { defineProps } from 'vue'
+import { useHead } from 'ream/app'
 import Nav from '../components/Nav.vue'
 
-const page = usePageData()
+const props = defineProps<{ posts: { title: string }[] }>()
 
 useHead({ title: 'Posts' })
 </script>
@@ -24,7 +25,7 @@ useHead({ title: 'Posts' })
   <div class="posts">
     <h1>Posts</h1>
     <ul>
-      <li v-for="post in page.posts" :key="post.title">
+      <li v-for="post in props.posts" :key="post.title">
         {{ post.title }}
       </li>
     </ul>

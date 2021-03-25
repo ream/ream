@@ -1,13 +1,13 @@
 import path from 'path'
 import { LRU } from './lru'
-import type { PreloadResult } from './render'
+import type { LoadResult } from './render'
 import { outputFile, pathExists, readFile } from './fs'
 import serializeJavascript from 'serialize-javascript'
 import { ExportManifest } from '.'
 
 type PageCache = {
   html?: string
-  preloadResult: PreloadResult
+  loadResult: LoadResult
   isStale?: boolean
 }
 
@@ -33,7 +33,7 @@ export const getExportOutputPath = (
   pathname = pathname.replace(/\/$/, '') || 'index'
 
   if (type === 'json') {
-    filename = `${pathname}.preload.json`
+    filename = `${pathname}.load.json`
   } else {
     if (pathname.endsWith('.html')) {
       filename = pathname
@@ -78,7 +78,7 @@ export class ExportCache {
       const htmlPath = this.getOutputPath(pathname, 'html')
       const jsonPath = this.getOutputPath(pathname, 'json')
       try {
-        const [html, preloadResult] = await Promise.all([
+        const [html, loadResult] = await Promise.all([
           pathExists(htmlPath).then((exists) =>
             exists ? readFile(htmlPath, 'utf8') : ''
           ),
@@ -88,8 +88,8 @@ export class ExportCache {
               readFile(jsonPath, 'utf8').then((res) => JSON.parse(res))
           ),
         ])
-        if (html || preloadResult) {
-          data = { html, preloadResult }
+        if (html || loadResult) {
+          data = { html, loadResult }
         }
       } catch (_) {
         // Error getting cache
@@ -99,8 +99,8 @@ export class ExportCache {
 
     if (
       data &&
-      data.preloadResult.expiry &&
-      data.preloadResult.expiry <= Date.now()
+      data.loadResult.expiry &&
+      data.loadResult.expiry <= Date.now()
     ) {
       data.isStale = true
     }
@@ -110,14 +110,14 @@ export class ExportCache {
 
   async set(
     pathname: string,
-    { html, preloadResult }: { html?: string; preloadResult: PreloadResult },
+    { html, loadResult }: { html?: string; loadResult: LoadResult },
     flushToDisk = this.options.flushToDisk
   ) {
-    this.cache.set(pathname, { html, preloadResult })
+    this.cache.set(pathname, { html, loadResult })
     if (flushToDisk) {
       const htmlPath = this.getOutputPath(pathname, 'html')
       const jsonPath = this.getOutputPath(pathname, 'json')
-      const json = serializeJavascript(preloadResult, { isJSON: true })
+      const json = serializeJavascript(loadResult, { isJSON: true })
       await Promise.all([
         html ? outputFile(htmlPath, html, 'utf8') : null,
         outputFile(jsonPath, json, 'utf8'),

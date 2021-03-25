@@ -1,5 +1,4 @@
-// @ts-check
-import { getPreloadPath } from './runtime-utils'
+import { getLoadPath } from './runtime-utils'
 
 const noop = () => {}
 
@@ -12,16 +11,16 @@ export const loadPageData = async (to, next = noop) => {
   const initialState = window._ream.initialState
 
   if (to.name === '404') {
-    initialState.preload[to.path] = { notFound: true }
+    initialState.load[to.path] = { notFound: true }
     return next()
   }
 
   const components = to.matched.map((m) => m.components.default)
-  const hasPreload = components.some(
-    (component) => component.$$preload || component.$$staticPreload
+  const hasLoad = components.some(
+    (component) => component.$$load || component.$$preload
   )
-  if (!hasPreload) {
-    initialState.preload[to.path] = { hasPreload: false }
+  if (!hasLoad) {
+    initialState.load[to.path] = { hasLoad: false }
     return next()
   }
 
@@ -29,8 +28,8 @@ export const loadPageData = async (to, next = noop) => {
     const result = {}
 
     for (const component of components) {
-      if (component.$$preload || component.$$staticPreload) {
-        const _result = await fetch(getPreloadPath(to.path)).then((res) => {
+      if (component.$$load || component.$$preload) {
+        const _result = await fetch(getLoadPath(to.path)).then((res) => {
           if (res.status === 404) {
             return { notFound: true }
           }
@@ -43,7 +42,7 @@ export const loadPageData = async (to, next = noop) => {
       }
     }
 
-    initialState.preload[to.path] = result
+    initialState.load[to.path] = result
 
     next(result.redirect ? result.redirect.url : undefined)
   }

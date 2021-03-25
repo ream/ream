@@ -5,8 +5,9 @@ const path = require('path')
 module.exports = () => {
   return {
     name: 'vuex',
-    apply(ctx) {
-      ctx.addPluginFile('app', path.join(__dirname, 'ream.app.js'))
+
+    enhanceAppFiles() {
+      return [path.join(__dirname, 'enhance-app.js')]
     },
   }
 }

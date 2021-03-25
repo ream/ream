@@ -1,7 +1,7 @@
 // Used in vue-app runtime
 // Be careful to import Node.js modules!
 
-export function getPreloadPath(path) {
+export function getLoadPath(path) {
   path = path.replace(/\/$/, '') || 'index'
-  return path + '.preload.json'
+  return path + '.load.json'
 }

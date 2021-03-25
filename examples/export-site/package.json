@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "name": "example-export-site",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start"
+  },
+  "dependencies": {
+    "ream": "workspace:*",
+    "@ream/test-utils": "workspace:*"
+  }
+}

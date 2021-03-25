@@ -7,6 +7,10 @@
     "@rollup/plugin-node-resolve": "^11.2.0",
     "rollup": "^2.42.3",
     "rollup-plugin-dts": "^3.0.1",
-    "rollup-plugin-esbuild": "^3.0.2"
+    "rollup-plugin-esbuild": "^3.0.2",
+    "text-table": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/text-table": "^0.2.1"
   }
 }

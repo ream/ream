@@ -7,7 +7,9 @@ export const ErrorComponent = defineComponent({
     useHead({ title: 'Error' })
 
     const error = useServerError()
+
     return () =>
+      error &&
       h(
         'div',
         {
@@ -26,9 +28,9 @@ export const ErrorComponent = defineComponent({
                 color: `red`,
               },
             },
-            [`Error: ${error.value.statusCode}`]
+            [`Error: ${error.status}`]
           ),
-          error.value.message &&
+          error.message &&
             h(
               'pre',
               {
@@ -36,7 +38,7 @@ export const ErrorComponent = defineComponent({
                   overflow: `auto`,
                 },
               },
-              [error.value.message]
+              [error.message]
             ),
         ]
       )

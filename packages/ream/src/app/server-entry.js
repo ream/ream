@@ -9,8 +9,8 @@ import {
   AppComponent,
 } from 'dot-ream/templates/shared-exports.js'
 import { serverRoutes } from 'dot-ream/templates/server-exports.js'
-import * as enhanceApp from 'dot-ream/templates/ream.app.js'
-import * as enhanceServer from 'dot-ream/templates/ream.server.js'
+import * as enhanceApp from 'dot-ream/templates/enhance-app.js'
+import * as enhanceServer from 'dot-ream/templates/enhance-server.js'
 
 globalThis.fetch = function (url, opts) {
   if (url && url[0] === '/') {
@@ -47,10 +47,9 @@ export function createServerRouter() {
   return router
 }
 
-export async function getGlobalPreload() {
-  if (!AppComponent.__asyncLoader) return null
-  const { $$preload } = await AppComponent.__asyncLoader()
-  return $$preload
+export async function getGlobalLoad() {
+  const { load } = await AppComponent.__asyncLoader()
+  return load
 }
 
 export { clientRoutes, serverRoutes, ErrorComponent, enhanceApp, enhanceServer }

@@ -1,55 +1,39 @@
 import { getCurrentInstance, computed, ComputedRef } from 'vue'
 import { useRoute } from 'vue-router'
-import type { PreloadResult } from '../node/server'
+import type { LoadResult } from '../node/server'
 
 export const useInitialState = <
   TInitialState extends object = { [k: string]: any },
   TData = any
 >(): ComputedRef<
-  TInitialState & { preload: { [pathname: string]: PreloadResult<TData> } }
+  TInitialState & { load: { [pathname: string]: LoadResult<TData> } }
 > => {
   const vm = getCurrentInstance()
-
-  return computed(
-    () =>
-      vm &&
-      // @ts-expect-error
-      vm.root.setupState.initialState
-  )
+  // @ts-expect-error
+  return vm.root.ctx.initialState
 }
 
-export const usePreloadResult = <TData = any>(): ComputedRef<
-  PreloadResult<TData>
-> => {
+export const useLoadResult = <TProps = any>(): LoadResult<TProps> => {
   const vm = getCurrentInstance()
-  const routePath = useRoutePath()
-
-  return computed(() => {
-    // @ts-expect-error
-    const { preload } = vm.root.setupState.initialState
-    if (preload[routePath.value]) {
-      return preload[routePath.value]
-    }
-    if (Object.keys(preload).length === 1 && preload['/404.html']) {
-      return preload['/404.html']
-    }
-    return {}
-  })
+  // @ts-expect-error
+  return vm.root.ctx.loadResult
 }
 
-export const useServerError = (): ComputedRef<{
-  statusCode: number
-  message?: string
-}> => {
-  const result = usePreloadResult()
+export const useServerError = ():
+  | {
+      status: number
+      message?: string
+    }
+  | undefined => {
+  const result = useLoadResult()
   // @ts-expect-error
-  return computed(() => result.value.error)
+  return result.error
 }
 
-export const usePageData = <TData = any>(): ComputedRef<TData> => {
-  const preloadResult = usePreloadResult()
+export const usePageProps = <TData = any>(): ComputedRef<TData> => {
+  const result = useLoadResult()
   // @ts-expect-error
-  return computed(() => preloadResult.value.data || {})
+  return result.value.props || {}
 }
 
 /**
@@ -79,4 +63,4 @@ export { createSSRApp } from 'vue'
 
 export { useRoute, useRouter, RouterView } from 'vue-router'
 
-export type { Preload, StaticPreload, GetStaticPaths } from '../node/server'
+export type { Preload, Load, GetStaticPaths } from '../node/server'

@@ -144,13 +144,17 @@ export class Connect<
 
     let i = 0
 
-    const next = (error?: string | ConnectError) => {
+    const next = async (error?: string | ConnectError) => {
       if (error) return this.onError(error, req, res)
 
       const m = matches[i++]
       if (m) {
         req.params = m.params
-        m.handler(req, res, next)
+        try {
+          await m.handler(req, res, next)
+        } catch (error) {
+          next(error)
+        }
       }
     }
 
