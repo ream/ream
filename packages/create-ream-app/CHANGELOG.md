@@ -1,5 +1,9 @@
 # create-ream-app
 
+## 1.0.0-beta.6
+
+- Override previous release.
+
 ## 1.0.0-beta.2
 
 - Update `ream.config.ts` to use `defineReamConfig`

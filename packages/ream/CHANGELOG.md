@@ -1,9 +1,14 @@
 # ream
 
+## 5.0.0-beta.9
+
+- Merge `@ream/app` and `@ream/server` into `ream`, now as `ream/app` and `ream/server`.
+- New data fetching functions: `load` and `preload`, replacing previous `preload` and `staticPreload` respectively. Now they return `{ props }` instead of `{ data }`.
+
 ## 5.0.0-beta.7
 
-- Add router to the server, powered by [egoist/router](https://github.com/egoist/router) 
-- __@ream/app__: Bundle dependencies.
+- Add router to the server, powered by [egoist/router](https://github.com/egoist/router)
+- **@ream/app**: Bundle dependencies.
 
 ## 5.0.0-beta.6
 

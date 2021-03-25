@@ -1,6 +1,6 @@
 {
   "name": "@ream/plugin-vuex",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "publishConfig": {
     "access": "public"
   },
@@ -9,6 +9,9 @@
     "*.js",
     "*.d.ts"
   ],
+  "peerDependencies": {
+    "vuex": "^4.0.0"
+  },
   "devDependencies": {
     "ream": "workspace:*",
     "vuex": "^4.0.0"
