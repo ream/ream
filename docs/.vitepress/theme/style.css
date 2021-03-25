@@ -1,3 +1,8 @@
+body {
+  --c-brand: #0c7ef4;
+  --c-brand-light: #0c7ef4;
+}
+
 .content h4 {
   margin-top: 30px;
 }

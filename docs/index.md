@@ -17,11 +17,23 @@ Create a new project in seconds with:
 npx create-ream-app my-app
 ```
 
+:::warning
+
+**PNPM USERS**: You need to explictly install `@vue/server-renderer` in your project as well:
+
+```bash
+cd my-app
+pnpm i @vue/server-renderer
+```
+
+:::
+
 ### Commands
 
 - `ream`: Start a dev server
 - `ream build`: Build a hybrid website (partially static)
 - `ream export`: Build a static website (fully static, meant for static hosts like GitHub Pages, Netlify, or Vercel)
+- `ream start`: Start a production server for the already built website. This is for the website built with `ream build`. For static sites built by `ream export`, you can use packages like [serve](http://npm.im/serve) to preview locally.
 
 ## Routing
 
