@@ -4,7 +4,7 @@ import { createConfig, createDtsConfig } from 'scripts/rollup-config'
 
 export default [
   createConfig({
-    label: 'test-utils:esm',
+    label: 'test-utils:cjs',
     input: ['./src/index.ts'],
     format: 'cjs',
   }),

@@ -54,6 +54,7 @@ export const createConfig = (options: {
   format: 'cjs' | 'esm'
   ext?: '.cjs' | '.mjs' | '.js'
   outDir?: string
+  target?: 'es2018' | 'es2019' | 'es2020'
 }): RollupOptions => {
   const outDir = options.outDir || 'dist'
   const ext = options.ext || '.js'
@@ -67,7 +68,7 @@ export const createConfig = (options: {
     },
     plugins: [
       json(),
-      esbuild({ target: 'es2020' }),
+      esbuild({ target: options.target || 'es2018' }),
       nodeResolve(),
       statsPlugin(options.label),
       // {

@@ -24,6 +24,8 @@ export default [
     },
     format: 'esm',
     outDir: './dist/app',
+    // Preserve `import.meta`
+    target: 'es2020',
   }),
   // dts
   createDtsConfig({

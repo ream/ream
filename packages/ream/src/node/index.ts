@@ -7,7 +7,6 @@ import { loadConfig, SUPPORTED_CONFIG_FILES } from './utils/load-config'
 import fs from 'fs-extra'
 import { ReamPlugin } from './types'
 import { getInitialState, State } from './state'
-import { getDirname } from './utils/dirname'
 import { ServerEntry } from './server'
 import { preparePlugin } from './plugins/prepare'
 
@@ -40,7 +39,7 @@ export type ReamConfig = {
 
 export const defineReamConfig = (config: ReamConfig) => config
 
-export const OWN_DIR = path.join(getDirname(import.meta.url), '../')
+export const OWN_DIR = path.join(__dirname, '../')
 
 export const resolveOwnDir = (...args: string[]) =>
   path.resolve(OWN_DIR, ...args)
