@@ -1,3 +1,4 @@
+import fs from 'fs'
 import { build as esbuild } from 'esbuild'
 import { Ream } from '.'
 import consola from 'consola'
@@ -13,8 +14,42 @@ export async function build(api: Ream) {
 }
 
 export async function buildStandalone(api: Ream) {
-  const inputFile = api.resolveDotReam('meta/server-context.js')
-  const outFile = api.resolveDotReam('meta/server-context-bundle.js')
+  const clientManifest = await fs.promises.readFile(
+    api.resolveDotReam('manifest/client-manifest.json'),
+    'utf8'
+  )
+  const ssrManifest = await fs.promises.readFile(
+    api.resolveDotReam('manifest/ssr-manifest.json'),
+    'utf8'
+  )
+  const exportManifest = await fs.promises
+    .readFile(api.resolveDotReam('manifest/export-manifest.json'), 'utf8')
+    .catch(() => `{}`)
+  const htmlTemplate = await fs.promises.readFile(
+    api.resolveDotReam('client/index.html'),
+    'utf8'
+  )
+
+  await fs.promises.writeFile(
+    api.resolveDotReam('server/standalone.js'),
+    `
+  import {createHandler as _createHandler} from 'ream/server'
+
+  const serverEntry = require('./server-entry')
+
+  export const createHandler = (cwd) => _createHandler({
+    cwd,
+    clientManifest: ${clientManifest},
+    ssrManifest: ${ssrManifest},
+    exportManifest: ${exportManifest},
+    serverEntry,
+    htmlTemplate: ${JSON.stringify(htmlTemplate)}
+  })
+  `
+  )
+
+  const inputFile = api.resolveDotReam('server/standalone.js')
+  const outFile = api.resolveDotReam('server/standalone-bundle.js')
   const { warnings } = await esbuild({
     entryPoints: [inputFile],
     outfile: outFile,
@@ -23,6 +58,7 @@ export async function buildStandalone(api: Ream) {
     platform: 'node',
     minify: !process.env.DEBUG,
     logLevel: 'error',
+    target: 'es2018',
   })
   for (const warning of warnings) {
     if (
