@@ -27,17 +27,17 @@ importers:
       vitepress: 0.12.2
     specifiers:
       vitepress: ^0.12.2
-  examples/api-routes:
-    dependencies:
-      ream: link:../../packages/ream
-    specifiers:
-      ream: workspace:*
   examples/automatic-routing:
     dependencies:
       ream: link:../../packages/ream
     specifiers:
       ream: workspace:*
   examples/data-fetching:
+    dependencies:
+      ream: link:../../packages/ream
+    specifiers:
+      ream: workspace:*
+  examples/endpoints:
     dependencies:
       ream: link:../../packages/ream
     specifiers:
