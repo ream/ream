@@ -1,5 +1,13 @@
 # ream
 
+## 5.0.0-beta.10
+
+- Catch router error so it won't crash the Node.js process.
+- Use `routes` folder instead of `pages` folder for routes.
+- Now API routes are renamed to endpoints, inspired by Svelte Kit, they are also available at the root of `routes` folder now, all `.js` and `.ts` files inside `routes` folder are treated as endpoints.
+- Refactored the options of `load` function, now it does not expose native Node.js `request` and `response` object.
+- FIx standalone build. i.e. the `ream build --standalone` flag, primarily for Vercel.
+
 ## 5.0.0-beta.9
 
 - Merge `@ream/app` and `@ream/server` into `ream`, now as `ream/app` and `ream/server`.
