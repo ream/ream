@@ -41,31 +41,31 @@ test('build routes', async () => {
           'name': 'index',
           'path': '/',
           'file': '/routes/index.vue',
-          'isServerRoute': false
+          'isEndpoint': false
         },
         {
           'name': 'about',
           'path': '/about',
           'file': '/routes/about.vue',
-          'isServerRoute': false
+          'isEndpoint': false
         },
         {
           'name': 'settings/a',
           'path': '/settings/a',
           'file': '/routes/settings/a.vue',
-          'isServerRoute': false,
+          'isEndpoint': false,
           'children': [
             {
               'name': 'settings/a/b',
               'path': 'b',
               'file': '/routes/settings/a/b.vue',
-              'isServerRoute': false
+              'isEndpoint': false
             },
             {
               'name': 'settings/a/c',
               'path': 'c',
               'file': '/routes/settings/a/c.vue',
-              'isServerRoute': false
+              'isEndpoint': false
             }
           ]
         },
@@ -73,43 +73,43 @@ test('build routes', async () => {
           'name': 'welcome/index',
           'path': '/welcome',
           'file': '/routes/welcome/index.vue',
-          'isServerRoute': false
+          'isEndpoint': false
         },
         {
           'name': 'welcome/a',
           'path': '/welcome/a',
           'file': '/routes/welcome/a.vue',
-          'isServerRoute': false
+          'isEndpoint': false
         },
         {
           'name': 'deep/nested/route',
           'path': '/deep/nested/route',
           'file': '/routes/deep/nested/route.vue',
-          'isServerRoute': false,
+          'isEndpoint': false,
           'children': [
             {
               'name': 'deep/nested/route/index',
               'path': '',
               'file': '/routes/deep/nested/route/index.vue',
-              'isServerRoute': false
+              'isEndpoint': false
             },
             {
               'name': 'deep/nested/route/a',
               'path': 'a',
               'file': '/routes/deep/nested/route/a.vue',
-              'isServerRoute': false
+              'isEndpoint': false
             },
             {
               'name': 'deep/nested/route/b',
               'path': 'b',
               'file': '/routes/deep/nested/route/b.vue',
-              'isServerRoute': false
+              'isEndpoint': false
             },
             {
               'name': 'deep/nested/route/c',
               'path': 'c',
               'file': '/routes/deep/nested/route/c.vue',
-              'isServerRoute': false
+              'isEndpoint': false
             }
           ]
         },
@@ -117,25 +117,25 @@ test('build routes', async () => {
           'name': 'api/index',
           'path': '/api',
           'file': '/routes/api/index.ts',
-          'isServerRoute': true
+          'isEndpoint': true
         },
         {
           'name': 'api/foo/index',
           'path': '/api/foo',
           'file': '/routes/api/foo/index.ts',
-          'isServerRoute': true
+          'isEndpoint': true
         },
         {
           'name': 'api/foo/bar',
           'path': '/api/foo/bar',
           'file': '/routes/api/foo/bar.ts',
-          'isServerRoute': true
+          'isEndpoint': true
         },
         {
           'name': 'api/foo',
           'path': '/api/foo',
           'file': '/routes/api/foo.ts',
-          'isServerRoute': true
+          'isEndpoint': true
         }
       ]
     }"
