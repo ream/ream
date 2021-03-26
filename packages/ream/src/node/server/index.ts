@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from 'fs'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'sirv'
@@ -210,8 +211,11 @@ export async function createHandler(options: CreateServerOptions) {
   }
 
   // Server static assets in production mode
-  if (!options.dev) {
-    const serveStaticFiles = serveStatic(path.join(dotReamDir, 'client'))
+  const clientDir = path.join(dotReamDir, 'client')
+  // In some cases `client` dir might not exist in a production
+  // e.g. when deployed on Vercel, the `client` folder is served by Vercel instead
+  if (!options.dev && fs.existsSync(clientDir)) {
+    const serveStaticFiles = serveStatic()
     server.use((req, res, next) => {
       if (req.path === '/' || req.path === '/index.html') return next()
       return serveStaticFiles(req, res, next)
