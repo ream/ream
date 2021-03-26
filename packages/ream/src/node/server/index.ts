@@ -215,7 +215,7 @@ export async function createHandler(options: CreateServerOptions) {
   // In some cases `client` dir might not exist in a production
   // e.g. when deployed on Vercel, the `client` folder is served by Vercel instead
   if (!options.dev && fs.existsSync(clientDir)) {
-    const serveStaticFiles = serveStatic()
+    const serveStaticFiles = serveStatic(clientDir)
     server.use((req, res, next) => {
       if (req.path === '/' || req.path === '/index.html') return next()
       return serveStaticFiles(req, res, next)
