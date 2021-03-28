@@ -58,7 +58,6 @@
     "@types/node": "14.14.31",
     "@types/serialize-javascript": "^5.0.0",
     "@vueuse/head": "^0.5.1",
-    "memfs": "^3.2.0",
     "mitt": "^2.1.0",
     "ts-essentials": "^7.0.1",
     "vue-router": "^4.0.3"
