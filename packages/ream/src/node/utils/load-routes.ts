@@ -1,6 +1,7 @@
 import path from 'path'
 import NODE_FS from 'fs'
 import { Endpoint, Route } from '../'
+import { normalizePath } from './normalize-path'
 
 type FileItem = {
   /** Absolute path */
@@ -27,9 +28,9 @@ export class RoutesLoader {
 
   readDir(dir: string): FileItem[] {
     return this.fs.readdirSync(dir).map((name) => {
-      const file = path.join(dir, name)
+      const file = normalizePath(path.join(dir, name))
       const stat = this.fs.statSync(file)
-      const relativePath = path.relative(this.dir, file)
+      const relativePath = normalizePath(path.relative(this.dir, file))
       return {
         path: file,
         relativePath,
