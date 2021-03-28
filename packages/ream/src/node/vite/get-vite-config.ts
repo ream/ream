@@ -59,7 +59,6 @@ const moveManifestPlugin = (manifestDir: string): Plugin => {
     },
   }
 }
-
 export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
   const ssrManifest = !server && !api.isDev
   const entry = api.isDev
@@ -122,9 +121,10 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     },
     server: {
       middlewareMode: true,
-      hmr: api.config.hmr && {
-        host: api.config.hmr.host,
-        port: api.config.hmr.port,
+      hmr: {
+        host: api.config.hmr?.host || api.host,
+        port: api.config.hmr?.port || api.port,
+        server: api._devServer,
       },
     },
     build: {

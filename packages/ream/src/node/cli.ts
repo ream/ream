@@ -1,7 +1,8 @@
 import { cac } from 'cac'
-import http from 'http'
 import consola from 'consola'
 import { version } from '../../package.json'
+
+const DEFAULT_PORT = 4000
 
 const cli = cac()
 
@@ -19,9 +20,10 @@ cli
         const app = new Ream({
           rootDir,
           dev: true,
+          host: options.host,
+          port: options.port || DEFAULT_PORT,
         })
-        const handler = await app.getRequestHandler()
-        startServer(handler, options.host, options.port)
+        await app.startServer()
       }
     )
   )
@@ -75,9 +77,10 @@ cli
         const app = new Ream({
           rootDir,
           dev: false,
+          host: options.host,
+          port: options.port || DEFAULT_PORT,
         })
-        const handler = await app.getRequestHandler()
-        startServer(handler, options.host, options.port)
+        await app.startServer()
       }
     )
   )
@@ -95,14 +98,4 @@ function handleError(fn: (...args: any[]) => Promise<void>) {
       process.exitCode = 1
     }
   }
-}
-
-function startServer(handler: any, host = 'localhost', port = 4000) {
-  // @ts-expect-error
-  globalThis.REAM_PORT = port
-  // @ts-expect-error
-  globalThis.REAM_HOST = host
-  const server = http.createServer(handler)
-  server.listen(port, host)
-  console.log(`> Open http://${host}:${port}`)
 }

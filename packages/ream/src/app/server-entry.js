@@ -11,9 +11,12 @@ import { serverRoutes } from 'dot-ream/templates/server-exports.js'
 import * as enhanceApp from 'dot-ream/templates/enhance-app.js'
 import * as enhanceServer from 'dot-ream/templates/enhance-server.js'
 
+// Prevent Vite from replacing this
+const ENV = process.env
+
 globalThis.fetch = function (url, opts) {
   if (url && url[0] === '/') {
-    url = `http://localhost:${globalThis.REAM_PORT}${url}`
+    url = `http://localhost:${ENV.PORT}${url}`
   }
   return nodeFetch(url, opts)
 }

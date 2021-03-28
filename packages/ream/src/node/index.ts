@@ -1,4 +1,5 @@
 import path from 'path'
+import http from 'http'
 import type { MarkRequired } from 'ts-essentials'
 import { ViteDevServer, UserConfig as ViteConfig, loadEnv } from 'vite'
 import resolveFrom from 'resolve-from'
@@ -9,12 +10,15 @@ import { ReamPlugin } from './types'
 import { getInitialState, State } from './state'
 import { ServerEntry } from './server'
 import { preparePlugin } from './plugins/prepare'
+import { getPort } from './utils/get-port'
 
 export interface Options {
   rootDir?: string
   srcDir?: string
   dev?: boolean
   mode?: string
+  host?: string
+  port?: number
 }
 
 export type Route = {
@@ -61,10 +65,15 @@ export class Ream {
   viteDevServer?: ViteDevServer
   userEnv!: Record<string, string>
   mode: string
+  host?: string
+  port?: number
+  _devServer?: http.Server
 
-  constructor(options: Options = {}, inlineConfig: ReamConfig = {}) {
+  constructor(options: Options, inlineConfig: ReamConfig = {}) {
     this.inlineConfig = inlineConfig
     this.rootDir = path.resolve(options.rootDir || '.')
+    this.host = options.host
+    this.port = options.port
     if (options.srcDir) {
       this.srcDir = path.join(this.rootDir, options.srcDir)
     } else {
@@ -159,38 +168,40 @@ export class Ream {
     return value || defaultValue
   }
 
-  async prepare({
-    shouldCleanDir,
-    shouldPrepreFiles,
-  }: {
-    shouldCleanDir: boolean
-    shouldPrepreFiles: boolean
-  }) {
+  async prepare(type: 'build' | 'dev' | 'start') {
     this.state = getInitialState()
 
-    await this.loadConfig()
+    if (type !== 'build') {
+      const { port, host } = await getPort(this.host, this.port)
+      this.host = host
+      this.port = port
+    }
 
-    this.userEnv = loadEnv(this.mode, this.rootDir, 'REAM_')
+    if (type !== 'start') {
+      await this.loadConfig()
 
-    if (shouldCleanDir) {
-      // Remove everything but cache
       await Promise.all(
-        ['templates', 'manifest', 'server', 'client', 'export', 'meta'].map(
-          (name) => {
-            return fs.remove(this.resolveDotReam(name))
-          }
-        )
+        ['templates', 'manifest', 'server', 'client', 'export'].map((name) => {
+          return fs.remove(this.resolveDotReam(name))
+        })
       )
     }
 
-    for (const plugin of this.config.plugins) {
-      if (plugin.prepare) {
-        await plugin.prepare.call(this)
+    this.userEnv = loadEnv(this.mode, this.rootDir, 'REAM_')
+
+    if (type !== 'start') {
+      // Call plugin prepare hook
+      for (const plugin of this.config.plugins) {
+        if (plugin.prepare) {
+          await plugin.prepare.call(this)
+        }
       }
     }
 
-    if (this.isDev) {
+    if (type === 'dev') {
       // Create Vite dev server
+      // Create a temp dev server to use as Vite hmr server
+      this._devServer = http.createServer()
       const { createServer: createViteServer } = await import('vite')
       const { getViteConfig } = await import('./vite/get-vite-config')
       const viteConfig = getViteConfig(this)
@@ -217,7 +228,7 @@ export class Ream {
         if (file === this.configPath || files.includes(file)) {
           consola.info(`Restarting Ream due to changes in ${file}`)
           await viteDevServer.close()
-          await this.prepare({ shouldCleanDir, shouldPrepreFiles })
+          await this.prepare(type)
         }
       })
 
@@ -240,10 +251,7 @@ export class Ream {
   }
 
   async getRequestHandler() {
-    await this.prepare({
-      shouldCleanDir: this.isDev,
-      shouldPrepreFiles: this.isDev,
-    })
+    await this.prepare(this.isDev ? 'dev' : 'start')
 
     if (this.isDev) {
       const { getRequestHandler } = await import('./dev-server')
@@ -258,6 +266,14 @@ export class Ream {
     })
   }
 
+  async startServer() {
+    const handler = await this.getRequestHandler()
+    const server = this._devServer || http.createServer()
+    server.on('request', handler)
+    server.listen(this.port, this.host)
+    console.log(`> Open http://${this.host}:${this.port}`)
+  }
+
   async build({
     fullyExport,
     standalone,
@@ -265,7 +281,7 @@ export class Ream {
     fullyExport?: boolean
     standalone?: boolean
   }) {
-    await this.prepare({ shouldCleanDir: true, shouldPrepreFiles: true })
+    await this.prepare('build')
     const { build, buildStandalone } = await import('./build')
     await build(this)
     // Export static pages
