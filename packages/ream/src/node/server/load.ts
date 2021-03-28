@@ -33,6 +33,17 @@ export type LoadResult<TProps = object> =
   // 404
   | undefined
 
+export type LoadResultNormalized<TProps = any> = {
+  props: TProps
+  hasLoad?: boolean
+  hasPreload?: boolean
+  notFound?: boolean
+  error?: { status: number; message?: string }
+  redirect?: { url: string; permanent?: boolean }
+  revalidate?: number
+  expiry?: number
+}
+
 export type Load<TData extends Record<string, any> = object> = LoadFactory<
   LoadOptions,
   LoadResult<TData>

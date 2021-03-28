@@ -1,19 +1,19 @@
 import { getCurrentInstance, computed, ComputedRef } from 'vue'
 import { useRoute } from 'vue-router'
-import type { LoadResult } from '../node/server'
+import type { LoadResultNormalized } from '../node/server'
 
 export const useInitialState = <
   TInitialState extends object = { [k: string]: any },
-  TData = any
+  TProps = any
 >(): ComputedRef<
-  TInitialState & { load: { [pathname: string]: LoadResult<TData> } }
+  TInitialState & { load: { [pathname: string]: LoadResultNormalized<TProps> } }
 > => {
   const vm = getCurrentInstance()
   // @ts-expect-error
   return vm.root.ctx.initialState
 }
 
-export const useLoadResult = <TProps = any>(): LoadResult<TProps> => {
+export const useLoadResult = <TProps = any>(): LoadResultNormalized<TProps> => {
   const vm = getCurrentInstance()
   // @ts-expect-error
   return vm.root.ctx.loadResult
@@ -26,7 +26,6 @@ export const useServerError = ():
     }
   | undefined => {
   const result = useLoadResult()
-  // @ts-expect-error
   return result.error
 }
 

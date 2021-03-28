@@ -1,9 +1,8 @@
 import { h, createSSRApp, isReactive, reactive, Transition } from 'vue'
 import { createHead, useHead } from '@vueuse/head'
-import { RouterView } from 'vue-router'
+import { ReamPage } from './components/ReamPage'
 import { RouterLink } from './index'
 import {
-  AppComponent,
   NotFoundComponent,
   ErrorComponent,
 } from 'dot-ream/templates/shared-exports.js'
@@ -47,33 +46,7 @@ export const createApp = async ({ router, initialState }) => {
         return h(ErrorComponent)
       }
 
-      return h(AppComponent, {}, () => {
-        return [
-          h(RouterView, null, (props) => {
-            const { meta } = props.route
-            const transition =
-              meta.transition === false
-                ? { name: undefined }
-                : typeof meta.transition === 'string'
-                ? { name: meta.transition }
-                : meta.transition || {}
-            const transitionProps = {
-              name: 'page',
-              mode: 'out-in',
-              ...transition,
-              onBeforeEnter() {
-                _ream.event.emit('trigger-scroll')
-                if (transition.onBeforeEnter) {
-                  transition.onBeforeEnter()
-                }
-              },
-            }
-            return h(Transition, transitionProps, () =>
-              h(props.Component, this.loadResult.props)
-            )
-          }),
-        ]
-      })
+      return h(ReamPage)
     },
   })
 
@@ -81,6 +54,8 @@ export const createApp = async ({ router, initialState }) => {
 
   app.use(router)
   app.use(head)
+
+  app.component(ReamPage.name, ReamPage)
 
   // Override Vue Router's RouterLink component
   // Can't use app.component() cause Vue will complain

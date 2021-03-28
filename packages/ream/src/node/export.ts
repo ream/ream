@@ -23,10 +23,7 @@ export const exportSite = async (dotReamDir: string, fullyExport?: boolean) => {
 
   const serverAssets = await getServerAssets(dotReamDir)
 
-  const globalLoad = await serverAssets.serverEntry.getGlobalLoad()
-
-  // Adding a global `preload` function in `_app.vue` will disable automatic static generation
-  if (globalLoad && !fullyExport) return
+  if (!fullyExport) return
 
   const clientRoutes = await flattenRoutes(
     serverAssets.serverEntry.clientRoutes

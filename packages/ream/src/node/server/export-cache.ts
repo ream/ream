@@ -1,13 +1,13 @@
 import path from 'path'
 import { LRU } from './lru'
-import type { LoadResult } from './render'
+import type { LoadResultNormalized } from './load'
 import { outputFile, pathExists, readFile } from './fs'
 import serializeJavascript from 'serialize-javascript'
 import { ExportManifest } from '.'
 
 type PageCache = {
   html?: string
-  loadResult: LoadResult
+  loadResult: LoadResultNormalized
   isStale?: boolean
 }
 
@@ -110,7 +110,7 @@ export class ExportCache {
 
   async set(
     pathname: string,
-    { html, loadResult }: { html?: string; loadResult: LoadResult },
+    { html, loadResult }: { html?: string; loadResult: LoadResultNormalized },
     flushToDisk = this.options.flushToDisk
   ) {
     this.cache.set(pathname, { html, loadResult })

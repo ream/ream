@@ -1,21 +1,23 @@
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
-import { Preload, usePageData } from 'ream/app'
+import { defineComponent } from 'vue'
+import { Load } from 'ream/app'
 
-export const preload: Preload = ({ params }) => {
+type Props = { message: string }
+
+export const load: Load<Props> = ({ params }) => {
   return {
-    data: {
+    props: {
       message: `hello ${params.name}`,
     },
   }
 }
 
 export default defineComponent({
-  setup() {
-    const data = usePageData()
-    return {
-      message: computed(() => data.value.message),
-    }
+  props: {
+    message: {
+      type: String,
+      required: true,
+    },
   },
 })
 </script>

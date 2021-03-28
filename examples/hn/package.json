@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "example-hn",
+  "scripts": {
+    "dev": "ream",
+    "build": "ream build",
+    "start": "ream start"
+  },
+  "dependencies": {
+    "dayjs": "^1.10.4",
+    "ream": "workspace:*"
+  },
+  "devDependencies": {
+    "vite-plugin-windicss": "^0.10.4"
+  }
+}

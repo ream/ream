@@ -6,7 +6,6 @@ import { createApp } from './create-app'
 import {
   clientRoutes,
   ErrorComponent,
-  AppComponent,
 } from 'dot-ream/templates/shared-exports.js'
 import { serverRoutes } from 'dot-ream/templates/server-exports.js'
 import * as enhanceApp from 'dot-ream/templates/enhance-app.js'
@@ -45,11 +44,6 @@ export function createServerRouter() {
   })
 
   return router
-}
-
-export async function getGlobalLoad() {
-  const { load } = await AppComponent.__asyncLoader()
-  return load
 }
 
 export { clientRoutes, serverRoutes, ErrorComponent, enhanceApp, enhanceServer }

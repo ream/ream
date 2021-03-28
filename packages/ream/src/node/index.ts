@@ -25,6 +25,11 @@ export type Route = {
   children?: Route[]
 }
 
+export interface Endpoint extends Route {
+  isEndpoint: true
+  children: undefined
+}
+
 export type ReamConfig = {
   env?: Record<string, string>
   plugins?: Array<ReamPlugin>
@@ -34,7 +39,8 @@ export type ReamConfig = {
     port?: number
   }
   vite?: (viteConfig: ViteConfig, opts: { dev: boolean }) => void
-  routes?: (defaultRoutes: Route[]) => Promise<Route[]> | Route[]
+  pages?: (defaultPages: Route[]) => Promise<Route[]> | Route[]
+  endpoints?: (defaultEndpoints: Endpoint[]) => Promise<Endpoint[]> | Endpoint[]
 }
 
 export const defineReamConfig = (config: ReamConfig) => config
@@ -62,7 +68,9 @@ export class Ream {
     if (options.srcDir) {
       this.srcDir = path.join(this.rootDir, options.srcDir)
     } else {
-      const hasRoutesInSrc = fs.existsSync(path.join(this.rootDir, 'src/route'))
+      const hasRoutesInSrc = fs.existsSync(
+        path.join(this.rootDir, 'src/routes')
+      )
       this.srcDir = hasRoutesInSrc
         ? path.join(this.rootDir, 'src')
         : this.rootDir

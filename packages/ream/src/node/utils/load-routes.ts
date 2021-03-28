@@ -1,92 +1,134 @@
 import path from 'path'
-import { normalizePath } from '../utils/normalize-path'
-import { Route } from '../'
+import FS from 'fs'
+import { Endpoint, Route } from '../'
 
-export const filesToRoutes = (files: string[], dir: string) => {
-  const routes: Route[] = []
-  let errorFile: string | undefined
-  let appFile: string | undefined
-  let notFoundFile: string | undefined
+type FileItem = {
+  /** Absolute path */
+  path: string
+  relativePath: string
+  /** Relative path without extension */
+  slug: string
+  isDir: boolean
+  /** basename of `path` without extension */
+  basename: string
+}
 
-  for (const file of files) {
-    const slug = file
-      // Remove extension
-      .replace(/\.[a-zA-Z0-9]+$/, '')
+const removeExt = (p: string) => p.replace(/\.[a-z0-9]+$/i, '')
 
-    const pathParts = slug.split('/')
-    const absolutePath = normalizePath(path.join(dir, file))
+type Fs = {
+  readdirSync: (dir: string) => string[]
+  statSync: (path: string) => { isDirectory(): boolean }
+}
 
-    if (slug === '_error') {
-      errorFile = absolutePath
-      continue
-    } else if (slug === '_app') {
-      appFile = absolutePath
-      continue
-    } else if (slug === '404') {
-      notFoundFile = absolutePath
-      continue
-    }
+export class RoutesLoader {
+  constructor(private dir: string, private fs: Fs = FS) {}
 
-    const isEndpoint = /\.[jt]s$/.test(file)
-    const route: Route = {
-      name: '',
-      path: '',
-      file: absolutePath,
-      isEndpoint,
-      children: undefined,
-    }
+  extRe = /\.(vue|ts|tsx|js|jsx)$/
 
-    let parent = routes
-
-    for (let i = 0; i < pathParts.length; i++) {
-      let part = pathParts[i]
-      const prevPart = pathParts[i - 1]
-      const nextPart = pathParts[i + 1]
-
-      if (part.startsWith('_')) {
-        break
+  readDir(dir: string): FileItem[] {
+    return this.fs.readdirSync(dir).map((name) => {
+      const file = path.join(dir, name)
+      const stat = this.fs.statSync(file)
+      const relativePath = path.relative(this.dir, file)
+      return {
+        path: file,
+        relativePath,
+        basename: removeExt(name),
+        slug: removeExt(relativePath),
+        isDir: stat.isDirectory(),
       }
-
-      const expectedParentRouteName = route.name
-      route.name += route.name ? `/${part}` : part
-
-      part = part
-        // Dynamic param, e.g. `[slug]` -> `:slug`
-        .replace(/\[([^\]\.]+)\]/g, ':$1')
-        // Call all route: e.g. `[...slug]` -> `:slug(.*)`
-        .replace(/\[\.{3}([^\]]+)\]/, ':$1(.*)')
-
-      // Find a parent route
-      // Except for endpoints
-      const child =
-        !route.isEndpoint &&
-        parent.find(
-          (parentRoute) => parentRoute.name === expectedParentRouteName
-        )
-
-      if (child) {
-        child.children = child.children || []
-        parent = child.children
-        if (part === 'index') {
-          route.path = ''
-        } else {
-          route.path = part.replace(/^\//, '')
-        }
-      } else if (part === 'index') {
-        if (nextPart) {
-          route.path += '/index'
-        } else if (prevPart) {
-          route.path += ''
-        } else if (!prevPart) {
-          route.path += '/'
-        }
-      } else {
-        route.path += `/${part}`
-      }
-    }
-
-    parent.push(route)
+    })
   }
 
-  return { routes, appFile, errorFile, notFoundFile }
+  walk(
+    dir: string,
+    parentPath: string,
+    endpoints: Endpoint[] = []
+  ): {
+    pages: Route[]
+    endpoints: Endpoint[]
+    notFoundFile?: string
+    errorFile?: string
+  } {
+    const files = this.readDir(dir)
+
+    let errorFile: string | undefined
+    let notFoundFile: string | undefined
+    let layout: Route | undefined
+    let pages: Route[] = []
+
+    files.forEach((file) => {
+      if (!file.isDir && !this.extRe.test(file.relativePath)) return
+
+      if (file.slug === '_error') {
+        errorFile = file.path
+        return
+      }
+
+      if (file.slug === '404') {
+        notFoundFile = file.path
+        return
+      }
+
+      const isLayout = file.basename === '_layout'
+      if (!isLayout && file.basename[0] === '_') return
+
+      let path = file.basename === 'index' || isLayout ? '' : file.basename
+      path = path
+        .replace(/\[([^\]]+)\]/g, ':$1')
+        .replace(/\[\.{3}([^\]]+)\]/, ':$1')
+
+      if (path) {
+        if (parentPath === '/') {
+          path = parentPath + path
+        } else {
+          path = parentPath + '/' + path
+        }
+      } else {
+        path = parentPath
+      }
+
+      if (file.isDir) {
+        this.walk(file.path, path, endpoints).pages.forEach((page) =>
+          pages.push(page)
+        )
+        return
+      }
+
+      const route: Route = {
+        name: file.slug,
+        path,
+        isEndpoint: /\.[jt]s$/.test(file.relativePath),
+        file: file.path,
+      }
+
+      if (route.isEndpoint) {
+        endpoints.push(route as Endpoint)
+        return
+      }
+
+      if (file.basename === '_layout') {
+        layout = route
+      } else {
+        pages.push(route)
+      }
+    })
+
+    if (layout) {
+      layout.children = pages.map((page) => {
+        page.path = page.path.replace(layout!.path, '').replace(/^\//, '')
+        return page
+      })
+      pages = [layout]
+    }
+
+    return { errorFile, notFoundFile, pages, endpoints }
+  }
+
+  load() {
+    return this.walk(this.dir, '/')
+  }
 }
+
+export const createRoutesLoader = (dir: string, fs?: Fs) =>
+  new RoutesLoader(dir, fs)

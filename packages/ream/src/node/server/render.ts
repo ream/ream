@@ -3,6 +3,7 @@ import { renderToString } from '@vue/server-renderer'
 import serializeJavaScript from 'serialize-javascript'
 import { ReamServerHandler } from './server'
 import type { Load, LoadOptions, ServerEntry } from '.'
+import { LoadResultNormalized } from './load'
 
 export type ServerRouteLoader = {
   type: 'server'
@@ -68,18 +69,16 @@ export async function render({
   htmlTemplate: string
 }): Promise<{
   html?: string
-  loadResult: LoadResult
+  loadResult: LoadResultNormalized
 }> {
   let html: string | undefined
-  let loadResult: LoadResult | undefined
+  let loadResult: LoadResultNormalized | undefined
 
   const route = router.currentRoute.value
 
-  const globalLoad = await serverEntry.getGlobalLoad()
-
   const components = route.matched.map((route) => route.components.default)
 
-  loadResult = await loadPageData(globalLoad, components, loadOptions)
+  loadResult = await loadPageData(undefined, components, loadOptions)
 
   if (notFound || route.name === '404') {
     loadResult.notFound = true
@@ -105,7 +104,7 @@ export async function render({
 export async function renderToHTML(options: {
   url: string
   path: string
-  loadResult: LoadResult
+  loadResult: LoadResultNormalized
   router: Router
   serverEntry: ServerEntry
   ssrManifest?: any
@@ -152,28 +151,17 @@ export async function renderToHTML(options: {
   return html
 }
 
-export type LoadResult = {
-  props: any
-  hasLoad?: boolean
-  hasPreload?: boolean
-  notFound?: boolean
-  error?: { status: number; message?: string }
-  redirect?: { url: string; permanent?: boolean }
-  revalidate?: number
-  expiry?: number
-}
-
 export async function loadPageData(
   globalLoad: Load | undefined,
   components: any[],
   options: LoadOptions
-): Promise<LoadResult> {
+): Promise<LoadResultNormalized> {
   const props = {}
   let hasPreload: boolean | undefined
   let hasLoad: boolean | undefined
   let notFound: boolean | undefined
   let error: { status: number; message?: string } | undefined
-  let redirect: LoadResult['redirect'] | undefined
+  let redirect: LoadResultNormalized['redirect'] | undefined
   let revalidate: number | undefined
 
   const fns: any[] = globalLoad ? [globalLoad] : []

@@ -4,3 +4,5 @@ interface ImportMeta {
 
 declare module 'dot-ream/templates/shared-exports.js'
 declare module 'dot-ream/templates/enhance-app.js'
+
+declare const _ream: any

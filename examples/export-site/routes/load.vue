@@ -4,7 +4,7 @@ import { computed, defineComponent } from 'vue'
 export async function load() {
   return {
     props: {
-      msg: 'static preload',
+      msg: 'this is a message',
     },
   }
 }

@@ -1,22 +1,19 @@
 <script lang="ts">
-import { usePageData } from 'ream/app'
 import { defineComponent } from 'vue'
+import type { Load } from 'ream/app'
 
-export const preload = () => {
+type Props = { title: string }
+
+export const load: Load<Props> = () => {
   return {
-    data: {
-      title: 'profile',
+    props: {
+      title: 'user layout',
     },
   }
 }
 
 export default defineComponent({
-  setup() {
-    const data = usePageData()
-    return {
-      title: data.value.title,
-    }
-  },
+  props: ['title'],
 })
 </script>
 
@@ -31,6 +28,6 @@ export default defineComponent({
         <router-link to="/user/kevin">kevin</router-link>
       </li>
     </ul>
-    <router-view></router-view>
+    <ream-page></ream-page>
   </div>
 </template>

@@ -3,7 +3,7 @@ import fs from 'fs'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import type { HTMLResult as HeadResult } from '@vueuse/head'
 import serveStatic from 'sirv'
-import type { Load, LoadOptions } from './load'
+import type { LoadOptions } from './load'
 import {
   ReamServerRequest,
   ReamServerResponse,
@@ -36,7 +36,6 @@ export type ServerEntry = {
   ErrorComponent: any
   serverRoutes: RouteRecordRaw[]
   clientRoutes: RouteRecordRaw[]
-  getGlobalLoad: () => Promise<Load | undefined>
   enhanceApp: {
     callAsync: (name: string, context: any) => Promise<void>
   }
@@ -140,9 +139,8 @@ export async function createHandler(options: CreateServerOptions) {
         !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
       const router = await createClientRouter(serverEntry, req.url)
       const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
-      const globalPreload = await serverEntry.getGlobalLoad()
       const loadResult = await loadPageData(
-        globalPreload,
+        undefined,
         [ErrorComponent],
         getLoadOptions(req)
       )

@@ -1,10 +1,9 @@
 import path from 'path'
 import { ReamPlugin } from '../types'
-import glob from 'fast-glob'
 import fs from 'fs-extra'
 import consola from 'consola'
 import { Ream, Route } from '../'
-import { filesToRoutes } from '../utils/load-routes'
+import { createRoutesLoader, RoutesLoader } from '../utils/load-routes'
 import { normalizePath } from '../utils/normalize-path'
 import { resolveFile } from '../utils/resolve-file'
 
@@ -20,9 +19,9 @@ const writeFileIfChanged = (filepath: string, content: string) => {
 }
 
 class FileWriter {
-  files: string[] = []
   projectAppHookFiles: string[]
   projectServerHookFiles: string[]
+  routesLoader: RoutesLoader
 
   constructor(private api: Ream) {
     this.projectAppHookFiles = [
@@ -34,6 +33,8 @@ class FileWriter {
       this.api.resolveSrcDir('enhance-server.js'),
       this.api.resolveSrcDir('enhance-server.ts'),
     ]
+
+    this.routesLoader = createRoutesLoader(this.routesDir)
   }
 
   get routesDir() {
@@ -48,52 +49,48 @@ class FileWriter {
   }
 
   async writeRoutes() {
-    const routesInfo = filesToRoutes(this.files, this.routesDir)
+    const routesInfo = this.routesLoader.load()
 
-    const getRoutes = this.api.config.routes
-    if (getRoutes) {
-      consola.info(`Loading extra routes`)
+    const extendPages = this.api.config.pages
+    if (extendPages) {
+      consola.info(`Loading extra pages`)
     }
-    const routes = getRoutes
-      ? await getRoutes(routesInfo.routes)
-      : routesInfo.routes
+    const pages = extendPages
+      ? await extendPages(routesInfo.pages)
+      : routesInfo.pages
 
-    const stringifyClientRoutes = (routes: Route[]): string => {
-      const clientRoutes = routes.filter((route) => !route.isEndpoint)
+    const extendEndpoints = this.api.config.endpoints
+    if (extendEndpoints) {
+      consola.info(`Loading extra endpoints`)
+    }
+    const endpoints = extendEndpoints
+      ? await extendEndpoints(routesInfo.endpoints)
+      : routesInfo.endpoints
+
+    const stringifyPages = (pages: Route[]): string => {
       return `[
-        ${clientRoutes
-          .map((route) => {
+        ${pages
+          .map((page) => {
             return `{
-            path: "${route.path}",
-            name: "${route.name}",
+            path: "${page.path}",
+            name: "${page.name}",
             meta: {},
             component: function() {
-              return import("${this.getRelativePathToTemplatesDir(route.file)}")
+              return import("${this.getRelativePathToTemplatesDir(page.file)}")
                 .then(wrapPage)
             },
             ${
-              route.children
-                ? `children: ${stringifyClientRoutes(route.children)}`
+              page.children && page.children.length > 0
+                ? `children: ${stringifyPages(page.children)}`
                 : ``
             }
           }`
           })
-          .join(',')}${clientRoutes.length === 0 ? '' : ','}
-          // Adding a 404 route to suppress vue-router warning
-          {
-            name: '404',
-            path: '/:404(.*)',
-            meta:{},
-            component: import.meta.env.DEV ? {
-              render() {
-                return h('h1','error: this component should not be rendered')
-              }
-            } : {}
-          }
+          .join(',')}
       ]`
     }
 
-    const stringifyServerRoutes = (routes: Route[]): string => {
+    const stringifyEndpoints = (routes: Route[]): string => {
       const serverRoutes = routes.filter((route) => route.isEndpoint)
       return `[
         ${serverRoutes
@@ -119,7 +116,6 @@ class FileWriter {
     const sharedExportsContent = `
     import { h, defineAsyncComponent } from 'vue'
     import { 
-      AppComponent as DefaultAppComponent, 
       ErrorComponent as DefaultErrorComponent , 
       NotFoundComponent as DefaultNotFoundComponent } from 'ream/app'
   
@@ -130,16 +126,6 @@ class FileWriter {
               routesInfo.errorFile
             )}")`
           : `Promise.resolve(DefaultErrorComponent)`
-      }
-    })
-  
-    export var AppComponent = defineAsyncComponent(function() {
-      return ${
-        routesInfo.appFile
-          ? `import("${this.getRelativePathToTemplatesDir(
-              routesInfo.appFile
-            )}")`
-          : `Promise.resolve(DefaultAppComponent)`
       }
     })
   
@@ -154,22 +140,28 @@ class FileWriter {
     })
   
     var wrapPage = function(page) {
+      var Component = page.default
       return {
-        name: 'PageWrapper',
+        ...Component,
         $$load: page.load,
         $$preload: page.preload,
         $$getStaticPaths: page.getStaticPaths,
         $$transition: page.transition,
-        setup: function () {
-          return function() {
-            var Component = page.default
-            return h(Component)
-          }
-        }
       }
     }
   
-    var clientRoutes = ${stringifyClientRoutes(routes)}
+    var clientRoutes = ${stringifyPages(pages)}
+
+    clientRoutes.push({
+      name: '404',
+      path: '/:404(.*)',
+      meta:{},
+      component: import.meta.env.DEV ? {
+        render() {
+          return h('h1','error: this component should not be rendered')
+        }
+      } : {}
+    })
   
     export {
       clientRoutes,
@@ -182,7 +174,7 @@ class FileWriter {
     )
 
     const serverExportsContent = `
-   export const serverRoutes = ${stringifyServerRoutes(routes)}
+   export const serverRoutes = ${stringifyEndpoints(endpoints)}
     `
 
     writeFileIfChanged(
@@ -278,17 +270,6 @@ class FileWriter {
 
     if (type === 'server') {
       content += `
-    export async function getInitialHTML(context) {
-      let html
-      for (const fn of getExportByName('getInitialHTML')) {
-        const result = fn(context)
-        if (result) {
-          html = result
-        }
-      }
-      return html
-    }
-  
     export const hasExport = (name) => getExportByName(name).length > 0
     `
     }
@@ -313,13 +294,6 @@ export const preparePlugin = (): ReamPlugin => {
         throw new Error(`${writer.routesDir} doesn't exist`)
       }
 
-      const routesFileGlob = '**/*.{vue,ts,tsx,js,jsx}'
-      writer.files = await glob(routesFileGlob, {
-        cwd: writer.routesDir,
-        onlyFiles: true,
-        ignore: ['node_modules', 'dist'],
-      })
-
       await Promise.all([
         writer.writeRoutes(),
         writer.writeHookFile('app'),
@@ -330,16 +304,12 @@ export const preparePlugin = (): ReamPlugin => {
     },
 
     async onFileChange(type, file) {
-      const routesFileRegexp = /\.(vue|ts|tsx|js|jsx)$/
-
       // Update routes
-      if (file.startsWith(writer.routesDir) && routesFileRegexp.test(file)) {
-        const relativePath = path.relative(writer.routesDir, file)
-        if (type === 'add') {
-          writer.files.push(relativePath)
-          await writer.writeRoutes()
-        } else if (type === 'unlink') {
-          writer.files.splice(writer.files.indexOf(relativePath), 1)
+      if (
+        file.startsWith(writer.routesDir) &&
+        writer.routesLoader.extRe.test(file)
+      ) {
+        if (type === 'add' || type === 'unlink') {
           await writer.writeRoutes()
         }
       }

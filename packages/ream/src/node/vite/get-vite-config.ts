@@ -13,7 +13,7 @@ const reamForceServerUpdatePlugin = (api: Ream): Plugin => {
     handleHotUpdate(ctx) {
       const { moduleGraph } = api.viteDevServer!
       for (const [key, value] of moduleGraph.fileToModulesMap.entries()) {
-        if (!key.includes('node_modules')) {
+        if (!key.includes('node_modules') && !key.includes('.ream')) {
           for (const mod of value) {
             moduleGraph.invalidateModule(mod)
           }
