@@ -1,5 +1,5 @@
 import path from 'path'
-import FS from 'fs'
+import NODE_FS from 'fs'
 import { Endpoint, Route } from '../'
 
 type FileItem = {
@@ -17,11 +17,11 @@ const removeExt = (p: string) => p.replace(/\.[a-z0-9]+$/i, '')
 
 type Fs = {
   readdirSync: (dir: string) => string[]
-  statSync: (path: string) => { isDirectory(): boolean }
+  statSync: (filepath: string) => NODE_FS.Stats
 }
 
 export class RoutesLoader {
-  constructor(private dir: string, private fs: Fs = FS) {}
+  constructor(private dir: string, private fs: Fs = NODE_FS) {}
 
   extRe = /\.(vue|ts|tsx|js|jsx)$/
 

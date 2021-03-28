@@ -1,14 +1,18 @@
 import path from 'path'
-import MFS from 'memory-fs'
+import { Volume, createFsFromVolume } from 'memfs'
 import { createRoutesLoader } from './load-routes'
 
 const prepareFs = (files: string[]) => {
-  const fs = new MFS()
+  const mfs = createFsFromVolume(new Volume())
   files.map((file) => {
-    fs.mkdirpSync(path.dirname(file))
-    fs.writeFileSync(file, '', 'utf8')
+    mfs.mkdirpSync(path.dirname(file))
+    mfs.writeFileSync(file, '', { encoding: 'utf8' })
   })
-  return fs
+  return {
+    readdirSync: (dir: string) =>
+      mfs.readdirSync(dir, { encoding: 'utf8' }) as string[],
+    statSync: (filepath: string) => mfs.statSync(filepath),
+  }
 }
 
 test('simple routes', () => {
@@ -28,10 +32,10 @@ test('simple routes', () => {
     Object {
       "endpoints": Array [
         Object {
-          "file": "/o/hello.ts",
+          "file": "/o/api/posts.js",
           "isEndpoint": true,
-          "name": "hello",
-          "path": "/hello",
+          "name": "api/posts",
+          "path": "/api/posts",
         },
         Object {
           "file": "/o/graphql.js",
@@ -40,26 +44,26 @@ test('simple routes', () => {
           "path": "/graphql",
         },
         Object {
-          "file": "/o/api/posts.js",
+          "file": "/o/hello.ts",
           "isEndpoint": true,
-          "name": "api/posts",
-          "path": "/api/posts",
+          "name": "hello",
+          "path": "/hello",
         },
       ],
       "errorFile": undefined,
       "notFoundFile": undefined,
       "pages": Array [
         Object {
-          "file": "/o/index.vue",
-          "isEndpoint": false,
-          "name": "index",
-          "path": "/",
-        },
-        Object {
           "file": "/o/about.vue",
           "isEndpoint": false,
           "name": "about",
           "path": "/about",
+        },
+        Object {
+          "file": "/o/index.vue",
+          "isEndpoint": false,
+          "name": "index",
+          "path": "/",
         },
         Object {
           "file": "/o/profile.vue",
@@ -132,16 +136,16 @@ describe('layout', () => {
           Object {
             "children": Array [
               Object {
-                "file": "/o/index.vue",
-                "isEndpoint": false,
-                "name": "index",
-                "path": "",
-              },
-              Object {
                 "file": "/o/about.vue",
                 "isEndpoint": false,
                 "name": "about",
                 "path": "about",
+              },
+              Object {
+                "file": "/o/index.vue",
+                "isEndpoint": false,
+                "name": "index",
+                "path": "",
               },
               Object {
                 "file": "/o/profile.vue",
@@ -182,12 +186,6 @@ describe('layout', () => {
         "notFoundFile": undefined,
         "pages": Array [
           Object {
-            "file": "/o/index.vue",
-            "isEndpoint": false,
-            "name": "index",
-            "path": "/",
-          },
-          Object {
             "file": "/o/about.vue",
             "isEndpoint": false,
             "name": "about",
@@ -200,12 +198,6 @@ describe('layout', () => {
                 "isEndpoint": false,
                 "name": "foo/bar",
                 "path": "bar",
-              },
-              Object {
-                "file": "/o/foo/baz.vue",
-                "isEndpoint": false,
-                "name": "foo/baz",
-                "path": "baz",
               },
               Object {
                 "children": Array [
@@ -233,11 +225,23 @@ describe('layout', () => {
                 "name": "foo/bar2/_layout",
                 "path": "bar2",
               },
+              Object {
+                "file": "/o/foo/baz.vue",
+                "isEndpoint": false,
+                "name": "foo/baz",
+                "path": "baz",
+              },
             ],
             "file": "/o/foo/_layout.vue",
             "isEndpoint": false,
             "name": "foo/_layout",
             "path": "/foo",
+          },
+          Object {
+            "file": "/o/index.vue",
+            "isEndpoint": false,
+            "name": "index",
+            "path": "/",
           },
         ],
       }
@@ -260,16 +264,16 @@ describe('layout', () => {
       Object {
         "endpoints": Array [
           Object {
-            "file": "/o/foo.ts",
-            "isEndpoint": true,
-            "name": "foo",
-            "path": "/foo",
-          },
-          Object {
             "file": "/o/foo/bar/api.ts",
             "isEndpoint": true,
             "name": "foo/bar/api",
             "path": "/foo/bar/api",
+          },
+          Object {
+            "file": "/o/foo.ts",
+            "isEndpoint": true,
+            "name": "foo",
+            "path": "/foo",
           },
         ],
         "errorFile": undefined,
@@ -277,12 +281,6 @@ describe('layout', () => {
         "pages": Array [
           Object {
             "children": Array [
-              Object {
-                "file": "/o/index.vue",
-                "isEndpoint": false,
-                "name": "index",
-                "path": "",
-              },
               Object {
                 "children": Array [
                   Object {
@@ -296,6 +294,12 @@ describe('layout', () => {
                 "isEndpoint": false,
                 "name": "foo/bar/_layout",
                 "path": "foo/bar",
+              },
+              Object {
+                "file": "/o/index.vue",
+                "isEndpoint": false,
+                "name": "index",
+                "path": "",
               },
             ],
             "file": "/o/_layout.vue",
