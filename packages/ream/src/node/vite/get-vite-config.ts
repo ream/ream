@@ -122,8 +122,7 @@ export const getViteConfig = (api: Ream, server?: boolean): ViteConfig => {
     server: {
       middlewareMode: true,
       hmr: {
-        host: api.config.hmr?.host || api.host,
-        port: api.config.hmr?.port || api.port,
+        port: api.port,
         server: api._devServer,
       },
     },

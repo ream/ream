@@ -38,10 +38,6 @@ export type ReamConfig = {
   env?: Record<string, string>
   plugins?: Array<ReamPlugin>
   imports?: string[]
-  hmr?: {
-    host?: string
-    port?: number
-  }
   vite?: (viteConfig: ViteConfig, opts: { dev: boolean }) => void
   pages?: (defaultPages: Route[]) => Promise<Route[]> | Route[]
   endpoints?: (defaultEndpoints: Endpoint[]) => Promise<Endpoint[]> | Endpoint[]
