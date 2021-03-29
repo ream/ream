@@ -2,6 +2,6 @@
 // Be careful to import Node.js modules!
 
 export function getLoadPath(path) {
-  path = path.replace(/\/$/, '') || 'index'
+  path = path.replace(/\/$/, '') || '/index'
   return path + '.load.json'
 }

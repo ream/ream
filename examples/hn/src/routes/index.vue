@@ -2,24 +2,11 @@
 import { defineComponent } from 'vue'
 import type { Load } from 'ream/app'
 import Header from '@/components/Header.vue'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-
-dayjs.extend(relativeTime)
-
-const HN_API = `https://hacker-news.firebaseio.com/v0`
-
-const loadItem = async (id: number) => {
-  const item = await fetch(`${HN_API}/item/${id}.json`).then((res) =>
-    res.json()
-  )
-  return item
-}
+import { loadItem, loadTopStoryIds } from '@/lib/hn'
+import { formatTime } from '@/lib/date'
 
 export const load: Load = async () => {
-  const ids: number[] = await fetch(`${HN_API}/topstories.json`).then((res) =>
-    res.json()
-  )
+  const ids = await loadTopStoryIds()
 
   const items = await Promise.all(ids.slice(0, 20).map((id) => loadItem(id)))
 
@@ -38,15 +25,14 @@ export default defineComponent({
   },
 
   setup() {
-    return { dayjs }
+    return { formatTime }
   },
 })
 </script>
 
 <template>
   <div>
-    <Header />
-    <div class="bg-white max-w-3xl mx-auto mt-18 mb-6">
+    <div class="bg-white max-w-3xl mx-auto">
       <div class="divide-y">
         <div v-for="item in items" :key="item.id" class="p-5 pl-0 flex">
           <div
@@ -71,7 +57,7 @@ export default defineComponent({
                 class="underline hover:text-orange-500"
                 >{{ item.by }}</router-link
               >
-              {{ dayjs(item.time * 1000).fromNow() }}
+              {{ formatTime(item.time) }}
               |
               <router-link
                 :to="`/item/${item.id}`"
