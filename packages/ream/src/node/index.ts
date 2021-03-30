@@ -41,6 +41,18 @@ export type ReamConfig = {
   vite?: (viteConfig: ViteConfig, opts: { dev: boolean }) => void
   pages?: (defaultPages: Route[]) => Promise<Route[]> | Route[]
   endpoints?: (defaultEndpoints: Endpoint[]) => Promise<Endpoint[]> | Endpoint[]
+  hmr?: {
+    /**
+     * Configure the port that hmr client connects to
+     *
+     * Note that this doesn't affect which port the server listens to,
+     * the actual server port is alway the value of `--port`
+     *
+     * You might set this to `443` if you're running Ream dev server on repl.it
+     * or other cloud IDEs.
+     */
+    port?: number
+  }
 }
 
 export const defineReamConfig = (config: ReamConfig) => config
