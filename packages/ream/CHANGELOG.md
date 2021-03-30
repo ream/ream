@@ -1,5 +1,17 @@
 # ream
 
+## 5.0.0-beta.12
+
+This release only contains bug fixes:
+
+- Re-enable `hmr.port` config option.
+
+  Configure the port that hmr client connects to
+
+  Note that this doesn't affect which port the server listens to, the actual server port is alway the value of `--port`.
+
+  You might set this to `443` if you're running Ream dev server on repl.it or other cloud IDEs.
+
 ## 5.0.0-beta.11
 
 This release only contains bug fixes:
