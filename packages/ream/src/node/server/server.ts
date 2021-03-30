@@ -20,6 +20,7 @@ export interface ReamServerRequest extends ConnectRequest {
   params: {
     [k: string]: any
   }
+  isLoadRequest?: boolean
 }
 
 export interface ReamServerResponse extends ConnectResponse {
@@ -34,6 +35,8 @@ export const createServer = (
   const app = connect<ReamServerRequest, ReamServerResponse>(options)
 
   app.use((req, res, next) => {
+    req.isLoadRequest = req.path.endsWith('.load.json')
+
     Object.defineProperties(res, {
       send: {
         enumerable: true,

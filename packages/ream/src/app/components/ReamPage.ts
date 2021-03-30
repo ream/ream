@@ -40,7 +40,7 @@ export const ReamPage = defineComponent({
             const componentProps = props.Component.type.props
             return h(props.Component, {
               ...getProps(
-                loadResult.props,
+                loadResult.props || {},
                 Array.isArray(componentProps)
                   ? componentProps
                   : componentProps

@@ -132,11 +132,22 @@ export async function createHandler(options: CreateServerOptions) {
     if (options.fixStacktrace) {
       options.fixStacktrace(err)
     }
+
     console.error('server error', err.stack)
 
+    res.statusCode =
+      !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
+
+    const error = {
+      status: res.statusCode,
+      message: options.dev ? err.stack : undefined,
+    }
+
+    if (req.isLoadRequest) {
+      return res.send({ error })
+    }
+
     try {
-      res.statusCode =
-        !res.statusCode || res.statusCode < 400 ? 500 : res.statusCode
       const router = await createClientRouter(serverEntry, req.url)
       const ErrorComponent = await serverEntry.ErrorComponent.__asyncLoader()
       const loadResult = await loadPageData(
@@ -144,10 +155,7 @@ export async function createHandler(options: CreateServerOptions) {
         [ErrorComponent],
         getLoadOptions(req)
       )
-      loadResult.error = {
-        status: res.statusCode,
-        message: options.dev ? err.stack : undefined,
-      }
+      loadResult.error = error
       const html = await renderToHTML({
         path: req.path,
         url: req.url,
@@ -183,6 +191,12 @@ export async function createHandler(options: CreateServerOptions) {
     res: ReamServerResponse,
     router: Router
   ) => {
+    res.statusCode = 404
+
+    if (req.isLoadRequest) {
+      return res.send({ status: 404 })
+    }
+
     let html: string | undefined
     if (exportCache) {
       const cache = await exportCache.get('/404.html')
@@ -204,7 +218,6 @@ export async function createHandler(options: CreateServerOptions) {
       })
       html = result.html
     }
-    res.statusCode = 404
     res.send(html!)
   }
 
@@ -242,8 +255,7 @@ export async function createHandler(options: CreateServerOptions) {
       return next()
     }
 
-    const isLoadRequest = req.path.endsWith('.load.json')
-    if (isLoadRequest) {
+    if (req.isLoadRequest) {
       req.url = req.url.replace(/(\/index)?\.load\.json/, '')
       if (req.url[0] !== '/') {
         req.url = `/${req.url}`
@@ -273,7 +285,7 @@ export async function createHandler(options: CreateServerOptions) {
     const pageCache = staticPage && (await exportCache?.get(req.path))
 
     if (pageCache) {
-      if (isLoadRequest) {
+      if (req.isLoadRequest) {
         res.send(serializeJavascript(pageCache.loadResult, { isJSON: true }))
       } else if (pageCache.html) {
         res.send(pageCache.html)
@@ -303,7 +315,7 @@ export async function createHandler(options: CreateServerOptions) {
     const { html, loadResult } = await render({
       url: req.url,
       loadOptions: getLoadOptions(req),
-      isLoadRequest,
+      isLoadRequest: req.isLoadRequest,
       ssrManifest,
       serverEntry,
       clientManifest,
@@ -316,7 +328,7 @@ export async function createHandler(options: CreateServerOptions) {
     }
 
     if (!pageCache || !pageCache.isStale) {
-      if (isLoadRequest) {
+      if (req.isLoadRequest) {
         res.send(serializeJavascript(loadResult, { isJSON: true }))
       } else {
         if (loadResult.redirect) {
