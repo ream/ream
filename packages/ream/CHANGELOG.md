@@ -1,5 +1,13 @@
 # ream
 
+## 5.0.0-beta.11
+
+This release only contains bug fixes:
+
+- make sure that `.ream/client` exists before starting the server in production mode
+- make hmr work on repl.it
+- properly render error and 404 page for `.load.json` requests
+
 ## 5.0.0-beta.10
 
 - Catch router error so it won't crash the Node.js process.
