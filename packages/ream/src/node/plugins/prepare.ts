@@ -2,8 +2,12 @@ import path from 'path'
 import { ReamPlugin } from '../types'
 import fs from 'fs-extra'
 import consola from 'consola'
-import { Ream, Route } from '../'
-import { createRoutesLoader, RoutesLoader } from '../utils/load-routes'
+import { Endpoint, Ream, Route } from '../'
+import {
+  createRoutesLoader,
+  RoutesInfo,
+  RoutesLoader,
+} from '../utils/load-routes'
 import { normalizePath } from '../utils/normalize-path'
 import { resolveFile } from '../utils/resolve-file'
 
@@ -22,6 +26,9 @@ class FileWriter {
   projectAppHookFiles: string[]
   projectServerHookFiles: string[]
   routesLoader: RoutesLoader
+  routesInfo: RoutesInfo
+  pages: Route[] = []
+  endpoints: Endpoint[] = []
 
   constructor(private api: Ream) {
     this.projectAppHookFiles = [
@@ -35,6 +42,7 @@ class FileWriter {
     ]
 
     this.routesLoader = createRoutesLoader(this.routesDir)
+    this.routesInfo = { endpoints: [], pages: [] }
   }
 
   get routesDir() {
@@ -48,139 +56,161 @@ class FileWriter {
     return normalizePath(path.relative(this.api.resolveDotReam('templates'), p))
   }
 
-  async writeRoutes() {
-    const routesInfo = this.routesLoader.load()
+  async updateRoutesInfo() {
+    this.routesInfo = this.routesLoader.load()
+    this.pages = this.routesInfo.pages
+    this.endpoints = this.routesInfo.endpoints
 
     const extendPages = this.api.config.pages
-    if (extendPages) {
+    const extendPagesFns = [
+      ...this.api.config.plugins.map((plugin) => plugin.pages),
+      ...(extendPages ? [extendPages] : []),
+    ].filter(Boolean)
+    if (extendPagesFns.length > 0) {
       consola.info(`Loading extra pages`)
+      for (const fn of extendPagesFns) {
+        if (fn) {
+          this.pages = await fn.call(this.api, this.pages)
+        }
+      }
     }
-    const pages = extendPages
-      ? await extendPages(routesInfo.pages)
-      : routesInfo.pages
 
     const extendEndpoints = this.api.config.endpoints
-    if (extendEndpoints) {
+    const extendEndpointsFns = [
+      ...this.api.config.plugins.map((plugin) => plugin.endpoints),
+      ...(extendEndpoints ? [extendEndpoints] : []),
+    ].filter(Boolean)
+    if (extendEndpointsFns.length > 0) {
       consola.info(`Loading extra endpoints`)
+      for (const fn of extendEndpointsFns) {
+        if (fn) {
+          this.endpoints = await fn.call(this.api, this.endpoints)
+        }
+      }
     }
-    const endpoints = extendEndpoints
-      ? await extendEndpoints(routesInfo.endpoints)
-      : routesInfo.endpoints
+  }
 
+  async writeClientRoutes() {
     const stringifyPages = (pages: Route[]): string => {
       return `[
-        ${pages
-          .map((page) => {
-            return `{
-            path: "${page.path}",
-            name: "${page.name}",
-            meta: {},
-            component: function() {
-              return import("${this.getRelativePathToTemplatesDir(page.file)}")
-                .then(wrapPage)
-            },
-            ${
-              page.children && page.children.length > 0
-                ? `children: ${stringifyPages(page.children)}`
-                : ``
-            }
-          }`
-          })
-          .join(',')}
-      ]`
+          ${pages
+            .map((page) => {
+              return `{
+              path: "${page.path}",
+              name: "${page.name}",
+              meta: {},
+              component: function() {
+                return import("${this.getRelativePathToTemplatesDir(
+                  page.file
+                )}")
+                  .then(wrapPage)
+              },
+              ${
+                page.children && page.children.length > 0
+                  ? `children: ${stringifyPages(page.children)}`
+                  : ``
+              }
+            }`
+            })
+            .join(',')}
+        ]`
     }
+    const clientRoutesContent = `
+      import { h, defineAsyncComponent } from 'vue'
+      import { 
+        ErrorComponent as DefaultErrorComponent , 
+        NotFoundComponent as DefaultNotFoundComponent } from 'ream/app'
+    
+      export var ErrorComponent = defineAsyncComponent(function() {
+        return ${
+          this.routesInfo.errorFile
+            ? `import("${this.getRelativePathToTemplatesDir(
+                this.routesInfo.errorFile
+              )}")`
+            : `Promise.resolve(DefaultErrorComponent)`
+        }
+      })
+    
+      export var NotFoundComponent = defineAsyncComponent(function() {
+        return ${
+          this.routesInfo.notFoundFile
+            ? `import("${this.getRelativePathToTemplatesDir(
+                this.routesInfo.notFoundFile
+              )}")`
+            : `Promise.resolve(DefaultNotFoundComponent)`
+        }
+      })
+    
+      var wrapPage = function(page) {
+        var Component = page.default
+        return {
+          ...Component,
+          $$load: page.load,
+          $$preload: page.preload,
+          $$getStaticPaths: page.getStaticPaths,
+          $$transition: page.transition,
+        }
+      }
+    
+      var clientRoutes = ${stringifyPages(this.pages)}
+  
+      clientRoutes.push({
+        name: '404',
+        path: '/:404(.*)',
+        meta:{},
+        component: import.meta.env.DEV ? {
+          render() {
+            return h('h1','error: this component should not be rendered')
+          }
+        } : {}
+      })
+    
+      export {
+        clientRoutes,
+      }
+      `
 
+    writeFileIfChanged(
+      this.api.resolveDotReam('templates/client-routes.js'),
+      clientRoutesContent
+    )
+  }
+
+  async writeServerRoutes() {
     const stringifyEndpoints = (routes: Route[]): string => {
       const serverRoutes = routes.filter((route) => route.isEndpoint)
       return `[
-        ${serverRoutes
-          .map((route) => {
-            return `{
-            path: "${route.path}",
-            meta: {load: () => import("${this.getRelativePathToTemplatesDir(
-              route.file
-            )}")},
-            component: {}
-          }`
-          })
-          .join(',')}${serverRoutes.length === 0 ? '' : ','}
-          {
-            name: '404',
-            path: '/:404(.*)',
-            component: {}
-          }
-      ]`
+          ${serverRoutes
+            .map((route) => {
+              return `{
+              path: "${route.path}",
+              meta: {load: () => import("${this.getRelativePathToTemplatesDir(
+                route.file
+              )}")},
+              component: {}
+            }`
+            })
+            .join(',')}${serverRoutes.length === 0 ? '' : ','}
+            {
+              name: '404',
+              path: '/:404(.*)',
+              component: {}
+            }
+        ]`
     }
-
-    // Exports that will be used in both server and client code
-    const sharedExportsContent = `
-    import { h, defineAsyncComponent } from 'vue'
-    import { 
-      ErrorComponent as DefaultErrorComponent , 
-      NotFoundComponent as DefaultNotFoundComponent } from 'ream/app'
-  
-    export var ErrorComponent = defineAsyncComponent(function() {
-      return ${
-        routesInfo.errorFile
-          ? `import("${this.getRelativePathToTemplatesDir(
-              routesInfo.errorFile
-            )}")`
-          : `Promise.resolve(DefaultErrorComponent)`
-      }
-    })
-  
-    export var NotFoundComponent = defineAsyncComponent(function() {
-      return ${
-        routesInfo.notFoundFile
-          ? `import("${this.getRelativePathToTemplatesDir(
-              routesInfo.notFoundFile
-            )}")`
-          : `Promise.resolve(DefaultNotFoundComponent)`
-      }
-    })
-  
-    var wrapPage = function(page) {
-      var Component = page.default
-      return {
-        ...Component,
-        $$load: page.load,
-        $$preload: page.preload,
-        $$getStaticPaths: page.getStaticPaths,
-        $$transition: page.transition,
-      }
-    }
-  
-    var clientRoutes = ${stringifyPages(pages)}
-
-    clientRoutes.push({
-      name: '404',
-      path: '/:404(.*)',
-      meta:{},
-      component: import.meta.env.DEV ? {
-        render() {
-          return h('h1','error: this component should not be rendered')
-        }
-      } : {}
-    })
-  
-    export {
-      clientRoutes,
-    }
-    `
+    const serverRoutesContent = `
+    export const serverRoutes = ${stringifyEndpoints(this.endpoints)}
+     `
 
     writeFileIfChanged(
-      this.api.resolveDotReam('templates/shared-exports.js'),
-      sharedExportsContent
+      this.api.resolveDotReam('templates/server-routes.js'),
+      serverRoutesContent
     )
+  }
 
-    const serverExportsContent = `
-   export const serverRoutes = ${stringifyEndpoints(endpoints)}
-    `
-
-    writeFileIfChanged(
-      this.api.resolveDotReam('templates/server-exports.js'),
-      serverExportsContent
-    )
+  async writeRoutes() {
+    await this.updateRoutesInfo()
+    await Promise.all([this.writeClientRoutes(), this.writeServerRoutes()])
   }
 
   async writeGlobalImports() {

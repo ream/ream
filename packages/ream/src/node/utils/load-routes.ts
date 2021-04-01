@@ -21,6 +21,13 @@ type Fs = {
   statSync: (filepath: string) => NODE_FS.Stats
 }
 
+export type RoutesInfo = {
+  pages: Route[]
+  endpoints: Endpoint[]
+  notFoundFile?: string
+  errorFile?: string
+}
+
 export class RoutesLoader {
   constructor(private dir: string, private fs: Fs = NODE_FS) {}
 
@@ -45,12 +52,7 @@ export class RoutesLoader {
     dir: string,
     parentPath: string,
     endpoints: Endpoint[] = []
-  ): {
-    pages: Route[]
-    endpoints: Endpoint[]
-    notFoundFile?: string
-    errorFile?: string
-  } {
+  ): RoutesInfo {
     const files = this.readDir(dir)
 
     let errorFile: string | undefined

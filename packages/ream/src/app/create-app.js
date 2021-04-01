@@ -5,7 +5,7 @@ import { RouterLink } from './index'
 import {
   NotFoundComponent,
   ErrorComponent,
-} from 'dot-ream/templates/shared-exports.js'
+} from 'dot-ream/templates/client-routes.js'
 import { callAsync as callEnhanceAppAsync } from 'dot-ream/templates/enhance-app.js'
 
 export const createApp = async ({ router, initialState }) => {

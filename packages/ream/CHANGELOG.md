@@ -1,5 +1,9 @@
 # ream
 
+## Unreleased
+
+- Add `pages`, `endpoints` plugin hooks to extend pages and endpoints respectively, they are also available in the config file.
+
 ## 5.0.0-beta.12
 
 This release only contains bug fixes:

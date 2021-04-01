@@ -1,4 +1,4 @@
-import { Ream } from '.'
+import { Endpoint, Ream, Route } from '.'
 
 export type OnFileChangeCallback = (
   this: Ream,
@@ -20,4 +20,8 @@ export type ReamPlugin = {
   enhanceServerFiles?: (this: Ream) => string[]
 
   onFileChange?: OnFileChangeCallback
+
+  pages?: (this: Ream, routes: Route[]) => Route[]
+
+  endpoints?: (this: Ream, endpoints: Endpoint[]) => Endpoint[]
 }

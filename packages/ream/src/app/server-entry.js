@@ -6,8 +6,8 @@ import { createApp } from './create-app'
 import {
   clientRoutes,
   ErrorComponent,
-} from 'dot-ream/templates/shared-exports.js'
-import { serverRoutes } from 'dot-ream/templates/server-exports.js'
+} from 'dot-ream/templates/client-routes.js'
+import { serverRoutes } from 'dot-ream/templates/server-routes.js'
 import * as enhanceApp from 'dot-ream/templates/enhance-app.js'
 import * as enhanceServer from 'dot-ream/templates/enhance-server.js'
 

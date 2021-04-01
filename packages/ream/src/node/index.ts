@@ -39,8 +39,11 @@ export type ReamConfig = {
   plugins?: Array<ReamPlugin>
   imports?: string[]
   vite?: (viteConfig: ViteConfig, opts: { dev: boolean }) => void
-  pages?: (defaultPages: Route[]) => Promise<Route[]> | Route[]
-  endpoints?: (defaultEndpoints: Endpoint[]) => Promise<Endpoint[]> | Endpoint[]
+  pages?: (this: Ream, defaultPages: Route[]) => Promise<Route[]> | Route[]
+  endpoints?: (
+    this: Ream,
+    defaultEndpoints: Endpoint[]
+  ) => Promise<Endpoint[]> | Endpoint[]
   hmr?: {
     /**
      * Configure the port that hmr client connects to
