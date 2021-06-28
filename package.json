@@ -15,7 +15,7 @@
     "@types/jest": "^26.0.20",
     "chalk": "^4.1.0",
     "execa": "^5.0.0",
-    "jest-cli": "^26.6.3",
+    "jest-cli": "^27.0.5",
     "prettier": "^2.0.5",
     "scripts": "workspace:*",
     "sucrase": "^3.17.1",
