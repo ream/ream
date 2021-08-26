@@ -1,7 +1,7 @@
 import { Endpoint, Ream, Route } from '.'
 
 export type OnFileChangeCallback = (
-  this: Ream,
+  ream: Ream,
   event: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir',
   filepath: string
 ) => any
@@ -13,15 +13,15 @@ export type ReamPlugin = {
    * Before start dev server / bundling
    * Never call before starting production server
    */
-  prepare?: (this: Ream) => void | Promise<void>
+  prepare?: (ream: Ream) => void | Promise<void>
 
-  enhanceAppFiles?: (this: Ream) => string[]
+  enhanceAppFiles?: (ream: Ream) => string[]
 
-  enhanceServerFiles?: (this: Ream) => string[]
+  enhanceServerFiles?: (ream: Ream) => string[]
 
   onFileChange?: OnFileChangeCallback
 
-  pages?: (this: Ream, routes: Route[]) => Route[]
+  pages?: (ream: Ream, routes: Route[]) => Route[]
 
-  endpoints?: (this: Ream, endpoints: Endpoint[]) => Endpoint[]
+  endpoints?: (ream: Ream, endpoints: Endpoint[]) => Endpoint[]
 }
